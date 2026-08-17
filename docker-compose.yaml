@@ -1,0 +1,16 @@
+services:
+  vcobs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vcobs
+    restart: unless-stopped
+    init: true
+    env_file:
+      - .env.local
+    environment:
+      NODE_ENV: production
+      PORT: 3080
+      HOSTNAME: 0.0.0.0
+    ports:
+      - "3080:3080"
