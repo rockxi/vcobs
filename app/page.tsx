@@ -22,7 +22,7 @@ export default async function HomePage() {
         </div>
       </section>
       <section className="paste-section">
-        <div className="paste-intro"><p className="eyebrow">quick share</p><h2>Вставьте текст — получите ссылку</h2><p>Подойдёт для заметок, логов и любой информации, которой нужно быстро поделиться.</p></div>
+        <div className="paste-intro"><p className="eyebrow">quick share</p><h2>Вставьте текст — получите ссылку</h2><p>Подойдёт для заметок и логов. Текст и ссылка автоматически удалятся через 24 часа.</p></div>
         <PasteForm />
       </section>
       <section className="note-grid" aria-label="Опубликованные заметки">

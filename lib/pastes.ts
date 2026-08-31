@@ -1,12 +1,18 @@
 import "server-only";
 import { randomBytes } from "node:crypto";
-import { mkdir, open, readFile } from "node:fs/promises";
+import { mkdir, open, readFile, readdir, unlink } from "node:fs/promises";
 import path from "node:path";
 
 export const MAX_PASTE_LENGTH = 100_000;
+export const PASTE_TTL_MS = 24 * 60 * 60 * 1000;
 const DATA_DIR = process.env.PASTE_DATA_DIR ?? path.join(process.cwd(), "data", "pastes");
 const SLUG_PATTERN = /^[a-zA-Z0-9_-]{8,32}$/;
 export type Paste = { text: string; createdAt: string };
+
+function isExpired(paste: Paste) {
+  const createdAt = Date.parse(paste.createdAt);
+  return !Number.isFinite(createdAt) || Date.now() - createdAt >= PASTE_TTL_MS;
+}
 
 export async function createPaste(text: string) {
   await mkdir(DATA_DIR, { recursive: true });
@@ -32,8 +38,30 @@ export async function getPaste(slug: string): Promise<Paste | null> {
   try {
     const value = JSON.parse(await readFile(path.join(DATA_DIR, `${slug}.json`), "utf8")) as Paste;
     if (typeof value.text !== "string" || typeof value.createdAt !== "string") return null;
+    if (isExpired(value)) {
+      await unlink(path.join(DATA_DIR, `${slug}.json`)).catch(() => undefined);
+      return null;
+    }
     return value;
   } catch {
     return null;
   }
+}
+
+export async function deleteExpiredPastes() {
+  await mkdir(DATA_DIR, { recursive: true });
+  const files = await readdir(DATA_DIR);
+  let deleted = 0;
+  await Promise.all(files.filter((file) => file.endsWith(".json")).map(async (file) => {
+    try {
+      const paste = JSON.parse(await readFile(path.join(DATA_DIR, file), "utf8")) as Paste;
+      if (typeof paste.createdAt === "string" && isExpired(paste)) {
+        await unlink(path.join(DATA_DIR, file));
+        deleted += 1;
+      }
+    } catch {
+      // A concurrently-created or externally-managed file is left untouched.
+    }
+  }));
+  return deleted;
 }
