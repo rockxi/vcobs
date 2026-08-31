@@ -47,3 +47,7 @@ curl -X POST http://localhost:3000/api/v1/refresh \
 - Не создаёт и не изменяет документы в исходной базе `obsidian`.
 
 Для production задайте отдельный длинный `VCOBS_REFRESH_TOKEN`, запустите `npm run build && npm run start` за reverse proxy с HTTPS.
+
+Проверка работы контейнера: `GET /api/health` возвращает `{ "status": "ok" }`.
+
+На главной странице можно вставить до 100 000 символов текста и получить публичную ссылку. Вставки хранятся отдельно от Obsidian в `data/pastes`.

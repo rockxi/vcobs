@@ -14,3 +14,5 @@ services:
       HOSTNAME: 0.0.0.0
     ports:
       - "3080:3080"
+    volumes:
+      - ./data/pastes:/app/data/pastes

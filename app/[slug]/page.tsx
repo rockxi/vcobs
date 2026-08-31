@@ -5,6 +5,7 @@ import remarkGfm from "remark-gfm";
 import type { BinaryFiles } from "@excalidraw/excalidraw/types";
 import { ExcalidrawViewer } from "@/components/excalidraw-viewer";
 import { getFile, getFileByName, getPublicNote } from "@/lib/couch";
+import { getPaste } from "@/lib/pastes";
 import { getExcalidrawData, getExcalidrawEmbeddedFiles, mediaType, prepareMarkdown, resolveVaultPath } from "@/lib/markdown";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +18,16 @@ function formatDate(timestamp?: number) {
 export default async function NotePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const note = await getPublicNote(slug);
-  if (!note) notFound();
+  if (!note) {
+    const paste = await getPaste(slug);
+    if (!paste) notFound();
+    const created = new Intl.DateTimeFormat("ru-RU", { dateStyle: "long", timeStyle: "short" }).format(new Date(paste.createdAt));
+    return <main className="reader-shell">
+      <header className="reader-header"><Link className="back-link" href="/" aria-label="Создать новую вставку">← <span>vcobs</span></Link><span className="public-badge"><i /> по ссылке</span></header>
+      <article className="note-paper paste-paper"><div className="note-context"><span>Текстовая вставка</span><time>Создано {created}</time></div><pre className="paste-content">{paste.text}</pre></article>
+      <footer className="reader-footer"><Link href="/">Создать свою ссылку</Link> <span>·</span> vcobs</footer>
+    </main>;
+  }
 
   const title = note.markdown.match(/^#\s+(.+)$/m)?.[1] ?? note.path.split("/").at(-1)?.replace(/\.md$/i, "") ?? slug;
   const drawing = getExcalidrawData(note.markdown);

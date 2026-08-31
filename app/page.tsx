@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getPublicNotes } from "@/lib/couch";
+import { PasteForm } from "@/components/paste-form";
 
 // CouchDB credentials exist only at container runtime, never while the image builds.
 export const dynamic = "force-dynamic";
@@ -19,6 +20,10 @@ export default async function HomePage() {
           <h1>Опубликованные заметки</h1>
           <p className="hero-copy">Только заметки с <code>vcobs-link</code> в свойствах Obsidian.</p>
         </div>
+      </section>
+      <section className="paste-section">
+        <div className="paste-intro"><p className="eyebrow">quick share</p><h2>Вставьте текст — получите ссылку</h2><p>Подойдёт для заметок, логов и любой информации, которой нужно быстро поделиться.</p></div>
+        <PasteForm />
       </section>
       <section className="note-grid" aria-label="Опубликованные заметки">
         {notes.map((note) => (
