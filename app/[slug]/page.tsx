@@ -46,7 +46,7 @@ export default async function NotePage({ params }: { params: Promise<{ slug: str
     drawing.files = Object.fromEntries(embeddedFiles.filter((file): file is NonNullable<typeof file> => file !== null)) as BinaryFiles;
   }
   return (
-    <main className="reader-shell">
+    <main className={`reader-shell${drawing ? " reader-shell-drawing" : ""}`}>
       <header className="reader-header">
         <Link className="back-link" href="/" aria-label="Все опубликованные заметки">← <span>vcobs</span></Link>
         <span className="public-badge"><i /> опубликовано</span>
