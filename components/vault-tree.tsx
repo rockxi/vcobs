@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { PublicNote } from "@/lib/couch";
 
 type TreeNode = {
@@ -55,8 +55,24 @@ export function VaultTree({ notes, activeSlug }: { notes: PublicNote[]; activeSl
   const topicNotes = useMemo(() => notes.filter((note) => note.topic), [notes]);
   const topics = useMemo(() => [...new Set(topicNotes.map((note) => note.topic!))].sort((a, b) => a.localeCompare(b, "ru")), [topicNotes]);
   const [topic, setTopic] = useState("all");
+  const [topicMenuOpen, setTopicMenuOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const topicFilterRef = useRef<HTMLDivElement>(null);
   useEffect(() => setCollapsed(localStorage.getItem("vcobs-sidebar") === "collapsed"), []);
+  useEffect(() => {
+    function closeTopicMenu(event: MouseEvent) {
+      if (!topicFilterRef.current?.contains(event.target as Node)) setTopicMenuOpen(false);
+    }
+    function closeTopicMenuOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setTopicMenuOpen(false);
+    }
+    document.addEventListener("mousedown", closeTopicMenu);
+    document.addEventListener("keydown", closeTopicMenuOnEscape);
+    return () => {
+      document.removeEventListener("mousedown", closeTopicMenu);
+      document.removeEventListener("keydown", closeTopicMenuOnEscape);
+    };
+  }, []);
   function toggleSidebar() {
     setCollapsed((current) => {
       const next = !current;
@@ -73,12 +89,32 @@ export function VaultTree({ notes, activeSlug }: { notes: PublicNote[]; activeSl
         <Link href="/" className="vault-logo"><span>v</span><strong>vcobs</strong></Link>
         <span className="vault-count">{visibleNotes.length}</span>
       </div>
-      <div className="topic-filter">
-        <label htmlFor="vcobs-topic">Топик</label>
-        <select id="vcobs-topic" value={topic} onChange={(event) => setTopic(event.target.value)}>
-          <option value="all">Все топики</option>
-          {topics.map((value) => <option value={value} key={value}>{value}</option>)}
-        </select>
+      <div className="topic-filter" ref={topicFilterRef}>
+        <span className="topic-filter-label">Топик</span>
+        <button className="topic-trigger" type="button" onClick={() => setTopicMenuOpen((open) => !open)} aria-haspopup="listbox" aria-expanded={topicMenuOpen}>
+          <span className="topic-trigger-icon">✦</span>
+          <span className="topic-trigger-value">{topic === "all" ? "Все топики" : topic}</span>
+          <span className={`topic-trigger-chevron${topicMenuOpen ? " is-open" : ""}`}>⌄</span>
+        </button>
+        {topicMenuOpen && <div className="topic-menu" role="listbox" aria-label="Выбор топика">
+          {["all", ...topics].map((value) => {
+            const isAll = value === "all";
+            const count = isAll ? topicNotes.length : topicNotes.filter((note) => note.topic === value).length;
+            const selected = topic === value;
+            return <button
+              aria-selected={selected}
+              className="topic-option"
+              key={value}
+              onClick={() => { setTopic(value); setTopicMenuOpen(false); }}
+              role="option"
+              type="button"
+            >
+              <span className="topic-option-mark">{selected ? "✓" : ""}</span>
+              <span>{isAll ? "Все топики" : value}</span>
+              <span className="topic-option-count">{count}</span>
+            </button>;
+          })}
+        </div>}
       </div>
       <p className="vault-label">Файлы</p>
       <nav className="vault-tree" aria-label="Опубликованные заметки по папкам">
