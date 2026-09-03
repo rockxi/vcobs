@@ -13,6 +13,7 @@ export function ExcalidrawViewer({ data }: { data: ExcalidrawInitialDataState })
     <div className="excalidraw-frame">
       <Excalidraw
         initialData={{ ...data, scrollToContent: true }}
+        theme="dark"
         viewModeEnabled
         UIOptions={{ canvasActions: { changeViewBackgroundColor: false, clearCanvas: false, export: false, loadScene: false, saveToActiveFile: false, toggleTheme: true } }}
       />
