@@ -85,6 +85,9 @@ export function VaultTree({ notes, activeSlug }: { notes: PublicNote[]; activeSl
   return (
     <aside className={`vault-sidebar${collapsed ? " vault-sidebar-collapsed" : ""}`}>
       <button className="vault-toggle" type="button" onClick={toggleSidebar} aria-label={collapsed ? "Показать боковое меню" : "Скрыть боковое меню"} aria-expanded={!collapsed} title={collapsed ? "Показать меню" : "Скрыть меню"}>{collapsed ? "›" : "‹"}</button>
+      <div className="vault-sidebar-header">
+        <Link href="/" className="vault-title">Obsidian заметки</Link>
+      </div>
       <div
         className="topic-filter"
         ref={topicFilterRef}
