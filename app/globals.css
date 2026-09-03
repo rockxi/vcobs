@@ -109,11 +109,11 @@ body { background:radial-gradient(circle at 72% 32%,rgba(84,62,119,.10),transpar
 .note-masthead h1 { margin:0 0 12px; color:#f2eff6; font:700 clamp(29px,3.2vw,40px)/1.08 Inter,ui-sans-serif,sans-serif; letter-spacing:-.035em; }
 .note-masthead p { display:flex; align-items:center; gap:10px; margin:0; color:#aaa6b2; font-size:12px; }.note-masthead p i { width:6px; height:6px; border-radius:50%; background:#a75bea; box-shadow:0 0 0 5px rgba(167,91,234,.12); }
 .prose { max-width:none; padding-top:34px; color:#c9c6d0; font-size:16px; line-height:1.62; }
-.prose h1,.prose h2,.prose h3 { color:#f0edf4; font-family:Inter,ui-sans-serif,sans-serif; letter-spacing:-.018em; }
-.prose h2 { padding-top:24px; border-top:1px solid #282932; font-size:23px; }.prose h2::before { content:"#"; margin-right:12px; color:#b65cff; }
+.prose h1,.prose h2,.prose h3,.prose h4,.prose h5,.prose h6 { position:relative; padding-bottom:10px; border-bottom:1px solid; border-image:linear-gradient(to right,#f4569d,#12131a 68%) 1; color:#cbdbe5; font-family:Inter,ui-sans-serif,sans-serif; font-weight:600; letter-spacing:-.018em; }
+.prose h1 { color:#0fb6d6; }.prose h2 { padding-top:24px; border-top:0; font-size:23px; }.prose h2::before { content:"#"; margin-right:12px; color:#b65cff; }
 .prose h3 { font-size:19px; }.prose h3::before { content:"#"; margin-right:10px; color:#a956ed; }
 .prose blockquote { margin:1.5em 0; padding:0 0 0 16px; border-left:3px solid #ad58ed; color:#c9c5cf; font:inherit; }
-.prose strong { background-image:none; color:#bf75f5; -webkit-text-fill-color:currentColor; }
+.prose strong { padding:0; color:#7aa2f7; background-color:#7aa2f7; background-image:linear-gradient(62deg,#87c2fd 0%,#dcb9fc 100%); background-clip:text; -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-weight:700; }
 .prose hr { border-color:#292a33; }
 .reader-footer { display:none; }
 @media (max-width:720px) { .vault-sidebar { width:100%; }.vault-sidebar-header { height:76px; padding:18px 16px; }.vault-toggle { top:18px; right:16px; left:auto; }.topic-filter { padding:18px 16px 6px; }.reader-header { height:58px; padding:0 18px; }.note-paper { min-height:calc(100vh - 58px); padding:25px 20px 50px; }.note-breadcrumbs { max-width:100%; overflow:auto; margin-bottom:22px; white-space:nowrap; }.note-masthead { align-items:flex-start; }.note-document-icon { width:46px; height:46px; flex-basis:46px; }.note-masthead h1 { font-size:28px; }.note-masthead p { display:block; line-height:1.5; }.note-masthead p i { display:none; }.prose { padding-top:26px; } }
