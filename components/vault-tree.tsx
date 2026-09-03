@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useMemo, useState } from "react";
 import type { PublicNote } from "@/lib/couch";
 
 type TreeNode = {
@@ -49,16 +52,28 @@ function TreeBranch({ node, depth = 0, activeSlug }: { node: TreeNode; depth?: n
 }
 
 export function VaultTree({ notes, activeSlug }: { notes: PublicNote[]; activeSlug?: string }) {
-  const tree = buildTree(notes);
+  const topicNotes = useMemo(() => notes.filter((note) => note.topic), [notes]);
+  const topics = useMemo(() => [...new Set(topicNotes.map((note) => note.topic!))].sort((a, b) => a.localeCompare(b, "ru")), [topicNotes]);
+  const [topic, setTopic] = useState("all");
+  const visibleNotes = topic === "all" ? topicNotes : topicNotes.filter((note) => note.topic === topic);
+  const tree = buildTree(visibleNotes);
   return (
     <aside className="vault-sidebar">
       <div className="vault-sidebar-header">
         <Link href="/" className="vault-logo"><span>v</span><strong>vcobs</strong></Link>
-        <span className="vault-count">{notes.length}</span>
+        <span className="vault-count">{visibleNotes.length}</span>
+      </div>
+      <div className="topic-filter">
+        <label htmlFor="vcobs-topic">Топик</label>
+        <select id="vcobs-topic" value={topic} onChange={(event) => setTopic(event.target.value)}>
+          <option value="all">Все топики</option>
+          {topics.map((value) => <option value={value} key={value}>{value}</option>)}
+        </select>
       </div>
       <p className="vault-label">Файлы</p>
       <nav className="vault-tree" aria-label="Опубликованные заметки по папкам">
         <TreeBranch node={tree} activeSlug={activeSlug} />
+        {!visibleNotes.length && <p className="vault-empty">В этом топике нет файлов</p>}
       </nav>
     </aside>
   );

@@ -85,7 +85,7 @@ async function getLeafData(ids: string[]) {
   return new Map(leaves.map((leaf) => [leaf._id, leaf.data]));
 }
 
-export type PublicNote = CouchFile & { slug: string };
+export type PublicNote = CouchFile & { slug: string; topic?: string };
 
 type PublicationIndex = {
   expiresAt: number;
@@ -123,14 +123,18 @@ async function buildPublicationIndex() {
   const notes = new Map<string, PublicNote>();
   const collisions = new Set<string>();
   for (const file of files) {
-    const slug = getVcobsLink(frontmatterSources.get(file._id) ?? "");
+    const source = frontmatterSources.get(file._id) ?? "";
+    const slug = getVcobsLink(source);
     if (!slug) continue;
     if (notes.has(slug)) {
       notes.delete(slug);
       collisions.add(slug);
       continue;
     }
-    if (!collisions.has(slug)) notes.set(slug, { ...file, slug });
+    if (!collisions.has(slug)) {
+      const topic = getVcobsTopic(source);
+      notes.set(slug, { ...file, slug, ...(topic ? { topic } : {}) });
+    }
   }
 
   publicationIndex = { notes, expiresAt: Date.now() + INDEX_TTL_MS };
@@ -147,6 +151,15 @@ export function getVcobsLink(chunk: string) {
   if (!frontmatter) return null;
   const match = frontmatter[1].match(/^\s*vcobs-link\s*(?:=|:)\s*["']?([a-zA-Z0-9][a-zA-Z0-9_-]{0,127})["']?\s*$/m);
   return match?.[1] ?? null;
+}
+
+export function getVcobsTopic(chunk: string) {
+  const frontmatter = chunk.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/);
+  if (!frontmatter) return null;
+  const match = frontmatter[1].match(/^\s*vcobs-topic\s*(?:=|:)\s*(.*?)\s*$/m);
+  if (!match) return null;
+  const topic = match[1].trim().replace(/^(["'])(.*)\1$/, "$2").trim();
+  return topic && topic.length <= 128 ? topic : null;
 }
 
 export function stripFrontmatter(markdown: string) {

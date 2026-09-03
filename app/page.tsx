@@ -21,7 +21,7 @@ export default async function HomePage() {
         <div>
           <p className="eyebrow">vcobs / public vault</p>
           <h1>Опубликованные заметки</h1>
-          <p className="hero-copy">Только заметки с <code>vcobs-link</code> в свойствах Obsidian.</p>
+          <p className="hero-copy">Все заметки с <code>vcobs-link</code>. В проводник попадают заметки с <code>vcobs-topic</code>.</p>
         </div>
       </section>
       <section className="paste-section">
