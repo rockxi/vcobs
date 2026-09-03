@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { PublicNote } from "@/lib/couch";
 
 type TreeNode = {
@@ -55,10 +55,20 @@ export function VaultTree({ notes, activeSlug }: { notes: PublicNote[]; activeSl
   const topicNotes = useMemo(() => notes.filter((note) => note.topic), [notes]);
   const topics = useMemo(() => [...new Set(topicNotes.map((note) => note.topic!))].sort((a, b) => a.localeCompare(b, "ru")), [topicNotes]);
   const [topic, setTopic] = useState("all");
+  const [collapsed, setCollapsed] = useState(false);
+  useEffect(() => setCollapsed(localStorage.getItem("vcobs-sidebar") === "collapsed"), []);
+  function toggleSidebar() {
+    setCollapsed((current) => {
+      const next = !current;
+      localStorage.setItem("vcobs-sidebar", next ? "collapsed" : "open");
+      return next;
+    });
+  }
   const visibleNotes = topic === "all" ? topicNotes : topicNotes.filter((note) => note.topic === topic);
   const tree = buildTree(visibleNotes);
   return (
-    <aside className="vault-sidebar">
+    <aside className={`vault-sidebar${collapsed ? " vault-sidebar-collapsed" : ""}`}>
+      <button className="vault-toggle" type="button" onClick={toggleSidebar} aria-label={collapsed ? "Показать боковое меню" : "Скрыть боковое меню"} aria-expanded={!collapsed} title={collapsed ? "Показать меню" : "Скрыть меню"}>{collapsed ? "›" : "‹"}</button>
       <div className="vault-sidebar-header">
         <Link href="/" className="vault-logo"><span>v</span><strong>vcobs</strong></Link>
         <span className="vault-count">{visibleNotes.length}</span>
