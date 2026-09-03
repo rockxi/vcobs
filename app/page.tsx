@@ -12,6 +12,7 @@ function formatDate(timestamp?: number) {
 
 export default async function HomePage() {
   const notes = await getPublicNotes();
+  const topicNotes = notes.filter((note) => note.topic);
   return (
     <div className="vault-layout">
       <VaultTree notes={notes} />
@@ -21,7 +22,7 @@ export default async function HomePage() {
         <div>
           <p className="eyebrow">vcobs / public vault</p>
           <h1>Опубликованные заметки</h1>
-          <p className="hero-copy">Все заметки с <code>vcobs-link</code>. В проводник попадают заметки с <code>vcobs-topic</code>.</p>
+          <p className="hero-copy">Здесь видны заметки с <code>vcobs-link</code> и <code>vcobs-topic</code>.</p>
         </div>
       </section>
       <section className="paste-section">
@@ -29,7 +30,7 @@ export default async function HomePage() {
         <PasteForm />
       </section>
       <section className="note-grid" aria-label="Опубликованные заметки">
-        {notes.map((note) => (
+        {topicNotes.map((note) => (
           <Link className="note-card" href={`/${note.slug}`} key={note.slug}>
             <span className="note-card-icon">↗</span>
             <p className="note-card-path">{note.path}</p>
@@ -38,11 +39,11 @@ export default async function HomePage() {
             <span className="note-card-slug">/{note.slug}</span>
           </Link>
         ))}
-        {!notes.length && (
+        {!topicNotes.length && (
           <div className="empty-state">
             <span>✦</span>
             <h2>Пока нет опубликованных заметок</h2>
-            <p>Добавьте в начало Markdown-файла блок свойств с <code>vcobs-link = my-note</code>.</p>
+            <p>Добавьте заметке свойства <code>vcobs-link</code> и <code>vcobs-topic</code>.</p>
           </div>
         )}
       </section>

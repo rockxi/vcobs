@@ -54,7 +54,7 @@ function TreeBranch({ node, depth = 0, activeSlug }: { node: TreeNode; depth?: n
 export function VaultTree({ notes, activeSlug }: { notes: PublicNote[]; activeSlug?: string }) {
   const topicNotes = useMemo(() => notes.filter((note) => note.topic), [notes]);
   const topics = useMemo(() => [...new Set(topicNotes.map((note) => note.topic!))].sort((a, b) => a.localeCompare(b, "ru")), [topicNotes]);
-  const [topic, setTopic] = useState("all");
+  const [topic, setTopic] = useState("");
   const [topicMenuOpen, setTopicMenuOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const topicFilterRef = useRef<HTMLDivElement>(null);
@@ -80,7 +80,7 @@ export function VaultTree({ notes, activeSlug }: { notes: PublicNote[]; activeSl
       return next;
     });
   }
-  const visibleNotes = topic === "all" ? topicNotes : topicNotes.filter((note) => note.topic === topic);
+  const visibleNotes = topic ? topicNotes.filter((note) => note.topic === topic) : [];
   const tree = buildTree(visibleNotes);
   return (
     <aside className={`vault-sidebar${collapsed ? " vault-sidebar-collapsed" : ""}`}>
@@ -101,13 +101,12 @@ export function VaultTree({ notes, activeSlug }: { notes: PublicNote[]; activeSl
         <span className="topic-filter-label">Топик</span>
         <button className="topic-trigger" type="button" onClick={() => setTopicMenuOpen((open) => !open)} aria-haspopup="listbox" aria-expanded={topicMenuOpen}>
           <span className="topic-trigger-icon">✦</span>
-          <span className="topic-trigger-value">{topic === "all" ? "Все топики" : topic}</span>
+          <span className="topic-trigger-value">{topic || "Выберите топик"}</span>
           <span className={`topic-trigger-chevron${topicMenuOpen ? " is-open" : ""}`}>⌄</span>
         </button>
         <div className={`topic-menu${topicMenuOpen ? " topic-menu-open" : ""}`} role="listbox" aria-label="Выбор топика" aria-hidden={!topicMenuOpen}>
-          {["all", ...topics].map((value) => {
-            const isAll = value === "all";
-            const count = isAll ? topicNotes.length : topicNotes.filter((note) => note.topic === value).length;
+          {topics.map((value) => {
+            const count = topicNotes.filter((note) => note.topic === value).length;
             const selected = topic === value;
             return <button
               aria-selected={selected}
@@ -119,7 +118,7 @@ export function VaultTree({ notes, activeSlug }: { notes: PublicNote[]; activeSl
               type="button"
             >
               <span className="topic-option-mark">{selected ? "✓" : ""}</span>
-              <span>{isAll ? "Все топики" : value}</span>
+              <span>{value}</span>
               <span className="topic-option-count">{count}</span>
             </button>;
           })}
@@ -128,7 +127,8 @@ export function VaultTree({ notes, activeSlug }: { notes: PublicNote[]; activeSl
       <p className="vault-label">Файлы</p>
       <nav className="vault-tree" aria-label="Опубликованные заметки по папкам">
         <TreeBranch node={tree} activeSlug={activeSlug} />
-        {!visibleNotes.length && <p className="vault-empty">В этом топике нет файлов</p>}
+        {!topic && <p className="vault-empty">Выберите топик, чтобы показать файлы</p>}
+        {Boolean(topic) && !visibleNotes.length && <p className="vault-empty">В этом топике нет файлов</p>}
       </nav>
     </aside>
   );
