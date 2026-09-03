@@ -89,14 +89,23 @@ export function VaultTree({ notes, activeSlug }: { notes: PublicNote[]; activeSl
         <Link href="/" className="vault-logo"><span>v</span><strong>vcobs</strong></Link>
         <span className="vault-count">{visibleNotes.length}</span>
       </div>
-      <div className="topic-filter" ref={topicFilterRef}>
+      <div
+        className="topic-filter"
+        ref={topicFilterRef}
+        onMouseEnter={() => setTopicMenuOpen(true)}
+        onMouseLeave={() => setTopicMenuOpen(false)}
+        onFocusCapture={() => setTopicMenuOpen(true)}
+        onBlurCapture={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget)) setTopicMenuOpen(false);
+        }}
+      >
         <span className="topic-filter-label">Топик</span>
         <button className="topic-trigger" type="button" onClick={() => setTopicMenuOpen((open) => !open)} aria-haspopup="listbox" aria-expanded={topicMenuOpen}>
           <span className="topic-trigger-icon">✦</span>
           <span className="topic-trigger-value">{topic === "all" ? "Все топики" : topic}</span>
           <span className={`topic-trigger-chevron${topicMenuOpen ? " is-open" : ""}`}>⌄</span>
         </button>
-        {topicMenuOpen && <div className="topic-menu" role="listbox" aria-label="Выбор топика">
+        <div className={`topic-menu${topicMenuOpen ? " topic-menu-open" : ""}`} role="listbox" aria-label="Выбор топика" aria-hidden={!topicMenuOpen}>
           {["all", ...topics].map((value) => {
             const isAll = value === "all";
             const count = isAll ? topicNotes.length : topicNotes.filter((note) => note.topic === value).length;
@@ -105,6 +114,7 @@ export function VaultTree({ notes, activeSlug }: { notes: PublicNote[]; activeSl
               aria-selected={selected}
               className="topic-option"
               key={value}
+              tabIndex={topicMenuOpen ? 0 : -1}
               onClick={() => { setTopic(value); setTopicMenuOpen(false); }}
               role="option"
               type="button"
@@ -114,7 +124,7 @@ export function VaultTree({ notes, activeSlug }: { notes: PublicNote[]; activeSl
               <span className="topic-option-count">{count}</span>
             </button>;
           })}
-        </div>}
+        </div>
       </div>
       <p className="vault-label">Файлы</p>
       <nav className="vault-tree" aria-label="Опубликованные заметки по папкам">

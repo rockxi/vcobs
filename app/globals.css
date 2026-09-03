@@ -52,3 +52,21 @@ h1 { margin:0; font:500 clamp(32px,5vw,52px)/1.05 Georgia,"Times New Roman",seri
 .paste-paper { padding:clamp(28px,6vw,64px); }.paste-content { margin:32px 0 0; overflow-wrap:anywhere; white-space:pre-wrap; color:#ded7e8; font:15px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace; }
 .not-found { display:flex; min-height:100vh; max-width:650px; flex-direction:column; align-items:flex-start; justify-content:center; padding:35px; margin:auto; }.not-found .brand-mark { margin-bottom:30px; }.not-found h1 { margin-bottom:17px; }.not-found p:not(.eyebrow) { max-width:430px; margin:0 0 28px; color:var(--muted); line-height:1.6; }.not-found a { padding:11px 15px; border-radius:8px; background:var(--ink); color:white; font-size:14px; }
 @media (max-width:720px) { .vault-layout { grid-template-columns:1fr; }.vault-layout:has(.vault-sidebar-collapsed) { grid-template-columns:1fr; }.vault-sidebar { position:relative; width:100%; height:auto; max-height:42vh; border-right:0; border-bottom:1px solid #2b2437; }.vault-sidebar-collapsed { width:0; height:0; min-height:0; border:0; }.vault-toggle { top:14px; right:14px; left:auto; }.vault-sidebar-collapsed .vault-toggle { right:auto; left:12px; }.vault-layout-drawing { display:block; height:100dvh; overflow:auto; }.vault-layout-drawing .vault-sidebar { height:auto; max-height:32vh; }.vault-layout-drawing .vault-sidebar-collapsed { height:0; }.library-shell { padding:50px 20px; }.library-hero { margin-bottom:37px; }.paste-section { grid-template-columns:1fr; gap:24px; padding:22px; }.note-grid { grid-template-columns:1fr; }.reader-shell { padding:18px 12px 30px; }.note-paper { padding:28px 22px; }.note-paper-drawing { padding:20px 12px; }.excalidraw-frame { height:65vh; min-height:400px; }.reader-shell-drawing { height:68vh; padding:0; }.vault-layout-drawing:has(.vault-sidebar-collapsed) .reader-shell-drawing { height:100dvh; }.reader-shell-drawing .note-paper-drawing { padding:0; }.reader-shell-drawing .excalidraw-frame { height:100%; min-height:0; }.reader-shell-drawing .reader-header { top:8px; left:8px; }.reader-shell-drawing .public-badge { display:none; }.note-context { display:block; }.note-context time { display:block; margin-top:7px; }.prose { font-size:16px; } }
+
+/* Inertial page motion and the reference header's clipped, staggered menu reveal. */
+html.lenis,html.lenis body { height:auto; }
+.lenis.lenis-smooth { scroll-behavior:auto!important; }
+.lenis.lenis-stopped { overflow:hidden; }
+.topic-trigger { transition:border-color .22s,box-shadow .22s,transform .22s cubic-bezier(.22,1,.36,1); }
+.topic-trigger:hover { transform:translateY(-1px); }
+.topic-trigger-chevron { transition:transform .3s cubic-bezier(.22,1,.36,1); }
+.topic-menu { visibility:hidden; clip-path:inset(0 0 100%); opacity:0; pointer-events:none; transform:translateY(12px) scale(.985); transform-origin:top; animation:none; transition:clip-path .36s cubic-bezier(.22,1,.36,1),opacity .32s cubic-bezier(.22,1,.36,1),transform .36s cubic-bezier(.22,1,.36,1),visibility 0s linear .36s; will-change:clip-path,opacity,transform; }
+.topic-menu-open { visibility:visible; clip-path:inset(0); opacity:1; pointer-events:auto; transform:translateY(0) scale(1); transition-delay:0s; }
+.topic-option { opacity:0; transform:translateY(-.35rem); transition:opacity .26s cubic-bezier(.22,1,.36,1),transform .3s cubic-bezier(.22,1,.36,1),background-color .22s cubic-bezier(.22,1,.36,1),color .22s cubic-bezier(.22,1,.36,1); }
+.topic-menu-open .topic-option { opacity:1; transform:translateY(0); }
+.topic-menu-open .topic-option:nth-child(2) { transition-delay:35ms; }
+.topic-menu-open .topic-option:nth-child(3) { transition-delay:70ms; }
+.topic-menu-open .topic-option:nth-child(4) { transition-delay:105ms; }
+.topic-menu-open .topic-option:nth-child(5) { transition-delay:140ms; }
+.topic-menu-open .topic-option:nth-child(n+6) { transition-delay:175ms; }
+@media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; } }
