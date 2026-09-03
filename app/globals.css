@@ -80,6 +80,8 @@ html { background:#0d0e13; }
 body { background:radial-gradient(circle at 72% 32%,rgba(84,62,119,.10),transparent 34rem),#0d0e13; font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
 .vault-layout { grid-template-columns:308px minmax(0,1fr); }
 .vault-sidebar { width:308px; border-color:#272832; background:linear-gradient(145deg,#171821,#111219 72%); }
+/* Keep the collapsed state after the desktop-width overrides above. */
+.vault-sidebar-collapsed { width:0; min-width:0; overflow:visible; border-color:transparent; }
 .vault-sidebar-header { height:112px; padding:27px 20px; align-items:flex-start; }
 .vault-title { display:flex; align-items:center; gap:12px; color:#f3f1f7; }
 .vault-title > span { display:grid; width:38px; height:38px; place-items:center; border:1px solid #39294c; background:#20182e; color:#bb78ff; font:700 13px ui-monospace,SFMono-Regular,monospace; }
@@ -116,4 +118,4 @@ body { background:radial-gradient(circle at 72% 32%,rgba(84,62,119,.10),transpar
 .prose strong { padding:0; color:#7aa2f7; background-color:#7aa2f7; background-image:linear-gradient(62deg,#87c2fd 0%,#dcb9fc 100%); background-clip:text; -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-weight:700; }
 .prose hr { border-color:#292a33; }
 .reader-footer { display:none; }
-@media (max-width:720px) { .vault-sidebar { width:100%; }.vault-sidebar-header { height:76px; padding:18px 16px; }.vault-toggle { top:18px; right:16px; left:auto; }.topic-filter { padding:18px 16px 6px; }.reader-header { height:58px; padding:0 18px; }.note-paper { min-height:calc(100vh - 58px); padding:25px 20px 50px; }.note-breadcrumbs { max-width:100%; overflow:auto; margin-bottom:22px; white-space:nowrap; }.note-masthead { align-items:flex-start; }.note-document-icon { width:46px; height:46px; flex-basis:46px; }.note-masthead h1 { font-size:28px; }.note-masthead p { display:block; line-height:1.5; }.note-masthead p i { display:none; }.prose { padding-top:26px; } }
+@media (max-width:720px) { .vault-sidebar { width:100%; }.vault-sidebar.vault-sidebar-collapsed { width:0; min-width:0; }.vault-sidebar-header { height:76px; padding:18px 16px; }.vault-toggle { top:18px; right:16px; left:auto; }.topic-filter { padding:18px 16px 6px; }.reader-header { height:58px; padding:0 18px; }.note-paper { min-height:calc(100vh - 58px); padding:25px 20px 50px; }.note-breadcrumbs { max-width:100%; overflow:auto; margin-bottom:22px; white-space:nowrap; }.note-masthead { align-items:flex-start; }.note-document-icon { width:46px; height:46px; flex-basis:46px; }.note-masthead h1 { font-size:28px; }.note-masthead p { display:block; line-height:1.5; }.note-masthead p i { display:none; }.prose { padding-top:26px; } }
