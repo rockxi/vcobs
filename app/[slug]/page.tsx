@@ -31,6 +31,8 @@ export default async function NotePage({ params }: { params: Promise<{ slug: str
   }
 
   const title = note.markdown.match(/^#\s+(.+)$/m)?.[1] ?? note.path.split("/").at(-1)?.replace(/\.md$/i, "") ?? slug;
+  const pathParts = note.path.replace(/\.md$/i, "").split("/").filter(Boolean);
+  const renderedMarkdown = prepareMarkdown(note.markdown, slug).replace(/^#\s+.+(?:\r?\n)+/, "");
   const notes = await getPublicNotes();
   const drawing = getExcalidrawData(note.markdown);
   if (drawing) {
@@ -52,17 +54,23 @@ export default async function NotePage({ params }: { params: Promise<{ slug: str
       <VaultTree notes={notes} activeSlug={slug} />
       <main className={`reader-shell${drawing ? " reader-shell-drawing" : ""}`}>
       <header className="reader-header">
-        <Link className="back-link" href="/" aria-label="Все опубликованные заметки">← <span>vcobs</span></Link>
+        <Link className="back-link" href="/" aria-label="Все опубликованные заметки">⌕ <span>Все заметки</span></Link>
         <span className="public-badge"><i /> опубликовано</span>
       </header>
       <article className={`note-paper${drawing ? " note-paper-drawing" : ""}`}>
-        <div className="note-context">
-          <span>{note.path}</span>
-          {formatDate(note.mtime) && <time>Обновлено {formatDate(note.mtime)}</time>}
-        </div>
+        {!drawing && <>
+          <nav className="note-breadcrumbs" aria-label="Путь к заметке">
+            <Link href="/" aria-label="Главная">⌂</Link>
+            {pathParts.map((part, index) => <span key={`${part}-${index}`}><i>›</i><b>{part}</b></span>)}
+          </nav>
+          <div className="note-masthead">
+            <span className="note-document-icon" aria-hidden="true">▤</span>
+            <div><h1>{title}</h1><p>{formatDate(note.mtime) ? `Обновлено ${formatDate(note.mtime)}` : "Опубликованная заметка"} <i /> Опубликовано</p></div>
+          </div>
+        </>}
         {drawing ? <ExcalidrawViewer data={drawing} /> : (
           <div className="prose">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{prepareMarkdown(note.markdown, slug)}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{renderedMarkdown}</ReactMarkdown>
           </div>
         )}
       </article>
