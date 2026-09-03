@@ -1,0 +1,62 @@
+/* Lilac Lab — a measured violet workspace: graph paper, calibration marks, instrument panels. */
+html[data-theme="lilac-lab"] {
+  color-scheme: dark;
+  --ink: #eeeaff; --muted: #aaa5c6; --paper: #151126; --line: #50466f;
+  --accent: #c29bff; --lime: #a9e8d2; --surface: #1c1830; --surface-raised: #27213f;
+  --page-background: #100d1f;
+  --page-surface: linear-gradient(rgba(177,144,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(177,144,255,.045) 1px,transparent 1px),radial-gradient(circle at 78% 13%,rgba(151,104,255,.18),transparent 27rem),#100d1f;
+  --theme-control-bg: #17132a; --theme-control-line: #665a8d; --theme-control-ink: #e1d8ff; --theme-select-bg: #27213f;
+  --shadow: 12px 12px 0 rgba(5,3,15,.28),0 0 0 1px rgba(199,170,255,.05);
+  background-size: 24px 24px,24px 24px,auto;
+}
+html[data-theme="lilac-lab"] body { font-family: ui-monospace,"SFMono-Regular",Consolas,monospace; }
+html[data-theme="lilac-lab"] .theme-switcher { border-radius:2px; box-shadow:4px 4px 0 #090714; text-transform:uppercase; letter-spacing:.06em; }
+html[data-theme="lilac-lab"] .theme-switcher::before { content:"theme /"; color:#9d94bd; font-size:9px; }
+html[data-theme="lilac-lab"] .vault-layout { grid-template-columns:292px minmax(0,1fr); }
+html[data-theme="lilac-lab"] .vault-layout:has(.vault-sidebar-collapsed) { grid-template-columns:0 minmax(0,1fr); }
+html[data-theme="lilac-lab"] .vault-sidebar { width:292px; border-right:1px solid #61557f; background:linear-gradient(90deg,rgba(100,79,145,.12) 1px,transparent 1px),#141026; background-size:12px 12px; }
+html[data-theme="lilac-lab"] .vault-sidebar-header { height:70px; border-color:#61557f; }
+html[data-theme="lilac-lab"] .vault-title { color:#eeeaff; font:700 12px ui-monospace,monospace; letter-spacing:.09em; text-transform:uppercase; }
+html[data-theme="lilac-lab"] .vault-title::before { content:"◈ "; color:#a9e8d2; }
+html[data-theme="lilac-lab"] .vault-toggle { left:248px; border-radius:2px; border-color:#7869a3; background:#1b1631; color:#bff6e2; box-shadow:3px 3px 0 #090714; }
+html[data-theme="lilac-lab"] .vault-sidebar-collapsed .vault-toggle { left:12px; }
+html[data-theme="lilac-lab"] .topic-filter { padding:20px 16px 8px; }
+html[data-theme="lilac-lab"] .topic-filter-label,html[data-theme="lilac-lab"] .vault-label { color:#a9e8d2; font-size:9px; }
+html[data-theme="lilac-lab"] .topic-filter-label::after { content:" / FILTER"; color:#81799c; }
+html[data-theme="lilac-lab"] .topic-trigger { height:45px; border-radius:2px; border-color:#6b5c93; background:#201a38; box-shadow:inset 3px 0 #a9e8d2; font-family:ui-monospace,monospace; }
+html[data-theme="lilac-lab"] .topic-trigger-icon { border-radius:0; background:#a9e8d2; color:#17132a; box-shadow:none; }
+html[data-theme="lilac-lab"] .topic-menu { border-radius:2px; border-color:#8b7ab8; background:#1b1631; box-shadow:8px 8px 0 rgba(5,3,15,.45); }
+html[data-theme="lilac-lab"] .topic-option { border-radius:0; font-family:ui-monospace,monospace; }
+html[data-theme="lilac-lab"] .topic-option:hover,html[data-theme="lilac-lab"] .topic-option[aria-selected="true"] { background:#373052; color:#fff; }
+html[data-theme="lilac-lab"] .topic-option-count,html[data-theme="lilac-lab"] .vault-count { border-radius:2px; }
+html[data-theme="lilac-lab"] .vault-file[aria-current="page"] { box-shadow:inset 3px 0 #a9e8d2; background:#332b50; color:#fff; }
+html[data-theme="lilac-lab"] .folder-icon,html[data-theme="lilac-lab"] .vault-file > span { color:#c29bff; }
+html[data-theme="lilac-lab"] .library-shell { max-width:1240px; padding-top:112px; }
+html[data-theme="lilac-lab"] .library-hero { position:relative; align-items:center; padding:18px 0 25px; border-bottom:1px solid #61557f; }
+html[data-theme="lilac-lab"] .library-hero::after { content:"INDEX  /  01—05  /  SYNC: LIVE"; position:absolute; right:0; bottom:8px; color:#a9e8d2; font-size:9px; letter-spacing:.08em; }
+html[data-theme="lilac-lab"] .brand-mark { border:1px solid #bca0ff; border-radius:2px; background:transparent; color:#bca0ff; box-shadow:5px 5px 0 #7152a9; font-family:ui-monospace,monospace; }
+html[data-theme="lilac-lab"] h1 { font-family:ui-monospace,monospace; font-weight:700; letter-spacing:-.065em; }
+html[data-theme="lilac-lab"] .eyebrow { color:#a9e8d2; font-size:10px; }
+html[data-theme="lilac-lab"] code { border-radius:1px; background:#332b50; color:#d5c5ff; }
+html[data-theme="lilac-lab"] .paste-section { position:relative; gap:56px; border-radius:2px; border-color:#625581; background:rgba(25,20,45,.86); box-shadow:8px 8px 0 rgba(4,2,13,.42); }
+html[data-theme="lilac-lab"] .paste-section::before { content:"INPUT STATION / 01"; position:absolute; top:-10px; left:17px; padding:0 7px; background:#151126; color:#a9e8d2; font-size:9px; letter-spacing:.1em; }
+html[data-theme="lilac-lab"] .paste-intro h2 { font-family:ui-monospace,monospace; font-size:26px; font-weight:700; }
+html[data-theme="lilac-lab"] .paste-form textarea { border-radius:1px; border-color:#695b94; background:#100d20; caret-color:#a9e8d2; }
+html[data-theme="lilac-lab"] .paste-form textarea:focus { border-color:#a9e8d2; box-shadow:0 0 0 2px rgba(169,232,210,.18); }
+html[data-theme="lilac-lab"] .paste-actions button { border-radius:1px; background:#a9e8d2; color:#17132a; box-shadow:3px 3px 0 #755aac; font-family:ui-monospace,monospace; }
+html[data-theme="lilac-lab"] .note-grid { gap:12px; }
+html[data-theme="lilac-lab"] .note-card { min-height:205px; border-radius:2px; border-color:#5d507c; background:rgba(26,21,46,.89); box-shadow:none; }
+html[data-theme="lilac-lab"] .note-card::after { content:"◇"; position:absolute; right:12px; bottom:10px; color:#a9e8d2; font-size:11px; }
+html[data-theme="lilac-lab"] .note-card:hover { transform:translate(-2px,-2px); border-color:#bca0ff; box-shadow:5px 5px 0 #090714; }
+html[data-theme="lilac-lab"] .note-card h2,html[data-theme="lilac-lab"] .prose h1,html[data-theme="lilac-lab"] .prose h2,html[data-theme="lilac-lab"] .prose h3 { font-family:ui-monospace,monospace; font-weight:700; }
+html[data-theme="lilac-lab"] .reader-shell { padding:36px 38px 56px; }
+html[data-theme="lilac-lab"] .reader-header { padding-bottom:14px; border-bottom:1px solid #5d507c; }
+html[data-theme="lilac-lab"] .public-badge { color:#a9e8d2; }
+html[data-theme="lilac-lab"] .public-badge i { border-radius:0; background:#a9e8d2; }
+html[data-theme="lilac-lab"] .note-paper { border-radius:2px; border-color:#665987; background:rgba(20,16,36,.93); box-shadow:10px 10px 0 rgba(6,3,17,.38); }
+html[data-theme="lilac-lab"] .note-context { border-color:#5d507c; color:#a9a2c3; }
+html[data-theme="lilac-lab"] .prose strong { color:#a9e8d2; background:none; -webkit-text-fill-color:currentColor; }
+html[data-theme="lilac-lab"] .prose a { color:#c9a9ff; text-decoration-color:#a9e8d2; }
+html[data-theme="lilac-lab"] .prose blockquote { border-color:#a9e8d2; font-family:ui-monospace,monospace; }
+html[data-theme="lilac-lab"] .prose pre { border-radius:1px; border-color:#655788; background:#0d0b19; }
+@media (max-width:720px) { html[data-theme="lilac-lab"] .vault-layout { grid-template-columns:1fr; } html[data-theme="lilac-lab"] .vault-sidebar { width:100%; } html[data-theme="lilac-lab"] .vault-toggle { left:auto; } html[data-theme="lilac-lab"] .library-hero::after { position:static; display:block; margin-top:12px; } html[data-theme="lilac-lab"] .reader-shell { padding:24px 14px 35px; } }

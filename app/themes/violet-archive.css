@@ -1,0 +1,68 @@
+/* Violet Archive — a quiet, edited collection of illuminated field notes. */
+html[data-theme="violet-archive"] {
+  color-scheme: dark;
+  --ink: #eee7df;
+  --muted: #a69aab;
+  --paper: #19121b;
+  --line: #5b425b;
+  --accent: #d6a5ef;
+  --lime: #e6c8ad;
+  --surface: #241928;
+  --surface-raised: #302035;
+  --shadow: 8px 11px 0 rgba(66, 39, 63, .28), 0 22px 52px rgba(7, 3, 10, .46);
+  --page-background: #160e18;
+  --page-surface: radial-gradient(circle at 82% 8%, rgba(184, 105, 193, .17), transparent 26rem), linear-gradient(105deg, #170d18, #211323 54%, #130d17);
+  --theme-control-bg: #2b1a2b;
+  --theme-control-line: #805476;
+  --theme-control-ink: #f2d7e9;
+  --theme-select-bg: #1c111d;
+}
+html[data-theme="violet-archive"] body { font-family: Georgia, "Times New Roman", serif; letter-spacing: .01em; }
+html[data-theme="violet-archive"] .theme-switcher { border-radius: 999px; padding: 6px 8px 6px 13px; font-family: ui-monospace, monospace; box-shadow: 3px 4px 0 #5a3458; }
+html[data-theme="violet-archive"] .theme-switcher select { border-radius: 999px; background: #42243f; }
+html[data-theme="violet-archive"] .vault-layout { grid-template-columns: 292px minmax(0, 1fr); }
+html[data-theme="violet-archive"] .vault-sidebar { width: 292px; border-right: 1px solid #6a4a64; background: linear-gradient(165deg, #28152a, #160e19 74%); color: #d7c6d4; }
+html[data-theme="violet-archive"] .vault-layout:has(.vault-sidebar-collapsed) { grid-template-columns: 0 minmax(0, 1fr); }
+html[data-theme="violet-archive"] .vault-sidebar-header { height: 74px; border-bottom: 1px solid #674860; padding: 0 20px; }
+html[data-theme="violet-archive"] .vault-logo { font-variant: small-caps; letter-spacing: .08em; }
+html[data-theme="violet-archive"] .vault-logo > span, html[data-theme="violet-archive"] .brand-mark { border: 1px solid #efbfca; border-radius: 50% 50% 46% 46%; background: #6d376b; box-shadow: inset 0 0 0 3px #3e203f, 3px 4px 0 #271125; }
+html[data-theme="violet-archive"] .vault-count, html[data-theme="violet-archive"] .topic-option-count { border-radius: 2px; border-color: #795573; color: #d5b6ce; }
+html[data-theme="violet-archive"] .vault-toggle { left: 244px; border-radius: 50%; background: #442642; border-color: #ad78a5; color: #ffe1ef; box-shadow: 3px 4px 0 #261126; }
+html[data-theme="violet-archive"] .vault-sidebar-collapsed .vault-toggle { left: 14px; }
+html[data-theme="violet-archive"] .topic-filter { padding: 22px 18px 4px; }
+html[data-theme="violet-archive"] .topic-filter-label, html[data-theme="violet-archive"] .vault-label { color: #c297b8; font-family: Georgia, serif; font-size: 11px; font-style: italic; font-weight: 400; letter-spacing: .05em; text-transform: none; }
+html[data-theme="violet-archive"] .topic-trigger { height: 46px; border-radius: 3px; border-color: #815778; background: #321d32; font-family: Georgia, serif; box-shadow: inset 0 0 0 1px rgba(255, 220, 236, .08); }
+html[data-theme="violet-archive"] .topic-trigger-icon { border-radius: 50%; background: #a85d91; }
+html[data-theme="violet-archive"] .topic-menu { border-radius: 2px; border-color: #9d6b8d; background: #2c1930; box-shadow: 5px 7px 0 rgba(33, 14, 31, .78); }
+html[data-theme="violet-archive"] .topic-option { border-radius: 0; font-family: Georgia, serif; }
+html[data-theme="violet-archive"] .topic-option:hover, html[data-theme="violet-archive"] .topic-option[aria-selected="true"] { background: #57304f; }
+html[data-theme="violet-archive"] .vault-folder summary, html[data-theme="violet-archive"] .vault-file { height: 34px; border-left: 2px solid transparent; font-family: Georgia, serif; }
+html[data-theme="violet-archive"] .vault-folder summary:hover, html[data-theme="violet-archive"] .vault-file:hover { border-left-color: #d68cbb; background: rgba(128, 64, 112, .22); }
+html[data-theme="violet-archive"] .vault-file[aria-current="page"] { border-left-color: #f0b6d5; background: linear-gradient(90deg, #713962, transparent); color: #fff1f7; box-shadow: none; }
+html[data-theme="violet-archive"] .library-shell { max-width: 1160px; padding-top: 118px; }
+html[data-theme="violet-archive"] .library-hero { max-width: 740px; margin-bottom: 72px; }
+html[data-theme="violet-archive"] .eyebrow { color: #eba8d5; font-family: ui-monospace, monospace; }
+html[data-theme="violet-archive"] h1 { font-size: clamp(40px, 6vw, 67px); font-style: italic; font-weight: 400; }
+html[data-theme="violet-archive"] .hero-copy { max-width: 560px; font-size: 17px; line-height: 1.65; }
+html[data-theme="violet-archive"] .paste-section { grid-template-columns: .82fr 1.18fr; gap: 54px; border: 1px solid #704b68; border-radius: 2px; background: linear-gradient(130deg, #2e1c2e, #211522); box-shadow: 8px 9px 0 #3d1d38; }
+html[data-theme="violet-archive"] .paste-intro h2 { font-style: italic; }
+html[data-theme="violet-archive"] .paste-form label { font-family: ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase; }
+html[data-theme="violet-archive"] .paste-form textarea { border-radius: 1px; border-color: #805477; background: #170d18; font-family: "Courier New", monospace; }
+html[data-theme="violet-archive"] .paste-form textarea:focus { border-color: #efa5d4; box-shadow: 0 0 0 3px rgba(239, 165, 212, .16); }
+html[data-theme="violet-archive"] .paste-actions button { border-radius: 1px; background: #a85083; box-shadow: 3px 3px 0 #512241; font-family: Georgia, serif; }
+html[data-theme="violet-archive"] .note-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+html[data-theme="violet-archive"] .note-card { min-height: 218px; border-radius: 2px; border-color: #674660; background: #261827; box-shadow: 4px 5px 0 rgba(62, 29, 55, .72); }
+html[data-theme="violet-archive"] .note-card:nth-child(3n+2) { transform: translateY(22px); background: #2c1927; }
+html[data-theme="violet-archive"] .note-card:nth-child(3n) { background: #211a2f; }
+html[data-theme="violet-archive"] .note-card:hover { transform: translate(-2px, -3px); border-color: #e198c4; box-shadow: 7px 9px 0 #4e2747; }
+html[data-theme="violet-archive"] .note-card h2 { font-style: italic; font-size: 27px; }
+html[data-theme="violet-archive"] .note-card-path, html[data-theme="violet-archive"] .note-card-meta { color: #c3a9b9; }
+html[data-theme="violet-archive"] .note-paper { max-width: 910px; margin: 0 auto; border: 1px solid #76506e; border-radius: 2px; background: #21151f; box-shadow: 9px 10px 0 #3b2036, 0 28px 60px rgba(6, 2, 8, .46); }
+html[data-theme="violet-archive"] .note-context { border-bottom-color: #6c4a65; color: #c4aabb; }
+html[data-theme="violet-archive"] .prose { font-size: 18px; line-height: 1.8; }
+html[data-theme="violet-archive"] .prose h1, html[data-theme="violet-archive"] .prose h2, html[data-theme="violet-archive"] .prose h3 { color: #ffe9f5; font-style: italic; }
+html[data-theme="violet-archive"] .prose blockquote { border-left-color: #e49cc8; color: #d8bdce; }
+html[data-theme="violet-archive"] .prose pre { border-radius: 0; border-color: #77516e; background: #160d17; }
+html[data-theme="violet-archive"] .prose a { color: #f0a8d5; text-decoration-color: #9b4c7e; }
+html[data-theme="violet-archive"] .reader-footer { color: #c09aaf; font-family: Georgia, serif; }
+@media (max-width:720px) { html[data-theme="violet-archive"] .vault-sidebar { width: 100%; } html[data-theme="violet-archive"] .vault-toggle { left:auto; } html[data-theme="violet-archive"] .note-grid { grid-template-columns:1fr; } html[data-theme="violet-archive"] .note-card:nth-child(3n+2) { transform:none; } }

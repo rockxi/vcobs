@@ -1,0 +1,133 @@
+/* Amethyst Garden — a nocturnal illuminated manuscript, rather than a UI skin. */
+html[data-theme="amethyst-garden"] {
+  color-scheme: dark;
+  --ink: #f0e7d4;
+  --muted: #b8aaae;
+  --paper: #17121d;
+  --line: rgba(194, 157, 102, .38);
+  --accent: #d7a9ff;
+  --lime: #e2c783;
+  --surface: #211727;
+  --surface-raised: #2c1d31;
+  --shadow: 0 20px 55px rgba(7, 3, 12, .58), 0 0 0 1px rgba(230, 196, 120, .06);
+  --page-background: #100b16;
+  --page-surface:
+    radial-gradient(ellipse at 13% 7%, rgba(113, 65, 141, .34), transparent 29rem),
+    radial-gradient(ellipse at 91% 88%, rgba(73, 102, 77, .2), transparent 32rem),
+    linear-gradient(120deg, #100b16 0%, #170d1c 47%, #0c1014 100%);
+  --theme-control-line: rgba(228, 194, 127, .48);
+  --theme-control-bg: rgba(26, 15, 31, .88);
+  --theme-control-ink: #f2dfb1;
+  --theme-select-bg: #26172d;
+}
+
+html[data-theme="amethyst-garden"] body {
+  min-height: 100vh;
+  background-image: var(--page-surface), repeating-linear-gradient(90deg, transparent 0 47px, rgba(237, 207, 145, .024) 48px 49px);
+  font-family: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+}
+
+html[data-theme="amethyst-garden"] body::before {
+  position: fixed; z-index: -1; inset: 0; pointer-events: none; content: "";
+  opacity: .48;
+  background: radial-gradient(circle at 6% 70%, rgba(203, 165, 255, .1) 0 1px, transparent 1.5px) 0 0 / 31px 31px;
+  mask-image: linear-gradient(90deg, black, transparent 27%, transparent 73%, black);
+}
+html[data-theme="amethyst-garden"] a { transition: color .18s ease, filter .18s ease; }
+html[data-theme="amethyst-garden"] a:hover { color: #f4d886; }
+html[data-theme="amethyst-garden"] code { border: 1px solid rgba(219, 182, 108, .24); border-radius: 3px; background: #2b1b32; color: #f0dca1; font-family: "SFMono-Regular", Consolas, monospace; }
+
+html[data-theme="amethyst-garden"] .theme-switcher { border-radius: 999px; border-color: rgba(228,194,127,.58); box-shadow: 0 8px 24px rgba(8,3,12,.5), inset 0 0 0 1px rgba(255,255,255,.04); font-family: "Palatino Linotype", Georgia, serif; letter-spacing: .04em; }
+html[data-theme="amethyst-garden"] .theme-switcher select { border-radius: 999px; }
+
+html[data-theme="amethyst-garden"] .vault-layout { grid-template-columns: 290px minmax(0,1fr); }
+html[data-theme="amethyst-garden"] .vault-layout:has(.vault-sidebar-collapsed) { grid-template-columns: 0 minmax(0,1fr); }
+html[data-theme="amethyst-garden"] .vault-sidebar { width: 290px; border-right: 1px solid rgba(209,174,109,.4); background: linear-gradient(160deg, #211329, #120f19 65%, #132018); color: #dccfbf; box-shadow: inset -14px 0 32px rgba(0,0,0,.14); }
+html[data-theme="amethyst-garden"] .vault-sidebar::after { position:absolute; right:8px; bottom:16px; width:84px; height:130px; opacity:.34; pointer-events:none; content:"✣\A   ❋\A ✦"; white-space:pre; color:#d5ad6d; font:31px/1.2 Georgia,serif; transform:rotate(-12deg); }
+html[data-theme="amethyst-garden"] .vault-sidebar-collapsed { width: 0; }
+html[data-theme="amethyst-garden"] .vault-toggle { left:244px; width:32px; height:32px; border-color: rgba(225,191,119,.62); border-radius:50%; background:#27172d; color:#f3d98d; box-shadow:0 5px 16px rgba(0,0,0,.4); }
+html[data-theme="amethyst-garden"] .vault-toggle:hover { background:#51305a; transform:rotate(-8deg); }
+html[data-theme="amethyst-garden"] .vault-sidebar-collapsed .vault-toggle { left:12px; }
+html[data-theme="amethyst-garden"] .vault-sidebar-header { height:74px; padding:0 21px; border-bottom-color:rgba(209,174,109,.38); }
+html[data-theme="amethyst-garden"] .vault-title { color:#f2ddb0; font:600 17px/1 Georgia,serif; letter-spacing:.07em; font-variant:small-caps; }
+html[data-theme="amethyst-garden"] .vault-title::before { margin-right:8px; content:"✦"; color:#c99af0; }
+html[data-theme="amethyst-garden"] .topic-filter { padding:20px 18px 6px; }
+html[data-theme="amethyst-garden"] .topic-filter-label,html[data-theme="amethyst-garden"] .vault-label { color:#d9b36b; font-family:"SFMono-Regular",Consolas,monospace; letter-spacing:.17em; }
+html[data-theme="amethyst-garden"] .topic-trigger { height:45px; border:1px solid rgba(216,177,105,.44); border-radius:4px 18px 4px 18px; background:linear-gradient(100deg, rgba(61,35,69,.96),rgba(27,26,32,.96)); color:#f4e9d0; box-shadow:inset 0 0 0 1px rgba(237,208,153,.055),0 7px 20px rgba(0,0,0,.25); font-family:Georgia,serif; }
+html[data-theme="amethyst-garden"] .topic-trigger:hover { border-color:#e4c27b; box-shadow:inset 0 0 20px rgba(185,128,232,.12),0 9px 23px rgba(0,0,0,.34); }
+html[data-theme="amethyst-garden"] .topic-trigger:focus-visible,html[data-theme="amethyst-garden"] .topic-trigger[aria-expanded="true"] { border-color:#f1d78e; box-shadow:0 0 0 3px rgba(218,174,255,.2); }
+html[data-theme="amethyst-garden"] .topic-trigger-icon { border-radius:50% 50% 50% 0; background:linear-gradient(135deg,#cc96ed,#76609b); color:#fff7d9; }
+html[data-theme="amethyst-garden"] .topic-menu { border-color:rgba(226,191,119,.53); border-radius:3px 17px 3px 17px; background:rgba(34,20,41,.98); box-shadow:0 20px 42px rgba(0,0,0,.6),inset 0 0 26px rgba(205,155,235,.08); }
+html[data-theme="amethyst-garden"] .topic-option { border-radius:3px; color:#d8c8c4; font-family:Georgia,serif; }
+html[data-theme="amethyst-garden"] .topic-option:hover { background:rgba(151,96,173,.25); color:#ffeec3; }
+html[data-theme="amethyst-garden"] .topic-option[aria-selected="true"] { background:linear-gradient(90deg,rgba(184,128,219,.38),rgba(186,156,80,.13)); color:#fff0c4; }
+html[data-theme="amethyst-garden"] .topic-option-mark { color:#f0d27d; }
+html[data-theme="amethyst-garden"] .topic-option-count { border-color:rgba(219,184,111,.36); border-radius:50%; color:#d9bd8a; }
+html[data-theme="amethyst-garden"] .vault-label { margin-top:23px; }
+html[data-theme="amethyst-garden"] .vault-folder summary,html[data-theme="amethyst-garden"] .vault-file { border-radius:0 13px 13px 0; }
+html[data-theme="amethyst-garden"] .vault-folder summary:hover,html[data-theme="amethyst-garden"] .vault-file:hover { background:linear-gradient(90deg,rgba(161,105,192,.26),transparent); color:#f4e4bd; }
+html[data-theme="amethyst-garden"] .folder-chevron { color:#d8ad67; } html[data-theme="amethyst-garden"] .folder-icon { color:#c895e2; }
+html[data-theme="amethyst-garden"] .vault-file > span { color:#e2bb6c; } html[data-theme="amethyst-garden"] .vault-file[aria-current="page"] { background:linear-gradient(90deg,rgba(192,130,220,.4),rgba(101,123,77,.15)); box-shadow:inset 3px 0 #f0d080; color:#fff1d1; }
+
+html[data-theme="amethyst-garden"] .library-shell { max-width:1180px; padding-top:118px; }
+html[data-theme="amethyst-garden"] .library-hero { position:relative; align-items:center; margin-bottom:67px; padding:0 24px 26px; border-bottom:1px solid rgba(215,177,102,.45); }
+html[data-theme="amethyst-garden"] .library-hero::after { position:absolute; right:0; bottom:-13px; content:"❦  ✦  ❦"; color:#dcb870; font-size:15px; letter-spacing:10px; }
+html[data-theme="amethyst-garden"] .brand-mark { border:1px solid #edcf87; border-radius:50% 50% 50% 0; background:radial-gradient(circle at 31% 28%,#e4b7ff 0 9%,#9a5ec0 29%,#392047 72%); box-shadow:0 0 0 5px rgba(214,174,103,.12),0 11px 27px rgba(0,0,0,.35); font-family:Georgia,serif; }
+html[data-theme="amethyst-garden"] .eyebrow { color:#edc97c; font-family:"SFMono-Regular",Consolas,monospace; letter-spacing:.16em; }
+html[data-theme="amethyst-garden"] h1 { color:#f7e6bd; font-family:"Palatino Linotype",Palatino,Georgia,serif; font-weight:400; letter-spacing:-.025em; text-shadow:0 1px 0 #563447; }
+html[data-theme="amethyst-garden"] .hero-copy { color:#cdbdb7; } html[data-theme="amethyst-garden"] .hero-copy code { color:#edcf8b; }
+html[data-theme="amethyst-garden"] .paste-section { position:relative; gap:48px; overflow:hidden; border:1px solid rgba(216,178,108,.44); border-radius:4px 35px 4px 35px; background:linear-gradient(125deg,rgba(52,29,59,.94),rgba(23,26,29,.94)); box-shadow:var(--shadow); }
+html[data-theme="amethyst-garden"] .paste-section::before { position:absolute; top:-42px; right:-12px; opacity:.22; content:"✣"; color:#e6c26f; font:160px Georgia,serif; }
+html[data-theme="amethyst-garden"] .paste-intro { position:relative; z-index:1; } html[data-theme="amethyst-garden"] .paste-intro h2 { color:#f1dfbb; font-family:"Palatino Linotype",Georgia,serif; }
+html[data-theme="amethyst-garden"] .paste-form { position:relative; z-index:1; }
+html[data-theme="amethyst-garden"] .paste-form label { color:#e5cc9a; font-family:Georgia,serif; letter-spacing:.04em; }
+html[data-theme="amethyst-garden"] .paste-form textarea { border-color:rgba(215,173,105,.46); border-radius:3px 18px 3px 18px; background:rgba(15,12,20,.82); color:#eee4d1; caret-color:#f2ca79; }
+html[data-theme="amethyst-garden"] .paste-form textarea:focus { border-color:#efcc7e; box-shadow:0 0 0 3px rgba(209,152,241,.2),inset 0 0 18px rgba(182,111,226,.06); }
+html[data-theme="amethyst-garden"] .paste-actions button { border:1px solid #f0cd7e; border-radius:3px 14px 3px 14px; background:linear-gradient(135deg,#9d5ebb,#56315e); color:#fff1cb; box-shadow:0 7px 17px rgba(0,0,0,.28); font-family:Georgia,serif; letter-spacing:.03em; }
+html[data-theme="amethyst-garden"] .paste-actions button:not(:disabled):hover { filter:brightness(1.18); transform:translateY(-1px); }
+html[data-theme="amethyst-garden"] .form-error { color:#ffabb5; }
+
+html[data-theme="amethyst-garden"] .note-grid { gap:20px; }
+html[data-theme="amethyst-garden"] .note-card { min-height:218px; border:1px solid rgba(207,168,105,.36); border-radius:3px 24px 3px 24px; background:linear-gradient(145deg,rgba(47,27,55,.9),rgba(20,27,26,.93)); box-shadow:inset 0 0 0 1px rgba(255,255,255,.025); }
+html[data-theme="amethyst-garden"] .note-card::before { position:absolute; top:12px; left:13px; width:17px; height:17px; border-top:1px solid #dbb66e; border-left:1px solid #dbb66e; content:""; }
+html[data-theme="amethyst-garden"] .note-card:hover { border-color:#f0ce80; box-shadow:0 18px 34px rgba(0,0,0,.34),inset 0 0 30px rgba(181,119,212,.1); transform:translateY(-5px) rotate(-.25deg); }
+html[data-theme="amethyst-garden"] .note-card-icon { color:#e3bd70; } html[data-theme="amethyst-garden"] .note-card-path { color:#b9c29b; }
+html[data-theme="amethyst-garden"] .note-card h2 { color:#f3e1bb; font-family:"Palatino Linotype",Georgia,serif; }
+html[data-theme="amethyst-garden"] .note-card-slug { color:#dfaafb; } html[data-theme="amethyst-garden"] .empty-state { border-color:rgba(222,185,112,.49); border-radius:3px 25px 3px 25px; background:rgba(38,26,43,.65); }
+
+html[data-theme="amethyst-garden"] .reader-shell { padding:42px 40px 55px; }
+html[data-theme="amethyst-garden"] .reader-header { max-width:960px; padding-bottom:16px; margin:0 auto 20px; border-bottom:1px solid rgba(216,176,102,.4); }
+html[data-theme="amethyst-garden"] .back-link { color:#e5c78d; font-family:Georgia,serif; } html[data-theme="amethyst-garden"] .public-badge { color:#d7b0ef; }
+html[data-theme="amethyst-garden"] .public-badge i { background:#ddbb70; box-shadow:0 0 0 4px rgba(221,187,112,.15); }
+html[data-theme="amethyst-garden"] .note-paper { position:relative; max-width:960px; margin:auto; border:1px solid rgba(216,177,104,.5); border-radius:3px 42px 3px 42px; background:linear-gradient(135deg,#25172b,#171a1c); box-shadow:var(--shadow); }
+html[data-theme="amethyst-garden"] .note-paper::before,html[data-theme="amethyst-garden"] .note-paper::after { position:absolute; color:rgba(231,195,117,.54); font:32px Georgia,serif; content:"❦"; }
+html[data-theme="amethyst-garden"] .note-paper::before { top:20px; left:22px; } html[data-theme="amethyst-garden"] .note-paper::after { right:22px; bottom:17px; transform:rotate(180deg); }
+html[data-theme="amethyst-garden"] .note-context { border-bottom-color:rgba(216,177,104,.34); color:#b7a999; }
+html[data-theme="amethyst-garden"] .prose { position:relative; color:#e2d8ca; font-family:"Palatino Linotype",Palatino,Georgia,serif; font-size:18px; }
+html[data-theme="amethyst-garden"] .prose h1,html[data-theme="amethyst-garden"] .prose h2,html[data-theme="amethyst-garden"] .prose h3 { color:#f7e4b7; font-family:"Palatino Linotype",Palatino,Georgia,serif; font-weight:500; }
+html[data-theme="amethyst-garden"] .prose h2::before { margin-right:.35em; content:"✦"; color:#dba9f4; font-size:.7em; vertical-align:middle; }
+html[data-theme="amethyst-garden"] .prose strong { background-image:linear-gradient(70deg,#edcf7f,#e5b3ff); color:#efd292; }
+html[data-theme="amethyst-garden"] .prose a { color:#e4b7ff; text-decoration-color:#c493dc; }
+html[data-theme="amethyst-garden"] .prose blockquote { border-left-color:#dfbb6f; color:#d7c6bd; }
+html[data-theme="amethyst-garden"] .prose pre { border-color:rgba(221,179,104,.38); border-radius:3px 15px 3px 15px; background:#100e14; color:#ece0c8; }
+html[data-theme="amethyst-garden"] .prose th,html[data-theme="amethyst-garden"] .prose td { border-color:rgba(219,177,105,.35); } html[data-theme="amethyst-garden"] .prose th { background:#38203d; }
+html[data-theme="amethyst-garden"] .prose hr { border-top-color:rgba(219,177,105,.42); } html[data-theme="amethyst-garden"] .reader-footer { color:#b9ad94; }
+html[data-theme="amethyst-garden"] .paste-content { color:#eadfcf; }
+html[data-theme="amethyst-garden"] .not-found h1 { color:#f4dfb5; } html[data-theme="amethyst-garden"] .not-found a { border:1px solid #e6c47b; border-radius:3px 13px 3px 13px; background:#6f407d; color:#fff0cb; }
+
+html[data-theme="amethyst-garden"] .reader-shell-drawing .reader-header { border-color:rgba(222,181,109,.56); border-radius:3px 14px 3px 14px; background:rgba(35,20,41,.9); }
+html[data-theme="amethyst-garden"] .reader-shell-drawing .note-paper-drawing { background:#15131a; }
+html[data-theme="amethyst-garden"] .reader-shell-drawing .note-paper-drawing::before,html[data-theme="amethyst-garden"] .reader-shell-drawing .note-paper-drawing::after { display:none; }
+
+@media (max-width:720px) {
+  html[data-theme="amethyst-garden"] .vault-layout,html[data-theme="amethyst-garden"] .vault-layout:has(.vault-sidebar-collapsed) { grid-template-columns:1fr; }
+  html[data-theme="amethyst-garden"] .vault-sidebar { width:100%; } html[data-theme="amethyst-garden"] .vault-sidebar-collapsed { width:0; }
+  html[data-theme="amethyst-garden"] .vault-toggle,html[data-theme="amethyst-garden"] .vault-sidebar-collapsed .vault-toggle { top:62px; right:14px; left:auto; }
+  html[data-theme="amethyst-garden"] .library-shell { padding:82px 20px 45px; } html[data-theme="amethyst-garden"] .library-hero { padding-left:0; }
+  html[data-theme="amethyst-garden"] .paste-section { padding:25px 22px; } html[data-theme="amethyst-garden"] .reader-shell { padding:28px 13px 35px; }
+  html[data-theme="amethyst-garden"] .note-paper { border-radius:3px 25px 3px 25px; } html[data-theme="amethyst-garden"] .prose { font-size:17px; }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  html[data-theme="amethyst-garden"] *,html[data-theme="amethyst-garden"] *::before,html[data-theme="amethyst-garden"] *::after { scroll-behavior:auto !important; animation:none !important; transition:none !important; }
+}
