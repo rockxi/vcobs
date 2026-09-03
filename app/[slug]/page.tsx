@@ -55,7 +55,6 @@ export default async function NotePage({ params }: { params: Promise<{ slug: str
       <main className={`reader-shell${drawing ? " reader-shell-drawing" : ""}`}>
       <header className="reader-header">
         <Link className="back-link" href="/" aria-label="Все опубликованные заметки">⌕ <span>Все заметки</span></Link>
-        <span className="public-badge"><i /> опубликовано</span>
       </header>
       <article className={`note-paper${drawing ? " note-paper-drawing" : ""}`}>
         {!drawing && <>
@@ -65,7 +64,7 @@ export default async function NotePage({ params }: { params: Promise<{ slug: str
           </nav>
           <div className="note-masthead">
             <span className="note-document-icon" aria-hidden="true">▤</span>
-            <div><h1>{title}</h1><p>{formatDate(note.mtime) ? `Обновлено ${formatDate(note.mtime)}` : "Опубликованная заметка"} <i /> Опубликовано</p></div>
+            <div><h1>{title}</h1>{formatDate(note.mtime) && <p>Обновлено {formatDate(note.mtime)}</p>}</div>
           </div>
         </>}
         {drawing ? <ExcalidrawViewer data={drawing} /> : (
