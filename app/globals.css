@@ -67,3 +67,8 @@ h1 { margin:0; font:500 clamp(32px,5vw,52px)/1.05 Georgia,"Times New Roman",seri
 .topic-menu-open .topic-option:nth-child(5) { transition-delay:140ms; }
 .topic-menu-open .topic-option:nth-child(n+6) { transition-delay:175ms; }
 @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; } }
+
+/* Square, document-first chrome. Excalidraw keeps its own controls untouched. */
+.topic-filter { padding-top:64px; }
+.vault-toggle,.topic-trigger,.topic-trigger-icon,.topic-menu,.topic-option,.topic-option-count,.vault-count,.vault-folder summary,.vault-file,.brand-mark,.paste-section,.paste-form textarea,.paste-actions button,.note-card,.empty-state,.note-paper,.excalidraw-frame,.reader-shell-drawing .reader-header,.prose code,.prose pre,.prose img,.not-found a { border-radius:0; }
+.vault-file[aria-current="page"] { box-shadow:none; }
