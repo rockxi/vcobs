@@ -4,9 +4,10 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { BinaryFiles } from "@excalidraw/excalidraw/types";
 import { ExcalidrawViewer } from "@/components/excalidraw-viewer";
-import { getFile, getFileByName, getPublicNote } from "@/lib/couch";
+import { getFile, getFileByName, getPublicNote, getPublicNotes } from "@/lib/couch";
 import { getPaste } from "@/lib/pastes";
 import { getExcalidrawData, getExcalidrawEmbeddedFiles, mediaType, prepareMarkdown, resolveVaultPath } from "@/lib/markdown";
+import { VaultTree } from "@/components/vault-tree";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +31,7 @@ export default async function NotePage({ params }: { params: Promise<{ slug: str
   }
 
   const title = note.markdown.match(/^#\s+(.+)$/m)?.[1] ?? note.path.split("/").at(-1)?.replace(/\.md$/i, "") ?? slug;
+  const notes = await getPublicNotes();
   const drawing = getExcalidrawData(note.markdown);
   if (drawing) {
     const embeddedFiles = await Promise.all(getExcalidrawEmbeddedFiles(note.markdown).map(async ({ id, reference }) => {
@@ -46,7 +48,9 @@ export default async function NotePage({ params }: { params: Promise<{ slug: str
     drawing.files = Object.fromEntries(embeddedFiles.filter((file): file is NonNullable<typeof file> => file !== null)) as BinaryFiles;
   }
   return (
-    <main className={`reader-shell${drawing ? " reader-shell-drawing" : ""}`}>
+    <div className={`vault-layout${drawing ? " vault-layout-drawing" : ""}`}>
+      <VaultTree notes={notes} activeSlug={slug} />
+      <main className={`reader-shell${drawing ? " reader-shell-drawing" : ""}`}>
       <header className="reader-header">
         <Link className="back-link" href="/" aria-label="Все опубликованные заметки">← <span>vcobs</span></Link>
         <span className="public-badge"><i /> опубликовано</span>
@@ -63,6 +67,7 @@ export default async function NotePage({ params }: { params: Promise<{ slug: str
         )}
       </article>
       <footer className="reader-footer">{title} <span>·</span> vcobs</footer>
-    </main>
+      </main>
+    </div>
   );
 }

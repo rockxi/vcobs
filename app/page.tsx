@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getPublicNotes } from "@/lib/couch";
 import { PasteForm } from "@/components/paste-form";
+import { VaultTree } from "@/components/vault-tree";
 
 // CouchDB credentials exist only at container runtime, never while the image builds.
 export const dynamic = "force-dynamic";
@@ -12,7 +13,9 @@ function formatDate(timestamp?: number) {
 export default async function HomePage() {
   const notes = await getPublicNotes();
   return (
-    <main className="library-shell">
+    <div className="vault-layout">
+      <VaultTree notes={notes} />
+      <main className="library-shell">
       <section className="library-hero">
         <span className="brand-mark">v</span>
         <div>
@@ -43,6 +46,7 @@ export default async function HomePage() {
           </div>
         )}
       </section>
-    </main>
+      </main>
+    </div>
   );
 }
