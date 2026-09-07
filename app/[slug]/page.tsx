@@ -8,6 +8,7 @@ import { getFile, getFileByName, getPublicNote, getPublicNotes } from "@/lib/cou
 import { getPaste } from "@/lib/pastes";
 import { getExcalidrawData, getExcalidrawEmbeddedFiles, mediaType, prepareMarkdown, resolveVaultPath } from "@/lib/markdown";
 import { VaultTree } from "@/components/vault-tree";
+import { PasteCopyButton } from "@/components/paste-copy-button";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +26,7 @@ export default async function NotePage({ params }: { params: Promise<{ slug: str
     const created = new Intl.DateTimeFormat("ru-RU", { dateStyle: "long", timeStyle: "short" }).format(new Date(paste.createdAt));
     return <main className="reader-shell">
       <header className="reader-header"><Link className="back-link" href="/" aria-label="Создать новую вставку">← <span>vcobs</span></Link><span className="public-badge"><i /> по ссылке</span></header>
-      <article className="note-paper paste-paper"><div className="note-context"><span>Удалится через 24 часа</span><time>Создано {created}</time></div><pre className="paste-content">{paste.text}</pre></article>
+      <article className="note-paper paste-paper"><div className="note-context"><span>Удалится через 24 часа</span><time>Создано {created}</time></div><PasteCopyButton text={paste.text} /><pre className="paste-content">{paste.text}</pre></article>
       <footer className="reader-footer"><Link href="/">Создать свою ссылку</Link> <span>·</span> vcobs</footer>
     </main>;
   }
