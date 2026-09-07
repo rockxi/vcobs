@@ -3,8 +3,8 @@ import { randomBytes } from "node:crypto";
 import { mkdir, open, readFile, readdir, unlink } from "node:fs/promises";
 import path from "node:path";
 
-export const MAX_PASTE_LENGTH = 100_000;
-export const PASTE_TTL_MS = 24 * 60 * 60 * 1000;
+export const MAX_PASTE_LENGTH = 1_000_000;
+export const PASTE_TTL_MS = 12 * 60 * 60 * 1000;
 const DATA_DIR = process.env.PASTE_DATA_DIR ?? path.join(process.cwd(), "data", "pastes");
 const SLUG_PATTERN = /^[a-zA-Z0-9_-]{8,32}$/;
 export type Paste = { text: string; createdAt: string };
