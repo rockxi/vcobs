@@ -16,3 +16,7 @@ services:
       - "3080:3080"
     volumes:
       - ./data/pastes:/app/data/pastes
+      - vcobs-files:/app/data/files
+
+volumes:
+  vcobs-files:

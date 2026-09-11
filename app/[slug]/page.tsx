@@ -9,6 +9,8 @@ import { getPaste } from "@/lib/pastes";
 import { getExcalidrawData, getExcalidrawEmbeddedFiles, mediaType, prepareMarkdown, resolveVaultPath } from "@/lib/markdown";
 import { VaultTree } from "@/components/vault-tree";
 import { PasteCopyButton } from "@/components/paste-copy-button";
+import { formatSharedFileSize } from "@/components/file-share-utils";
+import { getSharedFile } from "@/lib/shared-files";
 
 export const dynamic = "force-dynamic";
 
@@ -22,11 +24,20 @@ export default async function NotePage({ params }: { params: Promise<{ slug: str
   const note = await getPublicNote(slug);
   if (!note) {
     const paste = await getPaste(slug);
-    if (!paste) notFound();
-    const created = new Intl.DateTimeFormat("ru-RU", { dateStyle: "long", timeStyle: "short" }).format(new Date(paste.createdAt));
+    if (paste) {
+      const created = new Intl.DateTimeFormat("ru-RU", { dateStyle: "long", timeStyle: "short" }).format(new Date(paste.createdAt));
+      return <main className="reader-shell">
+        <header className="reader-header"><Link className="back-link" href="/" aria-label="Создать новую вставку">← <span>vcobs</span></Link><span className="public-badge"><i /> по ссылке</span></header>
+        <article className="note-paper paste-paper"><div className="note-context"><span>Удалится через 12 часов</span><time>Создано {created}</time></div><PasteCopyButton text={paste.text} /><pre className="paste-content">{paste.text}</pre></article>
+        <footer className="reader-footer"><Link href="/">Создать свою ссылку</Link> <span>·</span> vcobs</footer>
+      </main>;
+    }
+    const sharedFile = await getSharedFile(slug);
+    if (!sharedFile) notFound();
+    const created = new Intl.DateTimeFormat("ru-RU", { dateStyle: "long", timeStyle: "short" }).format(new Date(sharedFile.createdAt));
     return <main className="reader-shell">
-      <header className="reader-header"><Link className="back-link" href="/" aria-label="Создать новую вставку">← <span>vcobs</span></Link><span className="public-badge"><i /> по ссылке</span></header>
-      <article className="note-paper paste-paper"><div className="note-context"><span>Удалится через 12 часов</span><time>Создано {created}</time></div><PasteCopyButton text={paste.text} /><pre className="paste-content">{paste.text}</pre></article>
+      <header className="reader-header"><Link className="back-link" href="/" aria-label="Создать новую ссылку">← <span>vcobs</span></Link><span className="public-badge"><i /> временный файл</span></header>
+      <article className="note-paper paste-paper shared-file-paper"><div className="note-context"><span>Удалится через 12 часов</span><time>Создано {created}</time></div><div className="shared-file-details"><span className="shared-file-icon" aria-hidden="true">⇩</span><div><p className="eyebrow">file share</p><h1>{sharedFile.fileName}</h1><p>{formatSharedFileSize(sharedFile.size)} <span>·</span> {sharedFile.contentType}</p></div></div><a className="shared-file-download" download href={`/api/files/${sharedFile.slug}`}>Скачать файл</a></article>
       <footer className="reader-footer"><Link href="/">Создать свою ссылку</Link> <span>·</span> vcobs</footer>
     </main>;
   }
