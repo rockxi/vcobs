@@ -27,3 +27,11 @@ test("uses image-owned named-volume initialization without workflow ownership co
   assert.match(dockerfile, /chown -R nextjs:nodejs \/app\/data\/files/);
   assert.doesNotMatch(workflow, /data\/files|chown -R 1001:1001/);
 });
+
+test("limits Node heap only while building the production image", async () => {
+  const dockerfile = await readFile(path.join(root, "Dockerfile"), "utf8");
+  const builderStage = dockerfile.slice(dockerfile.indexOf("FROM base AS builder"), dockerfile.indexOf("FROM base AS runner"));
+  const runnerStage = dockerfile.slice(dockerfile.indexOf("FROM base AS runner"));
+  assert.match(builderStage, /ENV NODE_OPTIONS=--max-old-space-size=1024/);
+  assert.doesNotMatch(runnerStage, /NODE_OPTIONS/);
+});
