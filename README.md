@@ -50,7 +50,7 @@ curl -X POST http://localhost:3000/api/v1/refresh \
 
 ## Администратор
 
-`/admin` закрыт отдельным паролем. Для работы нужны `VCOBS_ADMIN_PASSWORD_HASH` и `VCOBS_ADMIN_SESSION_SECRET`. Примеры генерации приведены в `.env.example`; пароль в `.env.local` не записывается — сохраните его отдельно. При отсутствующей или повреждённой конфигурации вход закрыт. Сессия действует 8 часов, хранится в подписанной HttpOnly-cookie с `SameSite=Strict` и `Secure` в production. Вход ограничен пятью неудачными попытками на 15 минут для каждого IP и общим лимитом 50 неудач на экземпляр за тот же период.
+`/admin` закрыт отдельным паролем. Для работы нужны `VCOBS_ADMIN_PASSWORD_HASH` и `VCOBS_ADMIN_SESSION_SECRET`. Примеры генерации и обязательного для Docker Compose экранирования `$` как `$$` приведены в `.env.example`; пароль в `.env.local` не записывается — сохраните его отдельно. При отсутствующей или повреждённой конфигурации вход закрыт. Сессия действует 8 часов, хранится в подписанной HttpOnly-cookie с `SameSite=Strict` и `Secure` в production. Вход ограничен пятью неудачными попытками на 15 минут для каждого IP и общим лимитом 50 неудач на экземпляр за тот же период.
 
 По умолчанию заголовки `X-Forwarded-*` не доверяются: все попытки получают общий консервативный лимит. Задайте `VCOBS_TRUST_PROXY_HEADERS=true` только если ваш nginx **перезаписывает**, а не передаёт значения клиента: `proxy_set_header X-Forwarded-For $remote_addr;`, `proxy_set_header X-Forwarded-Host $host;`, `proxy_set_header X-Forwarded-Proto $scheme;`. В этом режиме origin сверяется с публичными `X-Forwarded-Host` и `X-Forwarded-Proto`, а клиентский лимит использует валидный IP из `X-Forwarded-For`.
 
