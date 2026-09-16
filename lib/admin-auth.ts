@@ -35,15 +35,27 @@ export function validateAdminSession(token: string | undefined, now = Date.now()
 export function adminSessionCookie(value: string) { return { name: ADMIN_SESSION_COOKIE, value, httpOnly: true, sameSite: "strict" as const, secure: process.env.NODE_ENV === "production", path: "/", maxAge: SESSION_TTL_SECONDS }; }
 export function expiredAdminSessionCookie() { return { ...adminSessionCookie(""), maxAge: 0 }; }
 function trustedProxyHeaders(): boolean { return process.env.VCOBS_TRUST_PROXY_HEADERS === "true"; }
-function requestOrigin(request: Request): string | null {
+function canonicalPublicOrigin(): string | null {
+  const value = process.env.VCOBS_PUBLIC_ORIGIN;
+  if (!value) return null;
   try {
-    if (!trustedProxyHeaders()) return new URL(request.url).origin;
-    const proto = request.headers.get("x-forwarded-proto"), host = request.headers.get("x-forwarded-host");
-    if (!proto || !host || !/^(https?|HTTPS?)$/.test(proto) || host.includes(",") || /[\s/\\@]/.test(host)) return null;
-    return new URL(`${proto.toLowerCase()}://${host}`).origin;
+    const parsed = new URL(value);
+    if (!/^https?:$/.test(parsed.protocol) || parsed.username || parsed.password || parsed.pathname !== "/" || parsed.search || parsed.hash) return null;
+    return parsed.origin;
   } catch { return null; }
 }
-export function originIsSameSite(request: Request): boolean { const origin = request.headers.get("origin"), expected = requestOrigin(request); if (!origin || !expected) return false; try { return new URL(origin).origin === expected; } catch { return false; } }
+export function publicRequestOrigin(request: Request): string | null {
+  try {
+    if (!trustedProxyHeaders()) return new URL(request.url).origin;
+    const canonical = canonicalPublicOrigin();
+    if (!canonical) return null;
+    const proto = request.headers.get("x-forwarded-proto"), host = request.headers.get("x-forwarded-host");
+    if (!proto || !host || !/^(https?|HTTPS?)$/.test(proto) || host.includes(",") || /[\s/\\@]/.test(host)) return null;
+    const forwardedOrigin = new URL(`${proto.toLowerCase()}://${host}`).origin;
+    return forwardedOrigin === canonical ? canonical : null;
+  } catch { return null; }
+}
+export function originIsSameSite(request: Request): boolean { const origin = request.headers.get("origin"), expected = publicRequestOrigin(request); if (!origin || !expected) return false; try { return new URL(origin).origin === expected; } catch { return false; } }
 function activeCount(entry: { count: number; resetAt: number } | undefined, now: number): number { return entry && entry.resetAt > now ? entry.count : 0; }
 export function loginAllowed(clientId: string, now = Date.now()): boolean { return activeCount(attempts.get(clientId), now) < MAX_LOGIN_ATTEMPTS && activeCount(globalAttempts, now) < MAX_GLOBAL_LOGIN_ATTEMPTS; }
 export function recordFailedLogin(clientId: string, now = Date.now()): void { const clientAttempt = attempts.get(clientId), resetAt = clientAttempt && clientAttempt.resetAt > now ? clientAttempt.resetAt : now + LOGIN_WINDOW_MS; attempts.set(clientId, { count: activeCount(clientAttempt, now) + 1, resetAt }); const globalResetAt = globalAttempts?.resetAt && globalAttempts.resetAt > now ? globalAttempts.resetAt : now + LOGIN_WINDOW_MS; globalAttempts = { count: activeCount(globalAttempts, now) + 1, resetAt: globalResetAt }; }
