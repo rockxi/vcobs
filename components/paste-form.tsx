@@ -31,6 +31,7 @@ function uploadFile(file: File, onProgress: (progress: number | null) => void) {
 export function PasteForm() {
   const [mode, setMode] = useState<ShareMode>("text");
   const [text, setText] = useState("");
+  const [editable, setEditable] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -65,7 +66,7 @@ export function PasteForm() {
         window.location.assign(result.url!);
         return;
       }
-      const response = await fetch("/api/pastes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
+      const response = await fetch("/api/pastes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text, editable }) });
       const result = await response.json() as { url?: string; error?: string };
       if (!response.ok || !result.url) throw new Error(result.error ?? "Не удалось создать ссылку.");
       window.location.assign(result.url);
@@ -81,6 +82,7 @@ export function PasteForm() {
     {mode === "text" ? <>
       <label htmlFor="paste-text">Текст для публикации</label>
       <textarea id="paste-text" maxLength={MAX_PASTE_LENGTH} onChange={(event) => setText(event.target.value)} placeholder="Вставьте сюда текст…" required rows={10} value={text} />
+      <label className="editable-option"><input checked={editable} onChange={(event) => setEditable(event.target.checked)} type="checkbox" /> <span><b>Редактирование</b><small>Все, кто откроет ссылку, смогут изменить текст.</small></span></label>
     </> : <div className="file-share-picker">
       <label htmlFor="share-file">Файл для временной ссылки</label>
       <input ref={fileInput} id="share-file" onChange={(event) => chooseFile(event.target.files?.[0] ?? null)} type="file" />

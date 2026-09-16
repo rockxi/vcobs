@@ -7,8 +7,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Некорректный запрос." }, { status: 400 });
   }
   const text = typeof body === "object" && body !== null && "text" in body ? (body as { text?: unknown }).text : null;
+  const editable = typeof body === "object" && body !== null && "editable" in body && (body as { editable?: unknown }).editable === true;
   if (typeof text !== "string" || !text.trim()) return NextResponse.json({ error: "Вставьте текст." }, { status: 400 });
   if (text.length > MAX_PASTE_LENGTH) return NextResponse.json({ error: "Текст длиннее 1 000 000 символов." }, { status: 413 });
-  const slug = await createPaste(text);
+  const slug = await createPaste(text, editable);
   return NextResponse.json({ slug, url: `/${slug}` }, { status: 201 });
 }

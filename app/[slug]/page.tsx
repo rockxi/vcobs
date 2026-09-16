@@ -9,6 +9,7 @@ import { getPaste } from "@/lib/pastes";
 import { getExcalidrawData, getExcalidrawEmbeddedFiles, mediaType, prepareMarkdown, resolveVaultPath } from "@/lib/markdown";
 import { VaultTree } from "@/components/vault-tree";
 import { PasteCopyButton } from "@/components/paste-copy-button";
+import { EditablePaste } from "@/components/editable-paste";
 import { formatSharedFileSize } from "@/components/file-share-utils";
 import { getSharedFile } from "@/lib/shared-files";
 
@@ -28,7 +29,7 @@ export default async function NotePage({ params }: { params: Promise<{ slug: str
       const created = new Intl.DateTimeFormat("ru-RU", { dateStyle: "long", timeStyle: "short" }).format(new Date(paste.createdAt));
       return <main className="reader-shell">
         <header className="reader-header"><Link className="back-link" href="/" aria-label="Создать новую вставку">← <span>vcobs</span></Link><span className="public-badge"><i /> по ссылке</span></header>
-        <article className="note-paper paste-paper"><div className="note-context"><span>Удалится через 12 часов</span><time>Создано {created}</time></div><PasteCopyButton text={paste.text} /><pre className="paste-content">{paste.text}</pre></article>
+        <article className="note-paper paste-paper"><div className="note-context"><span>{paste.editable ? "Доступно редактирование по ссылке" : "Удалится через 12 часов"}</span><time>Создано {created}</time></div>{paste.editable ? <EditablePaste initialText={paste.text} slug={slug} /> : <><PasteCopyButton text={paste.text} /><pre className="paste-content">{paste.text}</pre></>}</article>
         <footer className="reader-footer"><Link href="/">Создать свою ссылку</Link> <span>·</span> vcobs</footer>
       </main>;
     }
