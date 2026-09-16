@@ -15,6 +15,7 @@ const {
   SharedFileTooLargeError,
   deleteExpiredSharedFiles,
   getSharedFile,
+  listActiveSharedFiles,
   sanitizeSharedContentType,
   sanitizeSharedFileName,
   storeSharedFile,
@@ -93,4 +94,26 @@ test("removes stale crash artifacts but keeps a group protected by a fresh lock"
   assert.equal(files.some((file) => file.startsWith(staleSlug)), false);
   assert.equal(files.includes(`${activeSlug}.lock`), true);
   assert.equal(files.includes(`${activeSlug}.bin.part`), true);
+});
+
+test("lists complete active files only, newest first, without cleaning artifacts", async () => {
+  const first = await storeSharedFile({ stream: streamFrom(new Uint8Array([1])), fileName: "first.txt", contentType: "text/plain" });
+  const second = await storeSharedFile({ stream: streamFrom(new Uint8Array([1, 2])), fileName: "second.txt", contentType: "text/plain" });
+  const now = Date.now();
+  for (const [stored, createdAt] of [[first, now - 2_000], [second, now - 1_000]] as const) {
+    const metadata = JSON.parse(await readFile(path.join(testDirectory, `${stored.slug}.json`), "utf8"));
+    await writeFile(path.join(testDirectory, `${stored.slug}.json`), JSON.stringify({ ...metadata, createdAt: new Date(createdAt).toISOString() }));
+  }
+  await writeFile(path.join(testDirectory, "broken123.json"), "{");
+  await writeFile(path.join(testDirectory, "broken123.bin"), "x");
+  await writeFile(path.join(testDirectory, "partial123.json"), JSON.stringify({ fileName: "ok.txt", contentType: "text/plain", size: 1, createdAt: new Date().toISOString() }));
+  await writeFile(path.join(testDirectory, "partial123.bin"), "x");
+  await writeFile(path.join(testDirectory, "partial123.lock"), "uploading");
+  await writeFile(path.join(testDirectory, "expired123.json"), JSON.stringify({ fileName: "old.txt", contentType: "text/plain", size: 1, createdAt: new Date(now - SHARED_FILE_TTL_MS).toISOString() }));
+  await writeFile(path.join(testDirectory, "expired123.bin"), "x");
+  const records = await listActiveSharedFiles(now);
+  assert.deepEqual(records.map((record) => record.slug), [second.slug, first.slug]);
+  assert.equal(Object.hasOwn(records[0], "path"), false);
+  assert.equal(records[0].expiresAt, new Date(Date.parse(records[0].createdAt) + SHARED_FILE_TTL_MS).toISOString());
+  assert.equal((await readdir(testDirectory)).includes("expired123.json"), true);
 });

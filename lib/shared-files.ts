@@ -26,6 +26,7 @@ export type SharedFile = {
   createdAt: string;
   path: string;
 };
+export type SharedFileInventoryItem = Omit<SharedFile, "path"> & { expiresAt: string };
 
 type StoredSharedFile = Omit<SharedFile, "slug" | "path">;
 type StoreOptions = {
@@ -194,6 +195,43 @@ export async function getSharedFile(slug: string, now = Date.now()): Promise<Sha
   } catch {
     return null;
   }
+}
+
+/** Read complete, active file records for the admin inventory without cleanup. */
+export async function listActiveSharedFiles(now = Date.now()): Promise<SharedFileInventoryItem[]> {
+  let entries: string[];
+  try {
+    entries = await readdir(DATA_DIR);
+  } catch {
+    return [];
+  }
+  const entrySet = new Set(entries);
+  const records = await Promise.all(entries.map(async (entry) => {
+    if (!entry.endsWith(".json")) return null;
+    const slug = entry.slice(0, -".json".length);
+    if (!SLUG_PATTERN.test(slug) || !entrySet.has(`${slug}.bin`)) return null;
+    // Any upload marker means this group was not cleanly committed.
+    if (ARTIFACT_EXTENSIONS.some((extension) => entrySet.has(`${slug}${extension}`))) return null;
+    try {
+      const metadata = JSON.parse(await readFile(dataPath(slug, ".json"), "utf8")) as StoredSharedFile;
+      if (
+        typeof metadata.fileName !== "string" ||
+        typeof metadata.contentType !== "string" ||
+        typeof metadata.createdAt !== "string" ||
+        !Number.isSafeInteger(metadata.size) || metadata.size < 0 || metadata.size > MAX_SHARED_FILE_BYTES ||
+        metadata.fileName !== sanitizeSharedFileName(metadata.fileName) ||
+        metadata.contentType !== sanitizeSharedContentType(metadata.contentType) ||
+        isExpired(metadata, now)
+      ) return null;
+      const fileStats = await stat(dataPath(slug, ".bin"));
+      if (!fileStats.isFile() || fileStats.size !== metadata.size) return null;
+      const createdAt = Date.parse(metadata.createdAt);
+      return { slug, ...metadata, expiresAt: new Date(createdAt + SHARED_FILE_TTL_MS).toISOString() };
+    } catch {
+      return null;
+    }
+  }));
+  return records.filter((record): record is SharedFileInventoryItem => record !== null).sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt) || a.slug.localeCompare(b.slug));
 }
 
 export async function deleteExpiredSharedFiles(now = Date.now()) {

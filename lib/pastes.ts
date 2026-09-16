@@ -8,10 +8,17 @@ const DATA_DIR = process.env.PASTE_DATA_DIR ?? path.join(process.cwd(), "data", 
 const SLUG_PATTERN = /^[a-zA-Z0-9_-]{8,32}$/;
 const slugLocks = new Map<string, Promise<void>>();
 export type Paste = { text: string; createdAt: string; editable: boolean };
+export type PasteInventoryItem = {
+  slug: string;
+  createdAt: string;
+  expiresAt: string;
+  length: number;
+  editable: boolean;
+};
 
-function isExpired(paste: Paste) {
+function isExpired(paste: Paste, now = Date.now()) {
   const createdAt = Date.parse(paste.createdAt);
-  return !Number.isFinite(createdAt) || Date.now() - createdAt >= PASTE_TTL_MS;
+  return !Number.isFinite(createdAt) || now - createdAt >= PASTE_TTL_MS;
 }
 
 async function withSlugLock<T>(slug: string, operation: () => Promise<T>): Promise<T> {
@@ -70,6 +77,30 @@ export async function getPaste(slug: string): Promise<Paste | null> {
     // Records created before editable links were introduced are intentionally read-only.
     return value;
   });
+}
+
+/**
+ * Reads the active paste registry without changing it.  The admin view must not
+ * turn a page visit into cleanup, so unlike getPaste this deliberately leaves
+ * expired or malformed records alone for the scheduled cleanup job.
+ */
+export async function listActivePastes(now = Date.now()): Promise<PasteInventoryItem[]> {
+  let files: string[];
+  try {
+    files = await readdir(DATA_DIR);
+  } catch {
+    return [];
+  }
+  const records = await Promise.all(files.map(async (file) => {
+    if (!file.endsWith(".json")) return null;
+    const slug = file.slice(0, -".json".length);
+    if (!SLUG_PATTERN.test(slug)) return null;
+    const paste = await readCurrentPaste(slug);
+    if (!paste || isExpired(paste, now)) return null;
+    const createdAt = Date.parse(paste.createdAt);
+    return { slug, createdAt: paste.createdAt, expiresAt: new Date(createdAt + PASTE_TTL_MS).toISOString(), length: paste.text.length, editable: paste.editable };
+  }));
+  return records.filter((record): record is PasteInventoryItem => record !== null).sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt) || a.slug.localeCompare(b.slug));
 }
 
 export type UpdatePasteResult = "updated" | "not-found" | "read-only" | "invalid-text" | "too-large";

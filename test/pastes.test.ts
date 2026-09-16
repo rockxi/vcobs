@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -65,4 +65,17 @@ test("a deleted or expired record is never recreated by an update", async () => 
   await writeFile(path.join(testDirectory, "boundary123.json"), JSON.stringify({ text: "old", editable: true, createdAt: new Date(Date.now() - pastes.PASTE_TTL_MS).toISOString() }));
   assert.equal(await pastes.updatePaste("boundary123", "replacement"), "not-found");
   await assert.rejects(readFile(path.join(testDirectory, "boundary123.json"), "utf8"));
+});
+
+test("lists only active valid pastes as metadata in stable newest-first order", async () => {
+  const now = Date.now();
+  await writeFile(path.join(testDirectory, "older123.json"), JSON.stringify({ text: "old", createdAt: new Date(now - 2_000).toISOString() }));
+  await writeFile(path.join(testDirectory, "newer123.json"), JSON.stringify({ text: "secret", editable: true, createdAt: new Date(now - 1_000).toISOString() }));
+  await writeFile(path.join(testDirectory, "expired123.json"), JSON.stringify({ text: "gone", createdAt: new Date(now - pastes.PASTE_TTL_MS).toISOString() }));
+  await writeFile(path.join(testDirectory, "broken123.json"), "{");
+  await writeFile(path.join(testDirectory, ".newer123.backup"), "backup");
+  const records = await pastes.listActivePastes(now);
+  assert.deepEqual(records.map((record) => record.slug), ["newer123", "older123"]);
+  assert.deepEqual(records[0], { slug: "newer123", createdAt: new Date(now - 1_000).toISOString(), expiresAt: new Date(now - 1_000 + pastes.PASTE_TTL_MS).toISOString(), length: 6, editable: true });
+  assert.equal((await readdir(testDirectory)).includes("expired123.json"), true);
 });
