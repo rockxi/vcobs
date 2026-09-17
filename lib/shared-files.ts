@@ -54,6 +54,14 @@ async function removeFiles(slug: string) {
   await Promise.all([...STORED_EXTENSIONS, ...ARTIFACT_EXTENSIONS].map((extension) => unlink(dataPath(slug, extension)).catch(() => undefined)));
 }
 
+async function removeFileIfPresent(filePath: string) {
+  try {
+    await unlink(filePath);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+  }
+}
+
 async function isStale(filePath: string, now: number) {
   try {
     return now - (await stat(filePath)).mtimeMs >= SHARED_FILE_TTL_MS;
@@ -195,6 +203,18 @@ export async function getSharedFile(slug: string, now = Date.now()): Promise<Sha
   } catch {
     return null;
   }
+}
+
+/** Remove one complete, active shared-file record and all of its upload artifacts. */
+export async function deleteSharedFile(slug: string): Promise<"deleted" | "not-found"> {
+  if (!SLUG_PATTERN.test(slug)) return "not-found";
+  // Validate before deletion so malformed, expired, and incomplete entries remain a
+  // safe not-found response rather than giving this operation arbitrary cleanup scope.
+  if (!(await getSharedFile(slug))) return "not-found";
+  await Promise.all(
+    [...STORED_EXTENSIONS, ...ARTIFACT_EXTENSIONS].map((extension) => removeFileIfPresent(dataPath(slug, extension))),
+  );
+  return "deleted";
 }
 
 /** Read complete, active file records for the admin inventory without cleanup. */

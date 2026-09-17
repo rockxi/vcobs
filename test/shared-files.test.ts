@@ -13,6 +13,7 @@ const {
   MAX_SHARED_FILE_BYTES,
   SHARED_FILE_TTL_MS,
   SharedFileTooLargeError,
+  deleteSharedFile,
   deleteExpiredSharedFiles,
   getSharedFile,
   listActiveSharedFiles,
@@ -62,6 +63,27 @@ test("expires after 12 hours and removes expired data", async () => {
   const createdAt = Date.parse(stored.createdAt);
   assert.equal(await getSharedFile(stored.slug, createdAt + SHARED_FILE_TTL_MS), null);
   assert.equal((await readdir(testDirectory)).some((file) => file.startsWith(stored.slug)), false);
+});
+
+test("admin deletion removes the complete active record and same-slug artifacts", async () => {
+  const stored = await storeSharedFile({ stream: streamFrom(new Uint8Array([7, 8])), fileName: "remove.bin" });
+  await writeFile(path.join(testDirectory, `${stored.slug}.lock`), "stale marker");
+  await writeFile(path.join(testDirectory, `${stored.slug}.bin.part`), "partial");
+  await writeFile(path.join(testDirectory, `${stored.slug}.json.part`), "partial");
+
+  assert.equal(await deleteSharedFile(stored.slug), "deleted");
+  assert.equal(await getSharedFile(stored.slug), null);
+  assert.equal((await readdir(testDirectory)).some((file) => file.startsWith(stored.slug)), false);
+  assert.equal(await deleteSharedFile(stored.slug), "not-found");
+});
+
+test("shared-file deletion rejects invalid, missing, and incomplete records safely", async () => {
+  assert.equal(await deleteSharedFile("bad/slash"), "not-found");
+  assert.equal(await deleteSharedFile("missing12"), "not-found");
+  await writeFile(path.join(testDirectory, "broken123.json"), "{");
+  await writeFile(path.join(testDirectory, "broken123.bin"), "x");
+  assert.equal(await deleteSharedFile("broken123"), "not-found");
+  assert.deepEqual((await readdir(testDirectory)).sort(), ["broken123.bin", "broken123.json"]);
 });
 
 test("cleans partial files when the input stream fails", async () => {
