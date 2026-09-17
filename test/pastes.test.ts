@@ -67,6 +67,29 @@ test("a deleted or expired record is never recreated by an update", async () => 
   await assert.rejects(readFile(path.join(testDirectory, "boundary123.json"), "utf8"));
 });
 
+test("admin deletion makes an active paste unavailable and unknown slugs are safe", async () => {
+  const slug = await pastes.createPaste("initial", true);
+  assert.equal(await pastes.deletePaste(slug), "deleted");
+  assert.equal(await pastes.getPaste(slug), null);
+  assert.equal(await pastes.deletePaste(slug), "not-found");
+  assert.equal(await pastes.deletePaste("bad/slash"), "not-found");
+});
+
+test("admin editability changes persist for current and legacy records", async () => {
+  const slug = await pastes.createPaste("initial");
+  assert.equal(await pastes.setPasteEditable(slug, true), "updated");
+  assert.equal((await pastes.getPaste(slug))?.editable, true);
+  assert.equal(await pastes.setPasteEditable(slug, false), "updated");
+  assert.equal((await pastes.getPaste(slug))?.editable, false);
+
+  const createdAt = new Date().toISOString();
+  await writeFile(path.join(testDirectory, "legacy456.json"), JSON.stringify({ text: "old", createdAt }));
+  assert.equal(await pastes.setPasteEditable("legacy456", true), "updated");
+  assert.deepEqual(await pastes.getPaste("legacy456"), { text: "old", createdAt, editable: true });
+  assert.equal(await pastes.setPasteEditable("unknown12", true), "not-found");
+  assert.equal(await pastes.setPasteEditable("legacy456", "true"), "not-found");
+});
+
 test("lists only active valid pastes as metadata in stable newest-first order", async () => {
   const now = Date.now();
   await writeFile(path.join(testDirectory, "older123.json"), JSON.stringify({ text: "old", createdAt: new Date(now - 2_000).toISOString() }));

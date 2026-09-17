@@ -105,6 +105,34 @@ export async function listActivePastes(now = Date.now()): Promise<PasteInventory
 
 export type UpdatePasteResult = "updated" | "not-found" | "read-only" | "invalid-text" | "too-large";
 
+export type DeletePasteResult = "deleted" | "not-found";
+export type SetPasteEditableResult = "updated" | "not-found";
+
+async function writePasteAtomically(slug: string, paste: Paste): Promise<boolean> {
+  const target = path.join(DATA_DIR, `${slug}.json`);
+  const temporary = path.join(DATA_DIR, `.${slug}.${randomBytes(8).toString("hex")}.tmp`);
+  try {
+    const file = await open(temporary, "wx", 0o600);
+    try {
+      await file.writeFile(JSON.stringify(paste), "utf8");
+    } finally {
+      await file.close();
+    }
+    // Re-read immediately before commit so a missing or newly-expired record is never revived.
+    const current = await readCurrentPaste(slug);
+    if (!current || isExpired(current)) {
+      if (current) await unlink(target).catch(() => undefined);
+      return false;
+    }
+    await rename(temporary, target);
+    return true;
+  } catch {
+    return false;
+  } finally {
+    await unlink(temporary).catch(() => undefined);
+  }
+}
+
 export async function updatePaste(slug: string, text: unknown): Promise<UpdatePasteResult> {
   if (typeof text !== "string" || !text.trim()) return "invalid-text";
   if (text.length > MAX_PASTE_LENGTH) return "too-large";
@@ -117,28 +145,39 @@ export async function updatePaste(slug: string, text: unknown): Promise<UpdatePa
     }
     if (!paste.editable) return "read-only";
 
+    return (await writePasteAtomically(slug, { ...paste, text })) ? "updated" : "not-found";
+  });
+}
+
+/** Removes an active paste. Invalid, missing, and expired slugs are deliberately indistinguishable. */
+export async function deletePaste(slug: string): Promise<DeletePasteResult> {
+  if (!SLUG_PATTERN.test(slug)) return "not-found";
+  return withSlugLock(slug, async () => {
+    const paste = await readCurrentPaste(slug);
     const target = path.join(DATA_DIR, `${slug}.json`);
-    const temporary = path.join(DATA_DIR, `.${slug}.${randomBytes(8).toString("hex")}.tmp`);
+    if (!paste || isExpired(paste)) {
+      if (paste) await unlink(target).catch(() => undefined);
+      return "not-found";
+    }
     try {
-      const file = await open(temporary, "wx", 0o600);
-      try {
-        await file.writeFile(JSON.stringify({ ...paste, text } satisfies Paste), "utf8");
-      } finally {
-        await file.close();
-      }
-      // Re-read immediately before commit so a missing or newly-expired record is never revived.
-      const current = await readCurrentPaste(slug);
-      if (!current || isExpired(current)) {
-        if (current) await unlink(target).catch(() => undefined);
-        return "not-found";
-      }
-      await rename(temporary, target);
-      return "updated";
+      await unlink(target);
+      return "deleted";
     } catch {
       return "not-found";
-    } finally {
-      await unlink(temporary).catch(() => undefined);
     }
+  });
+}
+
+/** Sets public editability for an active paste, including records created before this field existed. */
+export async function setPasteEditable(slug: string, editable: unknown): Promise<SetPasteEditableResult> {
+  if (typeof editable !== "boolean" || !SLUG_PATTERN.test(slug)) return "not-found";
+  return withSlugLock(slug, async () => {
+    const paste = await readCurrentPaste(slug);
+    if (!paste || isExpired(paste)) {
+      if (paste) await unlink(path.join(DATA_DIR, `${slug}.json`)).catch(() => undefined);
+      return "not-found";
+    }
+    return (await writePasteAtomically(slug, { ...paste, editable })) ? "updated" : "not-found";
   });
 }
 
