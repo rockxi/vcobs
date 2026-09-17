@@ -1,6 +1,6 @@
 "use client";
-import { FormEvent, useRef, useState } from "react";
-import { encodeUploadFileName, formatSharedFileSize, isSharedFileSizeAllowed, MAX_SHARED_FILE_BYTES } from "@/components/file-share-utils";
+import { ClipboardEvent, DragEvent, FormEvent, useRef, useState } from "react";
+import { encodeUploadFileName, formatSharedFileSize, getFirstSharedFile, isSharedFileSizeAllowed, MAX_SHARED_FILE_BYTES } from "@/components/file-share-utils";
 
 const MAX_PASTE_LENGTH = 1_000_000;
 type ShareMode = "text" | "file";
@@ -36,6 +36,7 @@ export function PasteForm() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState<number | null>(null);
+  const [isDraggingFile, setIsDraggingFile] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
   function selectMode(nextMode: ShareMode) {
@@ -47,6 +48,7 @@ export function PasteForm() {
   function chooseFile(nextFile: File | null) {
     setError("");
     setProgress(null);
+    if (!nextFile && fileInput.current) fileInput.current.value = "";
     if (nextFile && !isSharedFileSizeAllowed(nextFile.size)) {
       setFile(null);
       if (fileInput.current) fileInput.current.value = "";
@@ -54,6 +56,22 @@ export function PasteForm() {
       return;
     }
     setFile(nextFile);
+  }
+
+  function handleDrop(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    setIsDraggingFile(false);
+    if (busy) return;
+    const droppedFile = getFirstSharedFile(event.dataTransfer.files);
+    if (droppedFile) chooseFile(droppedFile);
+  }
+
+  function handlePaste(event: ClipboardEvent<HTMLFormElement>) {
+    if (mode !== "file" || busy) return;
+    const pastedFile = getFirstSharedFile(event.clipboardData.files);
+    if (!pastedFile) return;
+    event.preventDefault();
+    chooseFile(pastedFile);
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -74,7 +92,7 @@ export function PasteForm() {
       setError(caught instanceof Error ? caught.message : "Не удалось создать ссылку."); setBusy(false); setProgress(null);
     }
   }
-  return <form className="paste-form" onSubmit={submit}>
+  return <form className="paste-form" onPaste={handlePaste} onSubmit={submit}>
     <div className="share-mode-switcher" aria-label="Что отправить">
       <button aria-pressed={mode === "text"} className="share-mode-button" disabled={busy} onClick={() => selectMode("text")} type="button">Текст</button>
       <button aria-pressed={mode === "file"} className="share-mode-button" disabled={busy} onClick={() => selectMode("file")} type="button">Файл до 500 МБ</button>
@@ -85,7 +103,10 @@ export function PasteForm() {
       <label className="editable-option"><input checked={editable} onChange={(event) => setEditable(event.target.checked)} type="checkbox" /> <span><b>Редактирование</b><small>Все, кто откроет ссылку, смогут изменить текст.</small></span></label>
     </> : <div className="file-share-picker">
       <label htmlFor="share-file">Файл для временной ссылки</label>
-      <input ref={fileInput} id="share-file" onChange={(event) => chooseFile(event.target.files?.[0] ?? null)} type="file" />
+      <div aria-describedby="file-drop-instructions" className={`file-drop-zone${isDraggingFile ? " file-drop-zone-active" : ""}`} onDragEnter={(event) => { event.preventDefault(); if (!busy) setIsDraggingFile(true); }} onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setIsDraggingFile(false); }} onDragOver={(event) => event.preventDefault()} onDrop={handleDrop}>
+        <input ref={fileInput} id="share-file" disabled={busy} onChange={(event) => chooseFile(getFirstSharedFile(event.target.files))} type="file" />
+        <p aria-live="polite" id="file-drop-instructions">{isDraggingFile ? "Отпустите, чтобы выбрать файл." : "Перетащите файл сюда, выберите его или вставьте из буфера через Ctrl/Cmd+V."}</p>
+      </div>
       <p>До {formatSharedFileSize(MAX_SHARED_FILE_BYTES)}. Файл удалится через 12 часов.</p>
       {file && <div className="selected-file"><span><b>{file.name}</b><small>{formatSharedFileSize(file.size)}</small></span><button disabled={busy} onClick={() => chooseFile(null)} type="button">Убрать</button></div>}
     </div>}

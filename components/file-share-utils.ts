@@ -4,6 +4,11 @@ export function isSharedFileSizeAllowed(size: number) {
   return Number.isSafeInteger(size) && size >= 0 && size <= MAX_SHARED_FILE_BYTES;
 }
 
+/** Returns the first file supplied by a file input, drop, or clipboard event. */
+export function getFirstSharedFile(files: ArrayLike<File> | null | undefined) {
+  return files && files.length > 0 ? files[0] ?? null : null;
+}
+
 export function encodeUploadFileName(fileName: string) {
   return encodeURIComponent(fileName);
 }
