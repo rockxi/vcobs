@@ -45,10 +45,10 @@ export function PasteForm() {
     setProgress(null);
   }
 
-  function chooseFile(nextFile: File | null) {
+  function chooseFile(nextFile: File | null, resetNativeInput = false) {
     setError("");
     setProgress(null);
-    if (!nextFile && fileInput.current) fileInput.current.value = "";
+    if ((!nextFile || resetNativeInput) && fileInput.current) fileInput.current.value = "";
     if (nextFile && !isSharedFileSizeAllowed(nextFile.size)) {
       setFile(null);
       if (fileInput.current) fileInput.current.value = "";
@@ -63,7 +63,7 @@ export function PasteForm() {
     setIsDraggingFile(false);
     if (busy) return;
     const droppedFile = getFirstSharedFile(event.dataTransfer.files);
-    if (droppedFile) chooseFile(droppedFile);
+    if (droppedFile) chooseFile(droppedFile, true);
   }
 
   function handlePaste(event: ClipboardEvent<HTMLFormElement>) {
@@ -71,7 +71,7 @@ export function PasteForm() {
     const pastedFile = getFirstSharedFile(event.clipboardData.files);
     if (!pastedFile) return;
     event.preventDefault();
-    chooseFile(pastedFile);
+    chooseFile(pastedFile, true);
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -104,7 +104,7 @@ export function PasteForm() {
     </> : <div className="file-share-picker">
       <label htmlFor="share-file">Файл для временной ссылки</label>
       <div aria-describedby="file-drop-instructions" className={`file-drop-zone${isDraggingFile ? " file-drop-zone-active" : ""}`} onDragEnter={(event) => { event.preventDefault(); if (!busy) setIsDraggingFile(true); }} onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setIsDraggingFile(false); }} onDragOver={(event) => event.preventDefault()} onDrop={handleDrop}>
-        <input ref={fileInput} id="share-file" disabled={busy} onChange={(event) => chooseFile(getFirstSharedFile(event.target.files))} type="file" />
+        <input ref={fileInput} id="share-file" disabled={busy} onChange={(event) => chooseFile(getFirstSharedFile(event.target.files), true)} type="file" />
         <p aria-live="polite" id="file-drop-instructions">{isDraggingFile ? "Отпустите, чтобы выбрать файл." : "Перетащите файл сюда, выберите его или вставьте из буфера через Ctrl/Cmd+V."}</p>
       </div>
       <p>До {formatSharedFileSize(MAX_SHARED_FILE_BYTES)}. Файл удалится через 12 часов.</p>
