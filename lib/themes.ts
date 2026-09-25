@@ -1,5 +1,5 @@
 export type VcobsTheme = {
-  id: "obsidianite" | "violet-night" | "lavender-ink";
+  id: "obsidianite" | "violet-night" | "lavender-ink" | "neon-grid";
   name: string;
   description: string;
   tokens: Record<"ink" | "muted" | "paper" | "surface" | "surface-raised" | "line" | "accent" | "lime", string>;
@@ -25,6 +25,12 @@ export const vcobsThemes = [
     name: "Lavender ink",
     description: "Мягкая лавандовая подача в той же тёмной гамме",
     tokens: { ink: "#eee9f5", muted: "#aaa1b7", paper: "#18131d", surface: "#211a28", "surface-raised": "#2a2134", line: "#403348", accent: "#bd94ea", lime: "#d5bbf0" },
+  },
+  {
+    id: "neon-grid",
+    name: "Neon Grid",
+    description: "HUD-сетка с циановыми каналами, магентовыми сигналами и контрастной техно-типографикой",
+    tokens: { ink: "#e8feff", muted: "#8faeb6", paper: "#071117", surface: "#0b1c25", "surface-raised": "#102934", line: "#1c5260", accent: "#21e6f3", lime: "#ff4fbf" },
   },
 ] as const satisfies readonly VcobsTheme[];
 

@@ -31,3 +31,11 @@ test("component library has an accessible selector backed by the shared vcobs th
   assert.match(themeSource, /export const vcobsThemes/);
   assert.match(themeSource, /defaultVcobsTheme/);
 });
+
+test("Neon Grid is a reusable theme and the component demo exposes stateful samples", async () => {
+  const [librarySource, themeSource] = await Promise.all([readFile(library, "utf8"), readFile(themes, "utf8")]);
+  assert.match(themeSource, /id: "neon-grid"/);
+  assert.match(themeSource, /name: "Neon Grid"/);
+  assert.match(librarySource, /aria-invalid="true"/);
+  assert.match(librarySource, /disabled>Недоступно/);
+});
