@@ -3,6 +3,8 @@ import test from "node:test";
 import { readFile } from "node:fs/promises";
 
 const page = new URL("../app/admin/components/page.tsx", import.meta.url);
+const library = new URL("../components/component-library.tsx", import.meta.url);
+const themes = new URL("../lib/themes.ts", import.meta.url);
 
 test("component library page applies the shared server-side admin session guard", async () => {
   const source = await readFile(page, "utf8");
@@ -16,6 +18,16 @@ test("admin session module uses webpack-compatible Node builtin specifiers", asy
 });
 
 test("component library exposes canonical component names", async () => {
-  const source = await readFile(page, "utf8");
+  const source = await readFile(library, "utf8");
   for (const name of ["button", "text_input", "textarea", "link", "status_badge", "notice"]) assert.match(source, new RegExp(`name: "${name}"`));
+});
+
+test("component library has an accessible selector backed by the shared vcobs theme registry", async () => {
+  const [librarySource, themeSource] = await Promise.all([readFile(library, "utf8"), readFile(themes, "utf8")]);
+  assert.match(librarySource, /<select id="vcobs-theme"/);
+  assert.match(librarySource, /onChange=\{\(event\) => setThemeId/);
+  assert.match(librarySource, /aria-describedby="vcobs-theme-description"/);
+  assert.match(librarySource, /themeCssVariables\(theme\)/);
+  assert.match(themeSource, /export const vcobsThemes/);
+  assert.match(themeSource, /defaultVcobsTheme/);
 });
