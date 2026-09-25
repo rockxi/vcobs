@@ -1,5 +1,5 @@
-import { createHmac, randomBytes, scrypt as scryptCallback, timingSafeEqual } from "node:crypto";
-import { isIP } from "node:net";
+import { createHmac, randomBytes, scrypt as scryptCallback, timingSafeEqual } from "crypto";
+import { isIP } from "net";
 function scrypt(password: string, salt: Buffer, length: number, options: { N: number; r: number; p: number; maxmem: number }): Promise<Buffer> {
   return new Promise((resolve, reject) => scryptCallback(password, salt, length, options, (error, derived) => error ? reject(error) : resolve(derived)));
 }
