@@ -39,3 +39,13 @@ test("Neon Grid is a reusable theme and the component demo exposes stateful samp
   assert.match(librarySource, /aria-invalid="true"/);
   assert.match(librarySource, /disabled>Недоступно/);
 });
+
+test("Frutiger Aero is a shared glossy theme with representative success and error states", async () => {
+  const [librarySource, themeSource, cssSource] = await Promise.all([readFile(library, "utf8"), readFile(themes, "utf8"), readFile(new URL("../app/globals.css", import.meta.url), "utf8")]);
+  assert.match(themeSource, /id: "frutiger-aero"/);
+  assert.match(themeSource, /name: "Frutiger Aero"/);
+  assert.match(librarySource, /component-button-success/);
+  assert.match(librarySource, /component-input-success/);
+  assert.match(cssSource, /data-vcobs-theme="frutiger-aero"/);
+  assert.match(cssSource, /prefers-reduced-motion:reduce/);
+});

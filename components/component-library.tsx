@@ -10,9 +10,9 @@ const tokenLabels = {
 } as const;
 
 const components = [
-  { name: "button", description: "Основное, фокусируемое и заблокированное действия", preview: <div className="component-buttons"><button type="button">Опубликовать</button><button type="button" disabled>Недоступно</button></div> },
+  { name: "button", description: "Основное, успешное, фокусируемое и заблокированное действия", preview: <div className="component-buttons"><button type="button">Опубликовать</button><button className="component-button-success" type="button">Готово</button><button type="button" disabled>Недоступно</button></div> },
   { name: "text_input", description: "Поле с фокусом, подсказкой и состоянием ошибки", preview: <label className="component-field">Название заметки<input defaultValue="Еженедельный обзор" aria-label="Название заметки" /><small>До 80 символов</small><input className="component-input-error" defaultValue="" aria-label="Название с ошибкой" aria-invalid="true" placeholder="Введите название" /><small className="component-error-text">Название обязательно</small></label> },
-  { name: "textarea", description: "Многострочный ввод с валидацией", preview: <label className="component-field">Содержимое<textarea defaultValue="Запишите мысль, ссылку или план." aria-label="Содержимое заметки" /><small>Markdown поддерживается</small></label> },
+  { name: "textarea", description: "Многострочный ввод с успешной валидацией", preview: <label className="component-field">Содержимое<textarea className="component-input-success" defaultValue="Запишите мысль, ссылку или план." aria-label="Содержимое заметки" /><small className="component-success-text">Содержимое сохранено</small></label> },
   { name: "link", description: "Навигационное действие", preview: <Link className="component-link" href="/admin/links">Открыть активные ссылки <span aria-hidden="true">→</span></Link> },
   { name: "status_badge", description: "Статус публикации", preview: <div className="component-badges"><span className="admin-status editable">редактирование</span><span className="admin-status">только чтение</span></div> },
   { name: "notice", description: "Статус и ошибка формы", preview: <div className="component-notices"><p className="component-success" role="status">Ссылка готова к отправке.</p><p className="form-error" role="alert">Не удалось сохранить изменения.</p></div> },
