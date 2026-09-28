@@ -3,6 +3,7 @@ declare module "@novnc/novnc" {
     constructor(target: HTMLElement, url: string | object, options?: { credentials?: Record<string, string> });
     scaleViewport: boolean;
     clipViewport: boolean;
+    showDotCursor: boolean;
     _isSupportedSecurityType(type: number): boolean;
     disconnect(): void;
     focus(options?: FocusOptions): void;

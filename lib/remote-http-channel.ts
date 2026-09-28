@@ -15,9 +15,11 @@ export class RemoteHttpChannel {
   private sendTimer: ReturnType<typeof setTimeout> | null = null;
   private sending = false;
   private readonly base: string;
+  private readonly mode: "stream" | "poll";
 
-  constructor(deviceId: string) {
+  constructor(deviceId: string, mode: "stream" | "poll" = "stream") {
     this.base = `/remote/http/?id=${encodeURIComponent(deviceId)}`;
+    this.mode = mode;
   }
 
   private url(action: string) { return this.base.replace("/http/", `/http/${action}`); }
@@ -35,7 +37,7 @@ export class RemoteHttpChannel {
       if (this.readyState !== 0) { this.releaseSession(); return; }
       this.readyState = 1;
       this.onopen?.();
-      void this.poll();
+      void (this.mode === "stream" ? this.stream() : this.poll());
     } catch { if (this.readyState === 0) this.fail(); }
   }
 
@@ -50,6 +52,37 @@ export class RemoteHttpChannel {
         if (data.byteLength && this.readyState === 1) this.onmessage?.({ data });
       } catch { if (this.readyState === 1) this.fail(); }
     }
+  }
+
+  private async stream() {
+    const controller = new AbortController(); this.pollAbort = controller;
+    let firstFrame = false;
+    const firstFrameTimeout = setTimeout(() => { if (!firstFrame) controller.abort(); }, 5_000);
+    try {
+      const response = await fetch(this.url("stream"), { credentials: "same-origin", cache: "no-store", headers: this.headers(this.session || undefined), signal: controller.signal });
+      if (!response.ok || !response.body) throw new Error(`HTTPS stream failed (${response.status})`);
+      const reader = response.body.getReader();
+      let pending = new Uint8Array(0);
+      while (this.readyState === 1) {
+        const { done, value } = await reader.read();
+        if (done) throw new Error("HTTPS stream closed");
+        const combined = new Uint8Array(pending.length + value.length);
+        combined.set(pending); combined.set(value, pending.length);
+        let offset = 0;
+        while (offset + 4 <= combined.length) {
+          const length = new DataView(combined.buffer).getUint32(offset);
+          if (length > 4 * 1024 * 1024) throw new Error("HTTPS stream frame too large");
+          if (offset + 4 + length > combined.length) break;
+          if (length && this.readyState === 1) {
+            firstFrame = true; clearTimeout(firstFrameTimeout);
+            this.onmessage?.({ data: combined.slice(offset + 4, offset + 4 + length).buffer });
+          }
+          offset += 4 + length;
+        }
+        pending = combined.slice(offset);
+      }
+    } catch { if (this.readyState === 1) this.fail(); }
+    finally { clearTimeout(firstFrameTimeout); }
   }
 
   send(data: Uint8Array | ArrayBuffer) {

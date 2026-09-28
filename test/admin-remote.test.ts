@@ -28,7 +28,7 @@ test("remote client uses noVNC over the same host and keeps VNC credentials out 
   assert.match(source, /<option value="vnc">Отдельный пароль VNC<\/option>/);
   assert.match(source, /<option value="mac">Учётная запись Mac<\/option>/);
   assert.match(source, /authenticationErrorRef\.current = true/);
-  assert.match(source, /new RemoteHttpChannel\(device\.id\)/);
+  assert.match(source, /new RemoteHttpChannel\(device\.id, channel === "https" \? "stream" : "poll"\)/);
   assert.match(source, /WebSocket недоступен\. Пробуем подключение через HTTPS/);
   assert.match(source, /rfbRef\.current\?\.focus\(\{ preventScroll: true \}\)/);
   assert.match(source, /Захватить клавиатуру/);

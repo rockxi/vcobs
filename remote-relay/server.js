@@ -63,8 +63,9 @@ export function createRelayServer(options = {}) {
   const agents = new Map(), browsers = new Map(), httpSessions = new Map();
   function finishHttp(id, notify = true) {
     const session = httpSessions.get(id); if (!session) return;
-    httpSessions.delete(id); clearTimeout(session.expiration); clearTimeout(session.idle); clearTimeout(session.pendingTimer); clearTimeout(session.flushTimer);
+    httpSessions.delete(id); clearTimeout(session.expiration); clearTimeout(session.idle); clearTimeout(session.pendingTimer); clearTimeout(session.flushTimer); clearInterval(session.keepalive);
     if (session.pending && !session.pending.writableEnded) session.pending.writeHead(410).end();
+    if (session.stream && !session.stream.writableEnded) session.stream.end();
     if (notify) safeSend(agents.get(id), JSON.stringify({ type: "detach" }));
   }
   function touchHttp(id, session) {
@@ -79,11 +80,21 @@ export function createRelayServer(options = {}) {
     session.pending.writeHead(200, { "content-type": "application/octet-stream", "cache-control": "no-store" }).end(data);
     session.pending = null;
   }
+  function flushStream(session) {
+    if (!session.stream || !session.queue.length || session.streamBackpressured) return;
+    clearTimeout(session.flushTimer); session.flushTimer = null;
+    const data = Buffer.concat(session.queue, session.queuedBytes);
+    session.queue = []; session.queuedBytes = 0;
+    const frame = Buffer.allocUnsafe(data.length + 4);
+    frame.writeUInt32BE(data.length, 0); data.copy(frame, 4);
+    session.streamBackpressured = !session.stream.write(frame);
+  }
   function deliverHttp(id, data) {
     const session = httpSessions.get(id); if (!session) return;
+    touchHttp(id, session);
     session.queue.push(Buffer.from(data)); session.queuedBytes += data.length;
     if (session.queuedBytes > maxBuffered) { finishHttp(id); return; }
-    if (session.pending && !session.flushTimer) { session.flushTimer = setTimeout(() => flushHttp(session), 16); session.flushTimer.unref(); }
+    if ((session.pending || session.stream) && !session.flushTimer) { session.flushTimer = setTimeout(() => { session.flushTimer = null; session.stream ? flushStream(session) : flushHttp(session); }, 16); session.flushTimer.unref(); }
   }
   const httpServer = http.createServer((request, response) => {
     if (request.method === "GET" && request.url === "/internal/devices") {
@@ -99,7 +110,7 @@ export function createRelayServer(options = {}) {
     response.setHeader("cache-control", "no-store");
     if (url.pathname === "/remote/http/connect" && request.method === "POST") {
       if (!agents.has(id) || browsers.has(id) || httpSessions.has(id) || connectionCount() >= maxConnections) { response.writeHead(409).end(); return; }
-      const session = { token: randomBytes(24).toString("base64url"), queue: [], queuedBytes: 0, pending: null, pendingTimer: null, flushTimer: null, expiration: null, idle: null };
+      const session = { token: randomBytes(24).toString("base64url"), queue: [], queuedBytes: 0, pending: null, pendingTimer: null, flushTimer: null, stream: null, streamBackpressured: false, keepalive: null, expiration: null, idle: null };
       httpSessions.set(id, session);
       const expiresAt = Number(cookieValue(request.headers.cookie, "vcobs_admin_session").split(".")[1]) * 1000;
       session.expiration = setTimeout(() => finishHttp(id), Math.max(1, Math.min(browserSessionMs, expiresAt - Date.now()))); session.expiration.unref();
@@ -111,8 +122,20 @@ export function createRelayServer(options = {}) {
     const session = httpSessions.get(id);
     if (!session || !equalToken(request.headers["x-vcobs-remote-session"], session.token)) { response.writeHead(403).end(); return; }
     touchHttp(id, session);
+    if (url.pathname === "/remote/http/stream" && request.method === "GET") {
+      if (session.stream || session.pending) { response.writeHead(409).end(); return; }
+      session.stream = response;
+      response.writeHead(200, { "content-type": "application/octet-stream", "cache-control": "no-store, no-transform", "x-accel-buffering": "no" });
+      response.flushHeaders();
+      response.socket?.setNoDelay(true);
+      response.on("drain", () => { session.streamBackpressured = false; flushStream(session); });
+      response.on("close", () => { if (session.stream === response) { clearInterval(session.keepalive); session.stream = null; session.streamBackpressured = false; } });
+      session.keepalive = setInterval(() => { if (session.stream === response && !session.streamBackpressured) { touchHttp(id, session); session.streamBackpressured = !response.write(Buffer.alloc(4)); } }, 15_000); session.keepalive.unref();
+      flushStream(session);
+      return;
+    }
     if (url.pathname === "/remote/http/poll" && request.method === "GET") {
-      if (session.pending) { response.writeHead(409).end(); return; }
+      if (session.pending || session.stream) { response.writeHead(409).end(); return; }
       session.pending = response;
       if (session.queue.length) { flushHttp(session); return; }
       session.pendingTimer = setTimeout(() => { if (session.pending === response) { session.pending = null; response.writeHead(204).end(); } }, 15_000); session.pendingTimer.unref();

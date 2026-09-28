@@ -22,3 +22,21 @@ test("HTTPS channel batches ordered VNC writes instead of posting each key or fr
     channel.close();
   } finally { globalThis.fetch = originalFetch; }
 });
+
+test("HTTPS stream reconstructs split binary frames for noVNC", async () => {
+  const originalFetch = globalThis.fetch;
+  const frame = new Uint8Array([0, 0, 0, 3, 1, 2, 3]);
+  globalThis.fetch = async (input) => {
+    const url = String(input);
+    if (url.includes("/connect")) return Response.json({ session: "test-session" });
+    if (url.includes("/stream")) return new Response(new ReadableStream({ start(controller) { controller.enqueue(frame.slice(0, 2)); controller.enqueue(frame.slice(2, 5)); controller.enqueue(frame.slice(5)); controller.close(); } }), { status: 200 });
+    return new Response(null, { status: 204 });
+  };
+  try {
+    const channel = new RemoteHttpChannel("mac", "stream");
+    const received = new Promise<Uint8Array>(resolve => { channel.onmessage = event => resolve(new Uint8Array(event.data)); });
+    await channel.start();
+    assert.deepEqual([...(await received)], [1, 2, 3]);
+    channel.close();
+  } finally { globalThis.fetch = originalFetch; }
+});
