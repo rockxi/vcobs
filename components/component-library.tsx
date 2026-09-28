@@ -1,16 +1,43 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type CSSProperties } from "react";
-import { defaultVcobsTheme, themeCssVariables, vcobsThemes } from "@/lib/themes";
+import { useRef, useState, type CSSProperties, type PointerEvent } from "react";
+import { defaultVcobsTheme, themeCssVariables, vcobsThemes, type VcobsTheme } from "@/lib/themes";
+import { LiquidGlassBackdrop } from "@/components/liquid-glass-backdrop";
 
 const tokenLabels = {
   ink: "Основной текст", muted: "Вторичный текст", paper: "Основная поверхность", surface: "Поверхность карточки",
   "surface-raised": "Поднятая поверхность", line: "Граница", accent: "Акцент и ссылки", lime: "Светлый акцент",
 } as const;
 
+function GlassToggle() {
+  const [enabled, setEnabled] = useState(true);
+  const start = useRef<number | null>(null);
+  const dragged = useRef(false);
+  const move = (event: PointerEvent<HTMLButtonElement>) => {
+    if (start.current === null) return;
+    const distance = event.clientX - start.current;
+    dragged.current = Math.abs(distance) > 5;
+    event.currentTarget.style.setProperty("--toggle-drag", `${Math.max(-30, Math.min(30, distance))}px`);
+  };
+  const finish = (event: PointerEvent<HTMLButtonElement>) => {
+    if (start.current === null) return;
+    const distance = event.clientX - start.current;
+    if (Math.abs(distance) > 5) setEnabled(distance > 0);
+    event.currentTarget.style.removeProperty("--toggle-drag");
+    start.current = null;
+  };
+  return <div className="glass-toggle-row"><span>Уведомления</span><button
+    type="button" className="glass-toggle" role="switch" aria-checked={enabled} aria-label="Уведомления"
+    onPointerDown={(event) => { start.current = event.clientX; dragged.current = false; event.currentTarget.setPointerCapture(event.pointerId); }}
+    onPointerMove={move} onPointerUp={finish} onPointerCancel={finish}
+    onClick={() => { if (dragged.current) { dragged.current = false; return; } setEnabled((value) => !value); }}
+  ><span className="glass-toggle-thumb" /></button></div>;
+}
+
 const components = [
   { name: "button", description: "Основное, успешное, фокусируемое и заблокированное действия", preview: <div className="component-buttons"><button type="button">Опубликовать</button><button className="component-button-success" type="button">Готово</button><button type="button" disabled>Недоступно</button></div> },
+  { name: "toggle", description: "Переключатель с нажатием, перетаскиванием и управлением с клавиатуры", preview: <GlassToggle /> },
   { name: "text_input", description: "Поле с фокусом, подсказкой и состоянием ошибки", preview: <label className="component-field">Название заметки<input defaultValue="Еженедельный обзор" aria-label="Название заметки" /><small>До 80 символов</small><input className="component-input-error" defaultValue="" aria-label="Название с ошибкой" aria-invalid="true" placeholder="Введите название" /><small className="component-error-text">Название обязательно</small></label> },
   { name: "textarea", description: "Многострочный ввод с успешной валидацией", preview: <label className="component-field">Содержимое<textarea className="component-input-success" defaultValue="Запишите мысль, ссылку или план." aria-label="Содержимое заметки" /><small className="component-success-text">Содержимое сохранено</small></label> },
   { name: "link", description: "Навигационное действие", preview: <Link className="component-link" href="/admin/links">Открыть активные ссылки <span aria-hidden="true">→</span></Link> },
@@ -19,11 +46,12 @@ const components = [
 ] as const;
 
 export function ComponentLibrary() {
-  const [themeId, setThemeId] = useState(defaultVcobsTheme.id);
+  const [themeId, setThemeId] = useState<VcobsTheme["id"]>(defaultVcobsTheme.id);
   const theme = vcobsThemes.find((item) => item.id === themeId) ?? defaultVcobsTheme;
   const style = themeCssVariables(theme) as CSSProperties;
 
   return <main className="admin-shell component-library-shell" data-vcobs-theme={theme.id} style={style}>
+    {theme.id === "liquid-glass" && <LiquidGlassBackdrop />}
     <section className="admin-inventory component-library">
       <header className="admin-inventory-header">
         <div><p className="eyebrow">vcobs · design system</p><h1>Библиотека компонентов</h1><p>Статический словарь production-интерфейса. Имена ниже используются как канонические идентификаторы для следующих экранов.</p></div>

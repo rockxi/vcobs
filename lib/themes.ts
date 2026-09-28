@@ -41,8 +41,8 @@ export const vcobsThemes = [
   {
     id: "liquid-glass",
     name: "Liquid Glass",
-    description: "Слоистое стекло: цвет фона проходит сквозь материал, а элементы управления ловят свет",
-    tokens: { ink: "#f8fbff", muted: "#c3cce0", paper: "#11172a", surface: "#273152", "surface-raised": "#354165", line: "#a9bddf", accent: "#d8e9ff", lime: "#a8d2ff" },
+    description: "Тёмное стекло с мягким фоном и спокойными поверхностями в духе macOS",
+    tokens: { ink: "#f1f1f4", muted: "#b4b3bc", paper: "#111116", surface: "#222127", "surface-raised": "#2c2b32", line: "#494851", accent: "#c9d8fb", lime: "#a9c1ff" },
   },
 ] as const satisfies readonly VcobsTheme[];
 
