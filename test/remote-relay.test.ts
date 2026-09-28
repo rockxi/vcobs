@@ -61,6 +61,9 @@ test("authenticated HTTPS polling transports binary RFB without a WebSocket upgr
   const poll = fetch(`${base}/remote/http/poll?id=mac`, { headers: tunnelHeaders });
   agent.send(Buffer.from([1, 2, 3]));
   assert.deepEqual(Buffer.from(await (await poll).arrayBuffer()), Buffer.from([1, 2, 3]));
+  const batchedPoll = fetch(`${base}/remote/http/poll?id=mac`, { headers: tunnelHeaders });
+  agent.send(Buffer.from([6])); agent.send(Buffer.from([7]));
+  assert.deepEqual(Buffer.from(await (await batchedPoll).arrayBuffer()), Buffer.from([6, 7]));
   const toAgent = nextMessage(agent);
   const sent = await fetch(`${base}/remote/http/send?id=mac`, { method: "POST", headers: tunnelHeaders, body: Buffer.from([4, 5]) });
   assert.equal(sent.status, 204); assert.deepEqual((await toAgent).data, Buffer.from([4, 5]));

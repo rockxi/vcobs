@@ -7,7 +7,9 @@ type Device = { id: string; name: string; online: boolean; controlled: boolean }
 type ConnectionState = "idle" | "connecting" | "connected" | "password" | "error";
 type AuthenticationMode = "vnc" | "mac";
 type TransportMode = "auto" | "websocket" | "https";
-type RfbClient = EventTarget & { scaleViewport: boolean; clipViewport: boolean; disconnect(): void; focus(options?: FocusOptions): void; sendCredentials(credentials: { username?: string; password?: string }): void };
+type RfbClient = EventTarget & { scaleViewport: boolean; clipViewport: boolean; disconnect(): void; focus(options?: FocusOptions): void; sendKey(keysym: number, code?: string): void; sendCredentials(credentials: { username?: string; password?: string }): void };
+
+const DIRECT_KEYS: Record<string, number> = { Backspace: 0xff08, Enter: 0xff0d, Escape: 0xff1b, Delete: 0xffff, ArrowLeft: 0xff51, ArrowUp: 0xff52, ArrowRight: 0xff53, ArrowDown: 0xff54, Home: 0xff50, End: 0xff57, PageUp: 0xff55, PageDown: 0xff56 };
 
 function relayUrl(deviceId: string) {
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
@@ -87,11 +89,20 @@ export function RemoteDesktop() {
     if (needsUsername && (typeof username !== "string" || !username)) return;
     rfbRef.current.sendCredentials(needsUsername ? { username: username as string, password } : { password }); event.currentTarget.reset(); setConnection("connecting"); setMessage("Проверяем данные для входа…");
   };
+  const typeDirectly = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (connection !== "connected" || !rfbRef.current || event.key === "Tab" || event.nativeEvent.isComposing) return;
+    const point = event.key.length === 1 ? event.key.codePointAt(0) : undefined;
+    const keysym = point === undefined ? DIRECT_KEYS[event.key] : point > 0xff ? 0x01000000 | point : point;
+    if (keysym === undefined) return;
+    event.preventDefault();
+    rfbRef.current.sendKey(keysym, event.code);
+  };
   const selected = devices.find((device) => device.id === selectedId);
   const canConnect = !!selected && selected.online && !selected.controlled;
   return <div className="remote-desktop" aria-live="polite">
     <div className="remote-toolbar"><label htmlFor="remote-device">Mac <select id="remote-device" value={selectedId ?? ""} onChange={(event) => { disconnect("Выберите Mac для подключения."); setSelectedId(event.target.value || null); }}><option value="">Выберите устройство</option>{devices.map((device) => <option key={device.id} value={device.id} disabled={!device.online}>{device.name}{device.online ? device.controlled ? " · занят" : " · онлайн" : " · офлайн"}</option>)}</select></label><label htmlFor="remote-auth">Способ входа<select id="remote-auth" value={authentication} onChange={(event) => { disconnect("Способ входа изменён."); setAuthentication(event.target.value as AuthenticationMode); }}><option value="vnc">Отдельный пароль VNC</option><option value="mac">Учётная запись Mac</option></select></label><label htmlFor="remote-transport">Канал<select id="remote-transport" value={transport} onChange={(event) => { disconnect("Канал изменён."); setTransport(event.target.value as TransportMode); }}><option value="auto">Авто</option><option value="websocket">WebSocket</option><option value="https">HTTPS</option></select></label><span className={`remote-status ${selected?.online ? "online" : ""}`}>{selected ? selected.online ? selected.controlled ? "занят" : "онлайн" : "офлайн" : `${devices.filter((device) => device.online).length} онлайн`}</span><button type="button" onClick={connection === "idle" || connection === "error" ? connect : () => disconnect()} disabled={(connection === "idle" || connection === "error") && !canConnect}>{connection === "idle" || connection === "error" ? "Подключиться" : "Отключиться"}</button><button type="button" className="remote-plain-button" onClick={() => rfbRef.current?.focus({ preventScroll: true })} disabled={connection !== "connected"}>{keyboardFocused ? "Клавиатура активна" : "Захватить клавиатуру"}</button><label className="remote-toggle"><input type="checkbox" checked={scale} onChange={(event) => setScale(event.target.checked)} /> Масштабировать</label><button type="button" className="remote-plain-button" onClick={() => canvasRef.current?.requestFullscreen?.()} disabled={!rfbRef.current}>Полный экран</button></div>
     <p className={connection === "error" ? "form-error" : "remote-message"} role="status">{message}</p>
+    {connection === "connected" && <label className="remote-direct-input">Прямой ввод с клавиатуры<input type="text" autoComplete="off" spellCheck={false} placeholder="Нажимайте клавиши здесь, если экран не принимает ввод" onKeyDown={typeDirectly} onChange={(event) => { event.currentTarget.value = ""; }} /></label>}
     {connection === "password" && <form className="remote-password" onSubmit={submitPassword}>{needsUsername && <label htmlFor="vnc-username">Имя пользователя Mac<input id="vnc-username" name="vnc-username" type="text" autoComplete="username" autoFocus required /></label>}<label htmlFor="vnc-password">{needsUsername ? "Пароль учётной записи Mac" : "Пароль VNC"}<input id="vnc-password" name="vnc-password" type="password" autoComplete="off" autoFocus={!needsUsername} required /></label><button type="submit">Продолжить</button></form>}
     <div className="remote-screen"><div className="remote-canvas" ref={canvasRef} onMouseDownCapture={() => { if (connection === "connected") rfbRef.current?.focus({ preventScroll: true }); }} onFocusCapture={() => setKeyboardFocused(true)} onBlurCapture={() => setKeyboardFocused(false)} aria-label="Интерактивный удалённый экран Mac" />{connection === "idle" && <p className="remote-placeholder">Экран появится здесь после подключения.</p>}</div><p className="remote-help">Для клавиатуры нажмите на экран или кнопку «Захватить клавиатуру». В закрытой сети канал автоматически переключится на HTTPS, если WebSocket заблокирован.</p>
   </div>;

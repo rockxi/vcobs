@@ -6,6 +6,7 @@ declare module "@novnc/novnc" {
     _isSupportedSecurityType(type: number): boolean;
     disconnect(): void;
     focus(options?: FocusOptions): void;
+    sendKey(keysym: number, code?: string, down?: boolean): void;
     sendCredentials(credentials: { password?: string; username?: string; target?: string }): void;
   }
 }

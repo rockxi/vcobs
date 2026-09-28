@@ -63,7 +63,7 @@ export function createRelayServer(options = {}) {
   const agents = new Map(), browsers = new Map(), httpSessions = new Map();
   function finishHttp(id, notify = true) {
     const session = httpSessions.get(id); if (!session) return;
-    httpSessions.delete(id); clearTimeout(session.expiration); clearTimeout(session.idle); clearTimeout(session.pendingTimer);
+    httpSessions.delete(id); clearTimeout(session.expiration); clearTimeout(session.idle); clearTimeout(session.pendingTimer); clearTimeout(session.flushTimer);
     if (session.pending && !session.pending.writableEnded) session.pending.writeHead(410).end();
     if (notify) safeSend(agents.get(id), JSON.stringify({ type: "detach" }));
   }
@@ -71,16 +71,19 @@ export function createRelayServer(options = {}) {
     clearTimeout(session.idle);
     session.idle = setTimeout(() => finishHttp(id), 60_000); session.idle.unref();
   }
+  function flushHttp(session) {
+    if (!session.pending || !session.queue.length) return;
+    clearTimeout(session.pendingTimer); clearTimeout(session.flushTimer); session.flushTimer = null;
+    const data = Buffer.concat(session.queue, session.queuedBytes);
+    session.queue = []; session.queuedBytes = 0;
+    session.pending.writeHead(200, { "content-type": "application/octet-stream", "cache-control": "no-store" }).end(data);
+    session.pending = null;
+  }
   function deliverHttp(id, data) {
     const session = httpSessions.get(id); if (!session) return;
-    if (session.pending) {
-      clearTimeout(session.pendingTimer);
-      session.pending.writeHead(200, { "content-type": "application/octet-stream", "cache-control": "no-store" }).end(data);
-      session.pending = null;
-    } else {
-      session.queue.push(Buffer.from(data)); session.queuedBytes += data.length;
-      if (session.queuedBytes > maxBuffered) finishHttp(id);
-    }
+    session.queue.push(Buffer.from(data)); session.queuedBytes += data.length;
+    if (session.queuedBytes > maxBuffered) { finishHttp(id); return; }
+    if (session.pending && !session.flushTimer) { session.flushTimer = setTimeout(() => flushHttp(session), 16); session.flushTimer.unref(); }
   }
   const httpServer = http.createServer((request, response) => {
     if (request.method === "GET" && request.url === "/internal/devices") {
@@ -96,7 +99,7 @@ export function createRelayServer(options = {}) {
     response.setHeader("cache-control", "no-store");
     if (url.pathname === "/remote/http/connect" && request.method === "POST") {
       if (!agents.has(id) || browsers.has(id) || httpSessions.has(id) || connectionCount() >= maxConnections) { response.writeHead(409).end(); return; }
-      const session = { token: randomBytes(24).toString("base64url"), queue: [], queuedBytes: 0, pending: null, pendingTimer: null, expiration: null, idle: null };
+      const session = { token: randomBytes(24).toString("base64url"), queue: [], queuedBytes: 0, pending: null, pendingTimer: null, flushTimer: null, expiration: null, idle: null };
       httpSessions.set(id, session);
       const expiresAt = Number(cookieValue(request.headers.cookie, "vcobs_admin_session").split(".")[1]) * 1000;
       session.expiration = setTimeout(() => finishHttp(id), Math.max(1, Math.min(browserSessionMs, expiresAt - Date.now()))); session.expiration.unref();
@@ -110,11 +113,8 @@ export function createRelayServer(options = {}) {
     touchHttp(id, session);
     if (url.pathname === "/remote/http/poll" && request.method === "GET") {
       if (session.pending) { response.writeHead(409).end(); return; }
-      if (session.queue.length) {
-        const data = session.queue.shift(); session.queuedBytes -= data.length;
-        response.writeHead(200, { "content-type": "application/octet-stream" }).end(data); return;
-      }
       session.pending = response;
+      if (session.queue.length) { flushHttp(session); return; }
       session.pendingTimer = setTimeout(() => { if (session.pending === response) { session.pending = null; response.writeHead(204).end(); } }, 15_000); session.pendingTimer.unref();
       response.on("close", () => { if (session.pending === response) { clearTimeout(session.pendingTimer); session.pending = null; } });
       return;

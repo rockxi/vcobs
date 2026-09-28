@@ -32,6 +32,8 @@ test("remote client uses noVNC over the same host and keeps VNC credentials out 
   assert.match(source, /WebSocket недоступен\. Пробуем подключение через HTTPS/);
   assert.match(source, /rfbRef\.current\?\.focus\(\{ preventScroll: true \}\)/);
   assert.match(source, /Захватить клавиатуру/);
+  assert.match(source, /Прямой ввод с клавиатуры/);
+  assert.match(source, /rfbRef\.current\.sendKey\(keysym, event\.code\)/);
   assert.doesNotMatch(source, /className="remote-canvas"[^>]*tabIndex=/);
   assert.match(source, /event\.currentTarget\.reset\(\)/);
   assert.match(source, /autoComplete="off"/);

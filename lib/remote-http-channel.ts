@@ -10,7 +10,10 @@ export class RemoteHttpChannel {
   onclose: ((event: { code: number; wasClean: boolean }) => void) | null = null;
   private session: string | null = null;
   private pollAbort: AbortController | null = null;
-  private outgoing: Promise<void> = Promise.resolve();
+  private pending: Uint8Array[] = [];
+  private pendingBytes = 0;
+  private sendTimer: ReturnType<typeof setTimeout> | null = null;
+  private sending = false;
   private readonly base: string;
 
   constructor(deviceId: string) {
@@ -51,13 +54,30 @@ export class RemoteHttpChannel {
 
   send(data: Uint8Array | ArrayBuffer) {
     if (this.readyState !== 1 || !this.session) return;
-    const bytes = data instanceof ArrayBuffer ? data.slice(0) : Uint8Array.from(data).buffer;
+    const bytes = data instanceof ArrayBuffer ? new Uint8Array(data.slice(0)) : Uint8Array.from(data);
+    this.pending.push(bytes); this.pendingBytes += bytes.byteLength;
+    if (this.pendingBytes > 4 * 1024 * 1024) { this.fail(); return; }
+    this.scheduleSend();
+  }
+
+  private scheduleSend() {
+    if (this.sendTimer || this.sending || !this.pendingBytes) return;
+    this.sendTimer = setTimeout(() => { this.sendTimer = null; void this.flushSend(); }, 16);
+  }
+
+  private async flushSend() {
+    if (this.sending || !this.pendingBytes || this.readyState !== 1 || !this.session) return;
+    this.sending = true;
+    const bytes = new Uint8Array(this.pendingBytes);
+    let offset = 0;
+    for (const chunk of this.pending) { bytes.set(chunk, offset); offset += chunk.byteLength; }
+    this.pending = []; this.pendingBytes = 0;
     const session = this.session;
-    this.outgoing = this.outgoing.then(async () => {
-      if (this.readyState !== 1) return;
+    try {
       const response = await fetch(this.url("send"), { method: "POST", credentials: "same-origin", cache: "no-store", headers: this.headers(session), body: bytes });
       if (!response.ok) throw new Error(`HTTPS tunnel send failed (${response.status})`);
-    }).catch(() => { if (this.readyState === 1) this.fail(); });
+    } catch { if (this.readyState === 1) this.fail(); }
+    finally { this.sending = false; this.scheduleSend(); }
   }
 
   private releaseSession() {
@@ -71,6 +91,8 @@ export class RemoteHttpChannel {
     if (this.readyState === 3) return;
     this.readyState = 3;
     this.pollAbort?.abort(); this.pollAbort = null;
+    if (this.sendTimer) clearTimeout(this.sendTimer);
+    this.sendTimer = null; this.pending = []; this.pendingBytes = 0;
     this.releaseSession();
     this.onclose?.({ code: clean ? 1000 : 1006, wasClean: clean });
   }
