@@ -436,3 +436,62 @@ html[data-vcobs-theme="frutiger-aero"] :is(.paste-form textarea,.editable-paste 
 html[data-vcobs-theme="frutiger-aero"] :is(.prose code,.prose pre,.prose th,.topic-option[aria-selected="true"]) { background:#d9f8ff; color:#073c63; }
 html[data-vcobs-theme="frutiger-aero"] .vault-title > span { background:#e9ffff; color:#087fc0; border-color:#76cbe5; }
 @media (prefers-reduced-transparency:reduce) { html[data-vcobs-theme="liquid-glass"] :is(.vault-sidebar,.topic-trigger,.public-theme-picker select,.note-card,.paste-section) { backdrop-filter:none; -webkit-backdrop-filter:none; } }
+
+/* Volumetric Liquid Glass: reflected light belongs to the controls, content stays solid. */
+.component-library-shell[data-vcobs-theme="liquid-glass"] {
+  background:radial-gradient(ellipse 55% 32% at 85% 4%,rgba(91,89,149,.22),transparent 80%),
+    radial-gradient(ellipse 38% 35% at 6% 56%,rgba(54,70,123,.16),transparent 85%),#0d0e15;
+}
+.component-library-shell[data-vcobs-theme="liquid-glass"] .glass-material-demo {
+  min-height:285px; isolation:isolate; border:1px solid rgba(182,188,237,.34); border-radius:23px;
+  background:radial-gradient(ellipse 45% 68% at 77% 9%,rgba(126,150,249,.36),transparent 75%),
+    radial-gradient(ellipse 45% 72% at 98% 100%,rgba(159,105,200,.35),transparent 80%),
+    linear-gradient(118deg,#1a1c2b 4%,#252743 56%,#31304f 100%);
+  box-shadow:inset 0 1px rgba(255,255,255,.23),inset 0 -1px rgba(4,4,17,.48),0 20px 52px rgba(0,0,0,.38),0 2px 9px rgba(0,0,0,.22);
+}
+.component-library-shell[data-vcobs-theme="liquid-glass"] .glass-material-demo::before {
+  content:""; position:absolute; z-index:-1; inset:0; pointer-events:none;
+  background:linear-gradient(132deg,transparent 53%,rgba(175,192,255,.11) 59%,transparent 65%),
+    radial-gradient(ellipse 35% 34% at 67% -9%,rgba(218,227,255,.28),transparent 80%);
+}
+.component-library-shell[data-vcobs-theme="liquid-glass"] .glass-material-content { padding:40px 40px 102px; }
+.component-library-shell[data-vcobs-theme="liquid-glass"] .glass-material-content p { color:#cbcbd8; }
+.component-library-shell[data-vcobs-theme="liquid-glass"] .glass-material-toolbar {
+  right:24px; bottom:24px; gap:4px; padding:5px; border:1px solid rgba(220,224,255,.47); border-radius:22px;
+  background:linear-gradient(145deg,rgba(124,126,169,.28),rgba(52,48,78,.52));
+  box-shadow:inset 0 1px rgba(255,255,255,.42),inset 0 -1px rgba(18,17,40,.38),0 10px 27px rgba(3,3,15,.48),0 2px 5px rgba(3,3,15,.24);
+  backdrop-filter:blur(16px) saturate(130%); -webkit-backdrop-filter:blur(16px) saturate(130%);
+}
+.component-library-shell[data-vcobs-theme="liquid-glass"] .glass-material-toolbar button {
+  display:inline-flex; min-height:46px; align-items:center; justify-content:center; gap:9px; padding:9px 17px;
+  border:1px solid transparent; border-radius:16px; background:transparent; color:#f5f4fb;
+  font:600 14px var(--ui-font); text-shadow:0 1px 2px rgba(0,0,0,.32);
+}
+.component-library-shell[data-vcobs-theme="liquid-glass"] .glass-material-toolbar button svg { width:19px; height:19px; flex:none; }
+.component-library-shell[data-vcobs-theme="liquid-glass"] .glass-material-toolbar .glass-material-primary {
+  border-color:rgba(209,225,255,.75);
+  background:linear-gradient(180deg,rgba(158,190,255,.95) 0%,rgba(76,116,211,.96) 43%,rgba(44,77,173,.98) 100%);
+  box-shadow:inset 0 1px rgba(255,255,255,.76),inset 0 -2px rgba(19,39,108,.45),0 4px 12px rgba(30,61,170,.44),0 1px 3px rgba(0,0,0,.25);
+}
+.component-library-shell[data-vcobs-theme="liquid-glass"] .glass-material-toolbar .glass-material-primary:hover { background:linear-gradient(180deg,#b1cbff,#527fdd 48%,#345ebc); }
+.component-library-shell[data-vcobs-theme="liquid-glass"] :is(.token-card,.type-specimens article,.component-sample) {
+  border-color:rgba(137,139,161,.22); background:linear-gradient(155deg,#25252e,#1d1d25 76%);
+  box-shadow:inset 0 1px rgba(255,255,255,.065),0 11px 24px rgba(0,0,0,.21),0 2px 5px rgba(0,0,0,.12);
+}
+.component-library-shell[data-vcobs-theme="liquid-glass"] :is(.theme-selector select,.component-library-nav button,.component-buttons button) {
+  border-color:rgba(206,210,241,.36); background:linear-gradient(180deg,#51505f,#30303b);
+  box-shadow:inset 0 1px rgba(255,255,255,.28),inset 0 -1px rgba(0,0,0,.3),0 5px 11px rgba(0,0,0,.23);
+}
+.component-library-shell[data-vcobs-theme="liquid-glass"] .component-buttons .component-button-success {
+  border-color:#b7ceff; background:linear-gradient(180deg,#8baeee,#567fd2 48%,#4369be);
+  box-shadow:inset 0 1px rgba(255,255,255,.57),0 5px 13px rgba(37,69,161,.3);
+}
+@media (max-width:620px) {
+  .component-library-shell[data-vcobs-theme="liquid-glass"] .glass-material-content { padding:28px 24px 106px; }
+  .component-library-shell[data-vcobs-theme="liquid-glass"] .glass-material-toolbar { right:14px; bottom:14px; left:14px; }
+  .component-library-shell[data-vcobs-theme="liquid-glass"] .glass-material-toolbar button { flex:1; padding:9px 8px; }
+}
+@media (prefers-reduced-transparency:reduce), (prefers-contrast:more) {
+  .component-library-shell[data-vcobs-theme="liquid-glass"] .glass-material-toolbar { background:#3b3a4b; backdrop-filter:none; -webkit-backdrop-filter:none; }
+  .component-library-shell[data-vcobs-theme="liquid-glass"] .glass-material-toolbar button { text-shadow:none; }
+}

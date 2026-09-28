@@ -41,7 +41,7 @@ export function ComponentLibrary() {
       <p className="theme-description" aria-live="polite">{theme.description}</p>
       {theme.id === "liquid-glass" && <section className="glass-material-demo" aria-label="Пример материала Liquid Glass">
         <div className="glass-material-content"><span>1 Лекция</span><h2>Заметки остаются главным</h2><p>Текст находится в слое содержимого. Панель действий проходит поверх него и мягко пропускает цвета фона.</p></div>
-        <div className="glass-material-toolbar" role="group" aria-label="Пример панели действий"><button type="button">Поиск</button><button type="button">Поделиться</button></div>
+        <div className="glass-material-toolbar" role="group" aria-label="Пример панели действий"><button className="glass-material-primary" type="button"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" strokeWidth="1.8" /><path d="m16 16 5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>Поиск</button><button type="button"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M12 16V3m0 0L8 7m4-4 4 4M5 13v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>Поделиться</button></div>
       </section>}
 
       <section className="component-library-section" aria-labelledby="tokens-heading">
