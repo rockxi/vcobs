@@ -196,3 +196,72 @@ body { background:radial-gradient(circle at 72% 32%,rgba(84,62,119,.10),transpar
 .remote-direct-input { display:grid; gap:6px; max-width:480px; color:#d8d2e3; font-size:12px; font-weight:700; }.remote-direct-input input { min-height:38px; width:100%; padding:8px 10px; border:1px solid #624880; background:#101117; color:var(--ink); }.remote-direct-input input:focus-visible { outline:2px solid var(--lime); outline-offset:2px; }
 .remote-screen.control-only .remote-canvas canvas { opacity:0; }.remote-control-overlay { position:absolute; inset:0; display:grid; place-items:center; margin:0; color:#bdb2ca; font:13px ui-monospace,SFMono-Regular,Menlo,monospace; pointer-events:none; }
 @media (max-width:620px) { .component-library-shell[data-vcobs-theme="liquid-glass"] .admin-inventory { border-radius:20px; }.component-library-shell[data-vcobs-theme="liquid-glass"] .theme-selector { width:100%; justify-content:space-between; } }
+
+/* Apple-inspired web approximation. Keep backdrop sampling on small controls only. */
+.component-library-shell[data-vcobs-theme="liquid-glass"] {
+  background:radial-gradient(circle at 14% 9%,#536789 0,transparent 25rem),radial-gradient(circle at 84% 56%,#685c87 0,transparent 30rem),linear-gradient(145deg,#151c31,#273655 52%,#171c35);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+.component-library-shell[data-vcobs-theme="liquid-glass"]::before,
+.component-library-shell[data-vcobs-theme="liquid-glass"]::after { display:none; }
+.component-library-shell[data-vcobs-theme="liquid-glass"] .admin-inventory {
+  border-color:rgba(240,247,255,.28); border-radius:24px;
+  background:rgba(16,23,43,.78);
+  box-shadow:inset 0 1px rgba(255,255,255,.24),0 20px 46px rgba(4,8,23,.22);
+  backdrop-filter:none; -webkit-backdrop-filter:none;
+}
+.component-library-shell[data-vcobs-theme="liquid-glass"] :is(.token-card,.type-specimens article,.component-sample) {
+  border-color:rgba(232,242,255,.19); border-radius:16px;
+  background:rgba(205,224,255,.095); box-shadow:inset 0 1px rgba(255,255,255,.16);
+  backdrop-filter:none; -webkit-backdrop-filter:none;
+}
+.component-library-shell[data-vcobs-theme="liquid-glass"] :is(.token-card,.type-specimens article,.component-sample)::before { display:none; }
+.component-library-shell[data-vcobs-theme="liquid-glass"] .component-sample:has(.component-buttons) { padding:0; }
+.component-library-shell[data-vcobs-theme="liquid-glass"] .component-sample:has(.component-buttons) header { padding:19px 19px 0; }
+.component-library-shell[data-vcobs-theme="liquid-glass"] .component-sample:has(.component-buttons) .component-preview {
+  min-height:126px; padding:20px; overflow:hidden;
+  background:linear-gradient(116deg,transparent 0 19%,rgba(238,172,165,.85) 19% 26%,transparent 26% 39%,rgba(166,177,238,.9) 39% 46%,transparent 46% 61%,rgba(204,185,245,.8) 61% 69%,transparent 69%),linear-gradient(155deg,#354267,#182441);
+}
+.component-library-shell[data-vcobs-theme="liquid-glass"] .component-buttons { position:relative; z-index:0; }
+.component-library-shell[data-vcobs-theme="liquid-glass"] .theme-selector { backdrop-filter:none; -webkit-backdrop-filter:none; background:rgba(229,240,255,.12); }
+.component-library-shell[data-vcobs-theme="liquid-glass"] :is(.theme-selector select,.component-library-nav button,.component-buttons button) {
+  min-height:42px; position:relative; isolation:isolate; overflow:hidden; padding:9px 17px;
+  border:1px solid rgba(241,249,255,.58); border-radius:999px;
+  background:linear-gradient(155deg,rgba(255,255,255,.29),rgba(233,242,255,.045) 45%,rgba(255,255,255,.13) 100%);
+  color:#f9fbff; font-weight:620; line-height:1.2; white-space:nowrap; text-shadow:0 1px 1px rgba(9,17,40,.5);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.78),inset 1px 0 1px rgba(255,255,255,.24),inset -1px 0 1px rgba(227,238,255,.18),inset 0 -1px 1px rgba(17,31,70,.38),0 4px 10px rgba(3,9,30,.17);
+  backdrop-filter:blur(4px) saturate(140%); -webkit-backdrop-filter:blur(4px) saturate(140%);
+  transition:transform .16s ease,background-color .16s ease,box-shadow .16s ease;
+}
+.component-library-shell[data-vcobs-theme="liquid-glass"] .theme-selector select { padding-right:30px; }
+.component-library-shell[data-vcobs-theme="liquid-glass"] :is(.component-library-nav button,.component-buttons button)::before {
+  top:1px; right:8px; left:8px; height:1px; border-radius:999px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.65) 35%,rgba(255,255,255,.75) 65%,transparent);
+  pointer-events:none;
+}
+.component-library-shell[data-vcobs-theme="liquid-glass"] :is(.component-library-nav button,.component-buttons button):hover:not(:disabled) {
+  transform:translateY(-1px); background-color:rgba(229,242,255,.15);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(14,28,61,.3),0 7px 14px rgba(3,9,30,.24);
+}
+.component-library-shell[data-vcobs-theme="liquid-glass"] :is(.component-library-nav button,.component-buttons button):active:not(:disabled) {
+  transform:translateY(1px) scale(.985); box-shadow:inset 0 2px 4px rgba(10,22,53,.38),0 1px 3px rgba(3,9,30,.2);
+}
+.component-library-shell[data-vcobs-theme="liquid-glass"] .component-buttons .component-button-success {
+  border-color:rgba(208,227,255,.82); background:linear-gradient(160deg,rgba(188,211,255,.5),rgba(78,111,188,.64)); color:#fff;
+}
+.component-library-shell[data-vcobs-theme="liquid-glass"] .component-buttons button:disabled {
+  border-color:rgba(225,235,255,.2); background:rgba(177,193,223,.13); color:#c7d0e2;
+  opacity:.65; text-shadow:none; box-shadow:inset 0 1px rgba(255,255,255,.14); backdrop-filter:none; -webkit-backdrop-filter:none;
+}
+.component-library-shell[data-vcobs-theme="liquid-glass"] :is(.component-field input,.component-field textarea,.admin-status,.component-success,.component-notices .form-error) {
+  backdrop-filter:none; -webkit-backdrop-filter:none;
+}
+.component-library-shell[data-vcobs-theme="liquid-glass"] :is(button,select,input,textarea,a):focus-visible { outline:2px solid #f0f7ff; outline-offset:3px; }
+@media (prefers-reduced-motion:reduce) {
+  .component-library-shell[data-vcobs-theme="liquid-glass"] :is(.theme-selector select,.component-library-nav button,.component-buttons button) { transition:none; }
+}
+@media (prefers-reduced-transparency:reduce) {
+  .component-library-shell[data-vcobs-theme="liquid-glass"] :is(.theme-selector select,.component-library-nav button,.component-buttons button) {
+    background:#344765; backdrop-filter:none; -webkit-backdrop-filter:none;
+  }
+}
