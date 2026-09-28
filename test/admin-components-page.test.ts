@@ -49,3 +49,14 @@ test("Frutiger Aero is a shared glossy theme with representative success and err
   assert.match(cssSource, /data-vcobs-theme="frutiger-aero"/);
   assert.match(cssSource, /prefers-reduced-motion:reduce/);
 });
+
+test("Liquid Glass is a shared layered-material theme for every component sample", async () => {
+  const [librarySource, themeSource, cssSource] = await Promise.all([readFile(library, "utf8"), readFile(themes, "utf8"), readFile(new URL("../app/globals.css", import.meta.url), "utf8")]);
+  assert.match(themeSource, /id: "liquid-glass"/);
+  assert.match(themeSource, /name: "Liquid Glass"/);
+  assert.match(librarySource, /vcobsThemes\.map/);
+  assert.match(cssSource, /data-vcobs-theme="liquid-glass"/);
+  assert.match(cssSource, /backdrop-filter:blur/);
+  assert.match(cssSource, /component-input-error/);
+  assert.match(cssSource, /component-notices/);
+});

@@ -1,5 +1,5 @@
 export type VcobsTheme = {
-  id: "obsidianite" | "violet-night" | "lavender-ink" | "neon-grid" | "frutiger-aero";
+  id: "obsidianite" | "violet-night" | "lavender-ink" | "neon-grid" | "frutiger-aero" | "liquid-glass";
   name: string;
   description: string;
   tokens: Record<"ink" | "muted" | "paper" | "surface" | "surface-raised" | "line" | "accent" | "lime", string>;
@@ -37,6 +37,12 @@ export const vcobsThemes = [
     name: "Frutiger Aero",
     description: "Небесное стекло, водные блики и живые зелёные акценты",
     tokens: { ink: "#073c63", muted: "#396783", paper: "#c9f4ff", surface: "#efffff", "surface-raised": "#d9f8ff", line: "#76cbe5", accent: "#087fc0", lime: "#168d3d" },
+  },
+  {
+    id: "liquid-glass",
+    name: "Liquid Glass",
+    description: "Слоистое стекло: цвет фона проходит сквозь материал, а элементы управления ловят свет",
+    tokens: { ink: "#f8fbff", muted: "#c3cce0", paper: "#11172a", surface: "#273152", "surface-raised": "#354165", line: "#a9bddf", accent: "#d8e9ff", lime: "#a8d2ff" },
   },
 ] as const satisfies readonly VcobsTheme[];
 
