@@ -36,6 +36,9 @@ test("remote client uses noVNC over the same host and keeps VNC credentials out 
   assert.match(source, /Захватить клавиатуру/);
   assert.match(source, /Прямой ввод с клавиатуры/);
   assert.match(source, /keyQueueRef\.current\.push/);
+  assert.match(source, /rfbKeysym\(event\.key, point\)/);
+  assert.match(source, /0x06d0/);
+  assert.match(source, /0x06c8/);
   assert.match(source, /rfb\.sendKey\(key\.keysym, key\.code, true\)/);
   assert.match(source, /rfb\.sendKey\(key\.keysym, key\.code, false\)/);
   assert.match(source, /Только управление/);

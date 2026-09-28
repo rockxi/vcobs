@@ -10,6 +10,18 @@ type TransportMode = "auto" | "websocket" | "https" | "https-poll";
 type RfbClient = EventTarget & { scaleViewport: boolean; clipViewport: boolean; showDotCursor: boolean; qualityLevel: number; compressionLevel: number; disconnect(): void; focus(options?: FocusOptions): void; sendKey(keysym: number, code?: string, down?: boolean): void; sendCredentials(credentials: { username?: string; password?: string }): void };
 
 const DIRECT_KEYS: Record<string, number> = { Backspace: 0xff08, Enter: 0xff0d, Escape: 0xff1b, Delete: 0xffff, ArrowLeft: 0xff51, ArrowUp: 0xff52, ArrowRight: 0xff53, ArrowDown: 0xff54, Home: 0xff50, End: 0xff57, PageUp: 0xff55, PageDown: 0xff56 };
+const RUSSIAN_LOWER = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
+const RUSSIAN_UPPER = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
+const RUSSIAN_LOWER_KEYSYMS = [0x06c1, 0x06c2, 0x06d7, 0x06c7, 0x06c4, 0x06c5, 0x06a3, 0x06d6, 0x06da, 0x06c9, 0x06ca, 0x06cb, 0x06cc, 0x06cd, 0x06ce, 0x06cf, 0x06d0, 0x06d2, 0x06d3, 0x06d4, 0x06d5, 0x06c6, 0x06c8, 0x06c3, 0x06de, 0x06db, 0x06dd, 0x06df, 0x06d9, 0x06d8, 0x06dc, 0x06c0, 0x06d1];
+
+function rfbKeysym(character: string, codepoint: number) {
+  if (character === "Ё") return 0x06b3;
+  const lowerIndex = RUSSIAN_LOWER.indexOf(character);
+  if (lowerIndex >= 0) return RUSSIAN_LOWER_KEYSYMS[lowerIndex];
+  const upperIndex = RUSSIAN_UPPER.indexOf(character);
+  if (upperIndex >= 0) return RUSSIAN_LOWER_KEYSYMS[upperIndex] + 0x20;
+  return codepoint > 0xff ? 0x01000000 | codepoint : codepoint;
+}
 
 function relayUrl(deviceId: string) {
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
@@ -110,7 +122,7 @@ export function RemoteDesktop() {
   const typeDirectly = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (connection !== "connected" || !rfbRef.current || event.key === "Tab" || event.nativeEvent.isComposing) return;
     const point = event.key.length === 1 ? event.key.codePointAt(0) : undefined;
-    const keysym = point === undefined ? DIRECT_KEYS[event.key] : point > 0xff ? 0x01000000 | point : point;
+    const keysym = point === undefined ? DIRECT_KEYS[event.key] : rfbKeysym(event.key, point);
     if (keysym === undefined) return;
     event.preventDefault();
     keyQueueRef.current.push({ keysym, code: event.code });
