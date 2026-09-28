@@ -23,6 +23,11 @@ test("remote client uses noVNC over the same host and keeps VNC credentials out 
   assert.match(source, /detail\?\.types\?\.includes\("username"\)/);
   assert.match(source, /sendCredentials\(needsUsername \? \{ username: username as string, password \} : \{ password \}\)/);
   assert.match(source, /name="vnc-username"/);
+  assert.match(source, /class PasswordOnlyRFB extends RFB/);
+  assert.match(source, /_isSupportedSecurityType\(type: number\) \{ return type === 2; \}/);
+  assert.match(source, /<option value="vnc">Отдельный пароль VNC<\/option>/);
+  assert.match(source, /<option value="mac">Учётная запись Mac<\/option>/);
+  assert.match(source, /authenticationErrorRef\.current = true/);
   assert.match(source, /event\.currentTarget\.reset\(\)/);
   assert.match(source, /autoComplete="off"/);
   assert.match(source, /disconnect\("Сеанс администратора завершён\."\)/);
