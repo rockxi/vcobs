@@ -4,6 +4,7 @@ export class RemoteHttpChannel {
   binaryType = "arraybuffer";
   protocol = "";
   readyState = 0;
+  lastError: string | null = null;
   onopen: (() => void) | null = null;
   onmessage: ((event: { data: ArrayBuffer }) => void) | null = null;
   onerror: (() => void) | null = null;
@@ -38,7 +39,7 @@ export class RemoteHttpChannel {
       this.readyState = 1;
       this.onopen?.();
       void (this.mode === "stream" ? this.stream() : this.poll());
-    } catch { if (this.readyState === 0) this.fail(); }
+    } catch (error) { if (this.readyState === 0) this.fail(error); }
   }
 
   private async poll() {
@@ -50,7 +51,7 @@ export class RemoteHttpChannel {
         if (!response.ok) throw new Error(`HTTPS tunnel poll failed (${response.status})`);
         const data = await response.arrayBuffer();
         if (data.byteLength && this.readyState === 1) this.onmessage?.({ data });
-      } catch { if (this.readyState === 1) this.fail(); }
+      } catch (error) { if (this.readyState === 1) this.fail(error); }
     }
   }
 
@@ -81,7 +82,7 @@ export class RemoteHttpChannel {
         }
         pending = combined.slice(offset);
       }
-    } catch { if (this.readyState === 1) this.fail(); }
+    } catch (error) { if (this.readyState === 1) this.fail(error); }
     finally { clearTimeout(firstFrameTimeout); }
   }
 
@@ -89,7 +90,7 @@ export class RemoteHttpChannel {
     if (this.readyState !== 1 || !this.session) return;
     const bytes = data instanceof ArrayBuffer ? new Uint8Array(data.slice(0)) : Uint8Array.from(data);
     this.pending.push(bytes); this.pendingBytes += bytes.byteLength;
-    if (this.pendingBytes > 4 * 1024 * 1024) { this.fail(); return; }
+    if (this.pendingBytes > 4 * 1024 * 1024) { this.fail(new Error("HTTPS send queue exceeded 4 MiB")); return; }
     this.scheduleSend();
   }
 
@@ -109,7 +110,7 @@ export class RemoteHttpChannel {
     try {
       const response = await fetch(this.url("send"), { method: "POST", credentials: "same-origin", cache: "no-store", headers: this.headers(session), body: bytes });
       if (!response.ok) throw new Error(`HTTPS tunnel send failed (${response.status})`);
-    } catch { if (this.readyState === 1) this.fail(); }
+    } catch (error) { if (this.readyState === 1) this.fail(error); }
     finally { this.sending = false; this.scheduleSend(); }
   }
 
@@ -119,7 +120,10 @@ export class RemoteHttpChannel {
     void fetch(this.url("close"), { method: "POST", credentials: "same-origin", cache: "no-store", keepalive: true, headers: this.headers(session) }).catch(() => {});
   }
 
-  private fail() { this.onerror?.(); this.close(false); }
+  private fail(error: unknown) {
+    this.lastError = error instanceof Error ? error.message : String(error);
+    this.onerror?.(); this.close(false);
+  }
   close(clean = true) {
     if (this.readyState === 3) return;
     this.readyState = 3;

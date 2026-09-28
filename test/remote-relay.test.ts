@@ -60,7 +60,10 @@ test("authenticated HTTPS polling transports binary RFB without a WebSocket upgr
   const tunnelHeaders = { ...headers, "x-vcobs-remote-session": tunnel };
   const poll = fetch(`${base}/remote/http/poll?id=mac`, { headers: tunnelHeaders });
   agent.send(Buffer.from([1, 2, 3]));
-  assert.deepEqual(Buffer.from(await (await poll).arrayBuffer()), Buffer.from([1, 2, 3]));
+  const pollResponse = await poll;
+  assert.equal(pollResponse.headers.get("content-length"), "3");
+  assert.equal(pollResponse.headers.get("transfer-encoding"), null);
+  assert.deepEqual(Buffer.from(await pollResponse.arrayBuffer()), Buffer.from([1, 2, 3]));
   const batchedPoll = fetch(`${base}/remote/http/poll?id=mac`, { headers: tunnelHeaders });
   agent.send(Buffer.from([6])); agent.send(Buffer.from([7]));
   assert.deepEqual(Buffer.from(await (await batchedPoll).arrayBuffer()), Buffer.from([6, 7]));

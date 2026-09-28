@@ -77,7 +77,7 @@ export function createRelayServer(options = {}) {
     clearTimeout(session.pendingTimer); clearTimeout(session.flushTimer); session.flushTimer = null;
     const data = Buffer.concat(session.queue, session.queuedBytes);
     session.queue = []; session.queuedBytes = 0;
-    session.pending.writeHead(200, { "content-type": "application/octet-stream", "cache-control": "no-store" }).end(data);
+    session.pending.writeHead(200, { "content-type": "application/octet-stream", "content-length": data.length, "cache-control": "no-store" }).end(data);
     session.pending = null;
   }
   function flushStream(session) {
