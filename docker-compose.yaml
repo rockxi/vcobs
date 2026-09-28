@@ -12,11 +12,26 @@ services:
       NODE_ENV: production
       PORT: 3080
       HOSTNAME: 0.0.0.0
+      VCOBS_REMOTE_RELAY_INTERNAL_URL: http://remote-relay:3081
     ports:
       - "3080:3080"
     volumes:
       - ./data/pastes:/app/data/pastes
       - vcobs-files:/app/data/files
+    depends_on:
+      - remote-relay
+
+  remote-relay:
+    build:
+      context: ./remote-relay
+    restart: unless-stopped
+    init: true
+    env_file:
+      - .env.local
+    environment:
+      PORT: 3081
+    ports:
+      - "127.0.0.1:3081:3081"
 
 volumes:
   vcobs-files:
