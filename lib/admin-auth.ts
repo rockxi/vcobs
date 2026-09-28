@@ -55,6 +55,10 @@ export function publicRequestOrigin(request: Request): string | null {
     return forwardedOrigin === canonical ? canonical : null;
   } catch { return null; }
 }
+export function adminRedirectUrl(request: Request, pathname: string): URL | null {
+  const origin = publicRequestOrigin(request);
+  return origin ? new URL(pathname, origin) : null;
+}
 export function originIsSameSite(request: Request): boolean { const origin = request.headers.get("origin"), expected = publicRequestOrigin(request); if (!origin || !expected) return false; try { return new URL(origin).origin === expected; } catch { return false; } }
 function activeCount(entry: { count: number; resetAt: number } | undefined, now: number): number { return entry && entry.resetAt > now ? entry.count : 0; }
 export function loginAllowed(clientId: string, now = Date.now()): boolean { return activeCount(attempts.get(clientId), now) < MAX_LOGIN_ATTEMPTS && activeCount(globalAttempts, now) < MAX_GLOBAL_LOGIN_ATTEMPTS; }
