@@ -62,4 +62,6 @@ Press Ctrl-C (or send `SIGTERM`) to stop it; it closes both relay and local VNC 
 - **Agent never appears online:** confirm the `wss://` hostname/certificate, device ID, and token match the server configuration. Check that the config file is `0600`.
 - **A browser opens but cannot view/control:** enable Screen Sharing and the VNC password option above; from the Mac, confirm a listener exists on `127.0.0.1:5900` with `lsof -nP -iTCP:5900 -sTCP:LISTEN`.
 - **`vnc_unavailable` in relay diagnostics:** Screen Sharing is stopped, not listening locally, or denied a VNC connection. Restart Screen Sharing and verify its settings.
-- **Frequent reconnects:** investigate TLS/proxy WebSocket support and network stability. The agent never falls back to unencrypted `ws://`.
+- **Browser gets 404/1006 on `/remote/ws`:** select the `HTTPS` channel in `/admin/remote`, or leave `Auto` selected to retry over authenticated HTTPS polling after a blocked WebSocket upgrade. The Mac agent still needs outbound `wss://` to Asus; it never falls back to unencrypted `ws://`.
+- **Keyboard does not respond:** click inside the remote screen or use the `Захватить клавиатуру` button. Only the focused noVNC canvas receives keys; browser-reserved shortcuts may remain local.
+- **Frequent reconnects:** investigate TLS/proxy connectivity and network stability for both the browser and the agent.

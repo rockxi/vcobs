@@ -44,6 +44,35 @@ test("relay exposes device status only to the internal shared secret", async () 
   await relay.close();
 });
 
+test("authenticated HTTPS polling transports binary RFB without a WebSocket upgrade", async () => {
+  const relay = createRelayServer({ devicesJson: JSON.stringify({ mac: { name: "Office Mac", token } }), publicOrigin: origin, sessionSecret: secret, heartbeatMs: 60_000 });
+  await relay.listen(0, "127.0.0.1");
+  const address = relay.server.address() as { port: number }, base = `http://127.0.0.1:${address.port}`;
+  const agent = await connect(`ws://127.0.0.1:${address.port}/remote/agent`, { "x-vcobs-device-id": "mac", authorization: `Bearer ${token}` });
+  const headers = { "x-vcobs-remote": "1", cookie: `vcobs_admin_session=${session()}`, origin };
+  assert.equal((await fetch(`${base}/remote/http/connect?id=mac`, { method: "POST", headers: { "x-vcobs-remote": "1", origin } })).status, 403);
+  const attach = nextMessage(agent);
+  const opened = await fetch(`${base}/remote/http/connect?id=mac`, { method: "POST", headers });
+  assert.equal(opened.status, 200);
+  const { session: tunnel } = await opened.json() as { session: string };
+  assert.deepEqual(JSON.parse((await attach).data.toString()), { type: "attach" });
+  assert.equal(relay.devices()[0].controlled, true);
+  const tunnelHeaders = { ...headers, "x-vcobs-remote-session": tunnel };
+  const poll = fetch(`${base}/remote/http/poll?id=mac`, { headers: tunnelHeaders });
+  agent.send(Buffer.from([1, 2, 3]));
+  assert.deepEqual(Buffer.from(await (await poll).arrayBuffer()), Buffer.from([1, 2, 3]));
+  const toAgent = nextMessage(agent);
+  const sent = await fetch(`${base}/remote/http/send?id=mac`, { method: "POST", headers: tunnelHeaders, body: Buffer.from([4, 5]) });
+  assert.equal(sent.status, 204); assert.deepEqual((await toAgent).data, Buffer.from([4, 5]));
+  assert.equal((await fetch(`${base}/remote/http/poll?id=mac`, { headers: { ...headers, "x-vcobs-remote-session": "wrong" } })).status, 403);
+  await assert.rejects(connect(`ws://127.0.0.1:${address.port}/remote/ws?id=mac`, { origin, cookie: `vcobs_admin_session=${session()}` }));
+  const detach = nextMessage(agent);
+  assert.equal((await fetch(`${base}/remote/http/close?id=mac`, { method: "POST", headers: tunnelHeaders })).status, 204);
+  assert.deepEqual(JSON.parse((await detach).data.toString()), { type: "detach" });
+  assert.equal(relay.devices()[0].controlled, false);
+  agent.close(); await closed(agent); await relay.close();
+});
+
 test("malformed upgrade targets are rejected without taking down the relay", async () => {
   const relay = createRelayServer({ devicesJson: JSON.stringify({ mac: { name: "Office Mac", token } }), publicOrigin: origin, sessionSecret: secret });
   await relay.listen(0, "127.0.0.1"); const address = relay.server.address() as { port: number };

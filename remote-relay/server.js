@@ -1,5 +1,5 @@
 import http from "node:http";
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { WebSocketServer, WebSocket } from "ws";
 
 const MAX_PAYLOAD = Number(process.env.VCOBS_REMOTE_MAX_PAYLOAD || 32 * 1024 * 1024);
@@ -60,11 +60,76 @@ export function createRelayServer(options = {}) {
   const maxConnections = options.maxConnections || MAX_CONNECTIONS;
   const maxBuffered = options.maxBuffered || MAX_BUFFERED;
   const browserSessionMs = options.browserSessionMs || BROWSER_SESSION_MS;
-  const agents = new Map(), browsers = new Map();
+  const agents = new Map(), browsers = new Map(), httpSessions = new Map();
+  function finishHttp(id, notify = true) {
+    const session = httpSessions.get(id); if (!session) return;
+    httpSessions.delete(id); clearTimeout(session.expiration); clearTimeout(session.idle); clearTimeout(session.pendingTimer);
+    if (session.pending && !session.pending.writableEnded) session.pending.writeHead(410).end();
+    if (notify) safeSend(agents.get(id), JSON.stringify({ type: "detach" }));
+  }
+  function touchHttp(id, session) {
+    clearTimeout(session.idle);
+    session.idle = setTimeout(() => finishHttp(id), 60_000); session.idle.unref();
+  }
+  function deliverHttp(id, data) {
+    const session = httpSessions.get(id); if (!session) return;
+    if (session.pending) {
+      clearTimeout(session.pendingTimer);
+      session.pending.writeHead(200, { "content-type": "application/octet-stream", "cache-control": "no-store" }).end(data);
+      session.pending = null;
+    } else {
+      session.queue.push(Buffer.from(data)); session.queuedBytes += data.length;
+      if (session.queuedBytes > maxBuffered) finishHttp(id);
+    }
+  }
   const httpServer = http.createServer((request, response) => {
-    if (request.method !== "GET" || request.url !== "/internal/devices" || !equalToken(request.headers.authorization?.replace(/^Bearer /, ""), internalSecret || "")) { response.writeHead(404).end(); return; }
-    response.setHeader("content-type", "application/json");
-    response.end(JSON.stringify({ devices: [...devices].map(([id, device]) => ({ id, name: device.name, online: agents.has(id), controlled: browsers.has(id) })) }));
+    if (request.method === "GET" && request.url === "/internal/devices") {
+      if (!equalToken(request.headers.authorization?.replace(/^Bearer /, ""), internalSecret || "")) { response.writeHead(404).end(); return; }
+      response.setHeader("content-type", "application/json");
+      response.end(JSON.stringify({ devices: [...devices].map(([id, device]) => ({ id, name: device.name, online: agents.has(id), controlled: browsers.has(id) || httpSessions.has(id) })) }));
+      return;
+    }
+    let url; try { url = new URL(request.url || "/", "http://relay"); } catch { response.writeHead(404).end(); return; }
+    if (!url.pathname.startsWith("/remote/http/")) { response.writeHead(404).end(); return; }
+    const id = url.searchParams.get("id");
+    if (!id || !devices.has(id) || url.searchParams.size !== 1 || request.headers["x-vcobs-remote"] !== "1" || !validateAdminSession(cookieValue(request.headers.cookie, "vcobs_admin_session"), sessionSecret) || (request.method === "POST" && request.headers.origin !== origin)) { response.writeHead(403).end(); return; }
+    response.setHeader("cache-control", "no-store");
+    if (url.pathname === "/remote/http/connect" && request.method === "POST") {
+      if (!agents.has(id) || browsers.has(id) || httpSessions.has(id) || connectionCount() >= maxConnections) { response.writeHead(409).end(); return; }
+      const session = { token: randomBytes(24).toString("base64url"), queue: [], queuedBytes: 0, pending: null, pendingTimer: null, expiration: null, idle: null };
+      httpSessions.set(id, session);
+      const expiresAt = Number(cookieValue(request.headers.cookie, "vcobs_admin_session").split(".")[1]) * 1000;
+      session.expiration = setTimeout(() => finishHttp(id), Math.max(1, Math.min(browserSessionMs, expiresAt - Date.now()))); session.expiration.unref();
+      touchHttp(id, session);
+      response.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify({ session: session.token }));
+      safeSend(agents.get(id), JSON.stringify({ type: "attach" }));
+      return;
+    }
+    const session = httpSessions.get(id);
+    if (!session || !equalToken(request.headers["x-vcobs-remote-session"], session.token)) { response.writeHead(403).end(); return; }
+    touchHttp(id, session);
+    if (url.pathname === "/remote/http/poll" && request.method === "GET") {
+      if (session.pending) { response.writeHead(409).end(); return; }
+      if (session.queue.length) {
+        const data = session.queue.shift(); session.queuedBytes -= data.length;
+        response.writeHead(200, { "content-type": "application/octet-stream" }).end(data); return;
+      }
+      session.pending = response;
+      session.pendingTimer = setTimeout(() => { if (session.pending === response) { session.pending = null; response.writeHead(204).end(); } }, 15_000); session.pendingTimer.unref();
+      response.on("close", () => { if (session.pending === response) { clearTimeout(session.pendingTimer); session.pending = null; } });
+      return;
+    }
+    if (url.pathname === "/remote/http/send" && request.method === "POST") {
+      void (async () => {
+        const chunks = []; let size = 0;
+        for await (const chunk of request) { size += chunk.length; if (size > maxBuffered) { response.writeHead(413).end(); return; } chunks.push(chunk); }
+        if (httpSessions.get(id) !== session || !safeSend(agents.get(id), Buffer.concat(chunks), true, maxBuffered)) { response.writeHead(410).end(); return; }
+        response.writeHead(204).end();
+      })().catch(() => { if (!response.headersSent) response.writeHead(400).end(); });
+      return;
+    }
+    if (url.pathname === "/remote/http/close" && request.method === "POST") { finishHttp(id); response.writeHead(204).end(); return; }
+    response.writeHead(404).end();
   });
   const wss = new WebSocketServer({ noServer: true, maxPayload, perMessageDeflate: false, clientTracking: false });
   function detach(id, notify = true, closeBrowser = false) {
@@ -73,19 +138,19 @@ export function createRelayServer(options = {}) {
     if (notify) safeSend(agents.get(id), JSON.stringify({ type: "detach" }));
     if (closeBrowser && browser.readyState < WebSocket.CLOSING) { browser.relayClosing = true; browser.close(1012, "agent unavailable"); }
   }
-  function connectionCount() { return agents.size + browsers.size; }
+  function connectionCount() { return agents.size + browsers.size + httpSessions.size; }
   wss.on("connection", (socket, request, info) => {
     socket.isAlive = true;
     socket.on("pong", () => { socket.isAlive = true; });
     if (info.kind === "agent") {
       const previous = agents.get(info.id);
-      if (previous) { detach(info.id, false, true); previous.close(1012, "replaced"); }
+      if (previous) { detach(info.id, false, true); finishHttp(info.id, false); previous.close(1012, "replaced"); }
       agents.set(info.id, socket);
       socket.on("message", (data, isBinary) => {
         if (!isBinary) {
           try {
             const control = JSON.parse(data.toString());
-            if (control?.type === "error") detach(info.id, false, true);
+            if (control?.type === "error") { detach(info.id, false, true); finishHttp(info.id, false); }
             else if (control?.type !== "ready") socket.close(1003, "unknown control");
             // `ready` is intentionally consumed locally: browsers never receive control JSON.
           } catch { socket.close(1003, "invalid control"); }
@@ -93,8 +158,9 @@ export function createRelayServer(options = {}) {
         }
         const browser = browsers.get(info.id);
         if (browser) safeSend(browser, data, true, maxBuffered);
+        else deliverHttp(info.id, data);
       });
-      socket.on("close", () => { if (agents.get(info.id) === socket) { agents.delete(info.id); detach(info.id, false, true); } });
+      socket.on("close", () => { if (agents.get(info.id) === socket) { agents.delete(info.id); detach(info.id, false, true); finishHttp(info.id, false); } });
       socket.on("error", () => {});
       return;
     }
@@ -118,13 +184,13 @@ export function createRelayServer(options = {}) {
       return wss.handleUpgrade(request, socket, head, ws => wss.emit("connection", ws, request, { kind: "agent", id }));
     }
     if (url.pathname === "/remote/ws") {
-      if (!origin || request.headers.origin !== origin || !validateAdminSession(cookieValue(request.headers.cookie, "vcobs_admin_session"), sessionSecret) || !agents.has(id) || browsers.has(id)) return writeUpgradeError(socket, "403 Forbidden");
+      if (!origin || request.headers.origin !== origin || !validateAdminSession(cookieValue(request.headers.cookie, "vcobs_admin_session"), sessionSecret) || !agents.has(id) || browsers.has(id) || httpSessions.has(id)) return writeUpgradeError(socket, "403 Forbidden");
       return wss.handleUpgrade(request, socket, head, ws => wss.emit("connection", ws, request, { kind: "browser", id, session: cookieValue(request.headers.cookie, "vcobs_admin_session") }));
     }
     writeUpgradeError(socket, "404 Not Found");
   });
   const heartbeat = setInterval(() => { for (const socket of [...agents.values(), ...browsers.values()]) { if (!socket.isAlive) socket.terminate(); else { socket.isAlive = false; socket.ping(); } } }, options.heartbeatMs || HEARTBEAT_MS);
   heartbeat.unref();
-  return { server: httpServer, listen: (port = Number(process.env.PORT || 3081), host = "0.0.0.0") => new Promise(resolve => httpServer.listen(port, host, resolve)), close: () => new Promise(resolve => { clearInterval(heartbeat); for (const socket of [...agents.values(), ...browsers.values()]) socket.terminate(); httpServer.close(() => resolve()); }), devices: () => [...devices].map(([id, device]) => ({ id, name: device.name, online: agents.has(id), controlled: browsers.has(id) })) };
+  return { server: httpServer, listen: (port = Number(process.env.PORT || 3081), host = "0.0.0.0") => new Promise(resolve => httpServer.listen(port, host, resolve)), close: () => new Promise(resolve => { clearInterval(heartbeat); for (const id of httpSessions.keys()) finishHttp(id, false); for (const socket of [...agents.values(), ...browsers.values()]) socket.terminate(); httpServer.close(() => resolve()); }), devices: () => [...devices].map(([id, device]) => ({ id, name: device.name, online: agents.has(id), controlled: browsers.has(id) || httpSessions.has(id) })) };
 }
 if (import.meta.url === `file://${process.argv[1]}`) createRelayServer().listen();
