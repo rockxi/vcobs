@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { PublicNote } from "@/lib/couch";
+import type { ThemeId } from "@/lib/theme-settings";
+import { PublicThemePicker } from "@/components/public-theme-picker";
 
 type TreeNode = {
   folders: Map<string, TreeNode>;
@@ -51,7 +53,7 @@ function TreeBranch({ node, depth = 0, activeSlug }: { node: TreeNode; depth?: n
   </>;
 }
 
-export function VaultTree({ notes, activeSlug }: { notes: PublicNote[]; activeSlug?: string }) {
+export function VaultTree({ notes, activeSlug, enabledThemes }: { notes: PublicNote[]; activeSlug?: string; enabledThemes: ThemeId[] }) {
   const topicNotes = useMemo(() => notes.filter((note) => note.topic), [notes]);
   const topics = useMemo(() => [...new Set(topicNotes.map((note) => note.topic!))].sort((a, b) => a.localeCompare(b, "ru")), [topicNotes]);
   const [topic, setTopic] = useState("");
@@ -124,6 +126,7 @@ export function VaultTree({ notes, activeSlug }: { notes: PublicNote[]; activeSl
           })}
         </div>
       </div>
+      <PublicThemePicker enabled={enabledThemes} />
       <p className="vault-label">Файлы</p>
       <nav className="vault-tree" aria-label="Опубликованные заметки по папкам">
         <TreeBranch node={tree} activeSlug={activeSlug} />

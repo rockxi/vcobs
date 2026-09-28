@@ -6,6 +6,7 @@ export const dynamic = "force-dynamic";
 const adminSections = [
   { href: "/admin/links", name: "Активные ссылки", description: "Просмотр, редактирование и отзыв опубликованных заметок и файлов." },
   { href: "/admin/components", name: "Библиотека компонентов", description: "Токены, темы и состояния общих компонентов интерфейса." },
+  { href: "/admin/themes", name: "Темы для посетителей", description: "Выберите, какие темы доступны на публичных страницах." },
   { href: "/admin/remote", name: "Удалённые экраны", description: "Подключение к доступным Mac через защищённый браузерный сеанс." },
 ] as const;
 

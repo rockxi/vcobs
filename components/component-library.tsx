@@ -50,7 +50,7 @@ export function ComponentLibrary() {
       </section>
       <section className="component-library-section" aria-labelledby="type-heading">
         <div className="component-section-heading"><p className="eyebrow">typography</p><h2 id="type-heading">Типографика</h2></div>
-        <div className="type-specimens"><article><code>display_heading</code><p className="type-display">Заметки без шума</p><small>Georgia · заголовок страницы</small></article><article><code>body_text</code><p className="type-body">Читаемый текст для описаний, заметок и безопасных пояснений интерфейса.</p><small>Arial · основной текст</small></article><article><code>mono_label</code><p className="type-mono">--accent / active-link</p><small>ui-monospace · метки и технические значения</small></article></div>
+        <div className="type-specimens"><article><code>display_heading</code><p className="type-display">Заметки без шума</p><small>Georgia · заголовок страницы</small></article><article><code>body_text</code><p className="type-body">Читаемый текст для описаний, заметок и безопасных пояснений интерфейса.</p><small>Системный UI · основной текст</small></article><article><code>mono_label</code><p className="type-mono">--accent / active-link</p><small>ui-monospace · метки и технические значения</small></article></div>
       </section>
       <section className="component-library-section" aria-labelledby="components-heading">
         <div className="component-section-heading"><p className="eyebrow">components</p><h2 id="components-heading">Состояния компонентов</h2></div>
