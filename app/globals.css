@@ -337,3 +337,59 @@ body { background:radial-gradient(circle at 72% 32%,rgba(84,62,119,.10),transpar
 .component-library-shell[data-vcobs-theme="liquid-glass"] .glass-toggle:focus-visible { outline:2px solid #c9d8fb; outline-offset:3px; }
 @media (prefers-reduced-motion:reduce) { .glass-toggle-thumb { transition:none; } }
 @media (prefers-reduced-transparency:reduce) { .component-library-shell[data-vcobs-theme="liquid-glass"] .glass-toggle { backdrop-filter:none; -webkit-backdrop-filter:none; } }
+
+/* Apple HIG layering: standard content surfaces, one floating glass control layer. */
+.component-library-shell[data-vcobs-theme="liquid-glass"] { background:#111116; }
+.component-library-shell[data-vcobs-theme="liquid-glass"] .admin-inventory {
+  border:0; border-radius:0; background:transparent; box-shadow:none;
+}
+.component-library-shell[data-vcobs-theme="liquid-glass"] :is(.token-card,.type-specimens article,.component-sample) {
+  border:1px solid #3a3941; border-radius:18px; background:#222127; box-shadow:none;
+}
+.component-library-shell[data-vcobs-theme="liquid-glass"] .theme-selector { border:0; background:transparent; box-shadow:none; }
+.component-library-shell[data-vcobs-theme="liquid-glass"] :is(.theme-selector select,.component-library-nav button,.component-buttons button) {
+  border:1px solid #575661; border-radius:11px; background:#34333b; color:#f3f3f6;
+  box-shadow:inset 0 1px rgba(255,255,255,.08); backdrop-filter:none; -webkit-backdrop-filter:none;
+}
+.component-library-shell[data-vcobs-theme="liquid-glass"] :is(.component-library-nav button,.component-buttons button):hover:not(:disabled) { background:#44434d; box-shadow:inset 0 1px rgba(255,255,255,.1); }
+.component-library-shell[data-vcobs-theme="liquid-glass"] .component-buttons .component-button-success { border-color:#7396d9; background:#6285cf; }
+.component-library-shell[data-vcobs-theme="liquid-glass"] .component-buttons button:disabled { border-color:#45444d; background:#292830; color:#aaa9b2; }
+.component-library-shell[data-vcobs-theme="liquid-glass"] .component-sample header p { font-size:13px; }
+.component-library-shell[data-vcobs-theme="liquid-glass"] .component-field { font-size:13px; }
+.component-library-shell[data-vcobs-theme="liquid-glass"] .component-field input { font-size:14px; }
+.component-library-shell[data-vcobs-theme="liquid-glass"] .glass-toggle { background:#45444e; backdrop-filter:none; -webkit-backdrop-filter:none; }
+.component-library-shell[data-vcobs-theme="liquid-glass"] .glass-toggle[aria-checked="true"] { background:#6285cf; }
+.component-library-shell[data-vcobs-theme="liquid-glass"] .glass-toggle:active .glass-toggle-thumb { box-shadow:inset 0 1px #fff,0 2px 5px rgba(0,0,0,.3),0 0 0 5px rgba(255,255,255,.09); }
+.glass-material-demo {
+  position:relative; min-height:265px; margin-top:28px; overflow:hidden; border:1px solid #3a3941; border-radius:22px;
+  background:radial-gradient(circle at 89% 91%,rgba(145,113,162,.78),transparent 32%),radial-gradient(circle at 72% 34%,rgba(82,100,140,.55),transparent 34%),radial-gradient(circle at 27% 81%,rgba(69,55,91,.54),transparent 38%),#1a1a24;
+}
+.glass-material-content { max-width:570px; padding:34px 34px 96px; }
+.glass-material-content span { color:#bbc8e5; font:600 12px ui-monospace,SFMono-Regular,monospace; }
+.glass-material-content h2 { margin:12px 0; color:#f4f3f8; font:650 clamp(24px,3vw,34px)/1.15 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+.glass-material-content p { margin:0; color:#d7d4e2; font-size:15px; line-height:1.55; }
+.glass-material-toolbar {
+  position:absolute; right:22px; bottom:20px; display:flex; gap:5px; padding:6px;
+  border:1px solid rgba(255,255,255,.22); border-radius:18px; background:rgba(48,47,59,.48);
+  box-shadow:inset 0 1px rgba(255,255,255,.2),0 12px 30px rgba(0,0,0,.25);
+  backdrop-filter:blur(20px) saturate(135%); -webkit-backdrop-filter:blur(20px) saturate(135%);
+}
+.component-library-shell[data-vcobs-theme="liquid-glass"] .glass-material-toolbar button {
+  min-height:38px; padding:8px 14px; border:1px solid transparent; border-radius:12px;
+  background:transparent; color:#f5f4f8; font:600 13px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  box-shadow:none; white-space:nowrap;
+}
+.component-library-shell[data-vcobs-theme="liquid-glass"] .glass-material-toolbar button:hover { background:rgba(255,255,255,.15); }
+.component-library-shell[data-vcobs-theme="liquid-glass"] .glass-material-toolbar button:active { background:rgba(255,255,255,.22); transform:scale(.98); }
+.component-library-shell[data-vcobs-theme="liquid-glass"] .glass-material-toolbar button:focus-visible { outline:2px solid #c9d8fb; outline-offset:2px; }
+@media (max-width:620px) {
+  .glass-material-demo { min-height:295px; }
+  .glass-material-content { padding:26px 22px 92px; }
+  .glass-material-toolbar { right:14px; bottom:14px; left:14px; justify-content:center; }
+}
+@media (prefers-reduced-transparency:reduce), (prefers-contrast:more) {
+  .glass-material-toolbar { border-color:#a4a3b1; background:#33323e; backdrop-filter:none; -webkit-backdrop-filter:none; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .component-library-shell[data-vcobs-theme="liquid-glass"] .glass-material-toolbar button { transition:none; }
+}

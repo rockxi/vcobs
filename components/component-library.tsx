@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState, type CSSProperties, type PointerEvent } from "react";
+import { useState, type CSSProperties } from "react";
 import { defaultVcobsTheme, themeCssVariables, vcobsThemes, type VcobsTheme } from "@/lib/themes";
-import { LiquidGlassBackdrop } from "@/components/liquid-glass-backdrop";
 
 const tokenLabels = {
   ink: "Основной текст", muted: "Вторичный текст", paper: "Основная поверхность", surface: "Поверхность карточки",
@@ -12,26 +11,9 @@ const tokenLabels = {
 
 function GlassToggle() {
   const [enabled, setEnabled] = useState(true);
-  const start = useRef<number | null>(null);
-  const dragged = useRef(false);
-  const move = (event: PointerEvent<HTMLButtonElement>) => {
-    if (start.current === null) return;
-    const distance = event.clientX - start.current;
-    dragged.current = Math.abs(distance) > 5;
-    event.currentTarget.style.setProperty("--toggle-drag", `${Math.max(-30, Math.min(30, distance))}px`);
-  };
-  const finish = (event: PointerEvent<HTMLButtonElement>) => {
-    if (start.current === null) return;
-    const distance = event.clientX - start.current;
-    if (Math.abs(distance) > 5) setEnabled(distance > 0);
-    event.currentTarget.style.removeProperty("--toggle-drag");
-    start.current = null;
-  };
   return <div className="glass-toggle-row"><span>Уведомления</span><button
     type="button" className="glass-toggle" role="switch" aria-checked={enabled} aria-label="Уведомления"
-    onPointerDown={(event) => { start.current = event.clientX; dragged.current = false; event.currentTarget.setPointerCapture(event.pointerId); }}
-    onPointerMove={move} onPointerUp={finish} onPointerCancel={finish}
-    onClick={() => { if (dragged.current) { dragged.current = false; return; } setEnabled((value) => !value); }}
+    onClick={() => setEnabled((value) => !value)}
   ><span className="glass-toggle-thumb" /></button></div>;
 }
 
@@ -51,13 +33,16 @@ export function ComponentLibrary() {
   const style = themeCssVariables(theme) as CSSProperties;
 
   return <main className="admin-shell component-library-shell" data-vcobs-theme={theme.id} style={style}>
-    {theme.id === "liquid-glass" && <LiquidGlassBackdrop />}
     <section className="admin-inventory component-library">
       <header className="admin-inventory-header">
         <div><p className="eyebrow">vcobs · design system</p><h1>Библиотека компонентов</h1><p>Статический словарь production-интерфейса. Имена ниже используются как канонические идентификаторы для следующих экранов.</p></div>
         <div className="component-library-actions"><label className="theme-selector" htmlFor="vcobs-theme"><span>Тема</span><select id="vcobs-theme" value={theme.id} onChange={(event) => setThemeId(event.target.value as typeof themeId)} aria-describedby="vcobs-theme-description">{vcobsThemes.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label><span id="vcobs-theme-description" className="sr-only">Выбор темы изменяет токены и все образцы компонентов на этой странице.</span><nav className="component-library-nav" aria-label="Администрирование"><Link href="/admin/links">Активные ссылки</Link><form action="/api/admin/logout" method="post"><button type="submit">Выйти</button></form></nav></div>
       </header>
       <p className="theme-description" aria-live="polite">{theme.description}</p>
+      {theme.id === "liquid-glass" && <section className="glass-material-demo" aria-label="Пример материала Liquid Glass">
+        <div className="glass-material-content"><span>1 Лекция</span><h2>Заметки остаются главным</h2><p>Текст находится в слое содержимого. Панель действий проходит поверх него и мягко пропускает цвета фона.</p></div>
+        <div className="glass-material-toolbar" role="group" aria-label="Пример панели действий"><button type="button">Поиск</button><button type="button">Поделиться</button></div>
+      </section>}
 
       <section className="component-library-section" aria-labelledby="tokens-heading">
         <div className="component-section-heading"><p className="eyebrow">tokens</p><h2 id="tokens-heading">Цвета и поверхности</h2></div>
