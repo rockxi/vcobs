@@ -25,6 +25,8 @@ test("remote client uses noVNC over the same host and keeps VNC credentials out 
   assert.match(source, /name="vnc-username"/);
   assert.match(source, /class PasswordOnlyRFB extends RFB/);
   assert.match(source, /_isSupportedSecurityType\(type: number\) \{ return type === 2; \}/);
+  assert.match(source, /class MacAccountRFB extends RFB/);
+  assert.match(source, /_isSupportedSecurityType\(type: number\) \{ return type === 30; \}/);
   assert.match(source, /<option value="vnc">Отдельный пароль VNC<\/option>/);
   assert.match(source, /<option value="mac">Учётная запись Mac<\/option>/);
   assert.match(source, /authenticationErrorRef\.current = true/);
@@ -33,7 +35,11 @@ test("remote client uses noVNC over the same host and keeps VNC credentials out 
   assert.match(source, /rfbRef\.current\?\.focus\(\{ preventScroll: true \}\)/);
   assert.match(source, /Захватить клавиатуру/);
   assert.match(source, /Прямой ввод с клавиатуры/);
-  assert.match(source, /rfbRef\.current\.sendKey\(keysym, event\.code\)/);
+  assert.match(source, /keyQueueRef\.current\.push/);
+  assert.match(source, /rfb\.sendKey\(key\.keysym, key\.code, true\)/);
+  assert.match(source, /rfb\.sendKey\(key\.keysym, key\.code, false\)/);
+  assert.match(source, /Только управление/);
+  assert.match(source, /_enabledContinuousUpdates = true/);
   assert.doesNotMatch(source, /className="remote-canvas"[^>]*tabIndex=/);
   assert.match(source, /event\.currentTarget\.reset\(\)/);
   assert.match(source, /autoComplete="off"/);
