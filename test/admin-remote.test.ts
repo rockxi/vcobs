@@ -20,7 +20,9 @@ test("remote client uses noVNC over the same host and keeps VNC credentials out 
   assert.match(source, /\/remote\/ws\?id=\$\{encodeURIComponent\(deviceId\)\}/);
   assert.match(source, /window\.location\.protocol === "https:" \? "wss:" : "ws:"/);
   assert.match(source, /credentialsrequired/);
-  assert.match(source, /sendCredentials\(\{ password \}\)/);
+  assert.match(source, /detail\?\.types\?\.includes\("username"\)/);
+  assert.match(source, /sendCredentials\(needsUsername \? \{ username: username as string, password \} : \{ password \}\)/);
+  assert.match(source, /name="vnc-username"/);
   assert.match(source, /event\.currentTarget\.reset\(\)/);
   assert.match(source, /autoComplete="off"/);
   assert.match(source, /disconnect\("Сеанс администратора завершён\."\)/);
