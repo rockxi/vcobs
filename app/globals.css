@@ -495,3 +495,37 @@ html[data-vcobs-theme="frutiger-aero"] .vault-title > span { background:#e9ffff;
   .component-library-shell[data-vcobs-theme="liquid-glass"] .glass-material-toolbar { background:#3b3a4b; backdrop-filter:none; -webkit-backdrop-filter:none; }
   .component-library-shell[data-vcobs-theme="liquid-glass"] .glass-material-toolbar button { text-shadow:none; }
 }
+/* Admin editing extends the existing Obsidianite reader rather than replacing its theme. */
+.admin-note-entry { display:flex; align-items:center; gap:12px; margin:18px 0 0; }
+.admin-note-entry button,.admin-note-actions button { border:1px solid #514166; background:#241b30; color:#e8d9ff; font:600 13px var(--ui-font); padding:9px 15px; cursor:pointer; transition:background .16s ease,border-color .16s ease; }
+.admin-note-entry button:hover,.admin-note-actions button:hover:not(:disabled) { background:#372849; border-color:#a879e2; }
+.admin-note-entry button:disabled,.admin-note-actions button:disabled { opacity:.5; cursor:not-allowed; }
+.admin-note-entry p { margin:0; color:#f6b0bb; font-size:13px; }
+.admin-note-workspace { margin-top:25px; border:1px solid #3b304b; background:#17131e; color:#ddd4e8; box-shadow:0 18px 40px rgba(8,5,14,.28); }
+.note-paper:has(.admin-note-workspace) > .prose { display:none; }
+.admin-note-toolbar { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:13px 16px; border-bottom:1px solid #33283f; }
+.admin-note-ident { display:flex; min-width:0; flex-direction:column; gap:4px; }
+.admin-note-ident strong { color:#f3ebff; font-size:14px; }
+.admin-note-ident span { overflow:hidden; color:#a89bb7; font:11px ui-monospace,SFMono-Regular,monospace; text-overflow:ellipsis; white-space:nowrap; }
+.admin-note-actions { display:flex; align-items:center; gap:8px; flex:0 0 auto; }
+.admin-note-actions .admin-note-save { border-color:#9c71d3; background:#8151be; color:white; }
+.admin-note-actions .admin-note-save:hover:not(:disabled) { background:#9867d0; }
+.admin-note-preview-toggle { display:flex; align-items:center; gap:7px; margin-right:6px; color:#c7b8d7; font-size:12px; cursor:pointer; white-space:nowrap; }
+.admin-note-preview-toggle input { accent-color:#a775df; }
+.admin-note-panels { display:grid; grid-template-columns:minmax(0,1fr); min-height:56vh; }
+.admin-note-panels-split { grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
+.admin-note-pane { display:flex; flex-direction:column; min-width:0; min-height:0; }
+.admin-note-panels-split .admin-note-pane + .admin-note-pane { border-left:1px solid #342941; }
+.admin-note-pane-label { display:flex; justify-content:space-between; padding:10px 15px; border-bottom:1px solid #30263c; color:#bd9dde; font:11px ui-monospace,SFMono-Regular,monospace; letter-spacing:.04em; }
+.admin-note-pane-label span { color:#a69bb1; letter-spacing:0; }
+.admin-note-pane textarea { display:block; width:100%; min-height:56vh; flex:1; resize:vertical; border:0; outline:0; padding:22px 24px 32px; background:#100e16; color:#e6deef; caret-color:#bc91ed; font:14px/1.7 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; tab-size:2; }
+.admin-note-pane textarea:focus-visible { box-shadow:inset 0 0 0 2px #9d69dc; }
+.admin-note-pane textarea::selection { background:#725095; color:white; }
+.admin-note-preview { max-height:75vh; overflow:auto; background:#191520; }
+.admin-note-preview .prose { padding:22px 27px 42px; color:#e8e0ed; font-size:15px; }
+.admin-note-warning,.admin-note-success { margin:0; padding:11px 16px; border-bottom:1px solid #4c384b; color:#ffd5dc; background:#432735; font-size:13px; }
+.admin-note-success { border-color:#405747; color:#c6f5d3; background:#223c2d; }
+.admin-note-hint { margin:0; padding:11px 16px; border-top:1px solid #33283f; color:#ab9fb9; font-size:12px; line-height:1.5; }
+.admin-note-hint code { color:#d4b5f8; }
+.admin-note-workspace :is(button,input):focus-visible { outline:2px solid #bd92ee; outline-offset:2px; }
+@media (max-width:900px) { .admin-note-toolbar { align-items:flex-start; flex-direction:column; }.admin-note-actions { width:100%; flex-wrap:wrap; }.admin-note-panels-split { grid-template-columns:1fr; }.admin-note-panels-split .admin-note-pane + .admin-note-pane { border-left:0; border-top:1px solid #342941; }.admin-note-pane textarea { min-height:45vh; }.admin-note-preview { max-height:none; } }

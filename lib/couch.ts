@@ -10,6 +10,8 @@ export type CouchFile = {
   size?: number;
   type: string;
   deleted?: boolean;
+  _conflicts?: string[];
+  eden?: Record<string, unknown>;
 };
 
 type Leaf = { _id: string; data: string; type: "leaf" };
@@ -30,9 +32,9 @@ function databaseUrl(path = "") {
   return `${config.url}/${encodeURIComponent(config.database)}${path}`;
 }
 
-async function couchFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
+export async function couchRequest(path: string, init: RequestInit = {}): Promise<Response> {
   const credentials = Buffer.from(`${config.username}:${config.password}`).toString("base64");
-  const response = await fetch(databaseUrl(path), {
+  return fetch(databaseUrl(path), {
     ...init,
     headers: {
       Authorization: `Basic ${credentials}`,
@@ -41,6 +43,10 @@ async function couchFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
     },
     cache: "no-store",
   });
+}
+
+async function couchFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const response = await couchRequest(path, init);
 
   if (!response.ok) throw new Error(`CouchDB request failed (${response.status}).`);
   return response.json() as Promise<T>;
@@ -174,6 +180,24 @@ export async function getPublicNote(slug: string) {
   const markdown = note.children.map((id) => chunks.get(id) ?? "").join("");
   if (getVcobsLink(markdown) !== slug) return null;
   return { ...note, markdown: stripFrontmatter(markdown) };
+}
+
+/** A fresh, complete source is required before editing; never edit a cached or partial document. */
+export async function getPublishedNoteSource(slug: string) {
+  const candidate = (await getPublicationIndex()).notes.get(slug);
+  if (!candidate) return null;
+  const response = await couchRequest(`/${encodeURIComponent(candidate._id)}?conflicts=true`);
+  if (response.status === 404) return null;
+  if (!response.ok) throw new Error(`CouchDB request failed (${response.status}).`);
+  const note = await response.json() as CouchFile;
+  if (note.deleted || note._id !== candidate._id || note.type !== "plain" || !note.path?.toLowerCase().endsWith(".md") || !Array.isArray(note.children)) return null;
+  const leaves = await getDocuments<Leaf>(note.children);
+  const chunks = new Map(leaves.map((leaf) => [leaf._id, leaf]));
+  const parts = note.children.map((id) => chunks.get(id));
+  if (parts.some((leaf) => !leaf || leaf.type !== "leaf" || typeof leaf.data !== "string")) throw new Error("Заметка содержит недоступные чанки.");
+  const markdown = parts.map((leaf) => leaf!.data).join("");
+  if (getVcobsLink(markdown) !== slug) return null;
+  return { note, markdown };
 }
 
 export async function getPublicNotes() {

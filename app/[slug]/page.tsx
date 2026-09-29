@@ -13,6 +13,9 @@ import { PasteCopyButton } from "@/components/paste-copy-button";
 import { EditablePaste } from "@/components/editable-paste";
 import { formatSharedFileSize } from "@/components/file-share-utils";
 import { getSharedFile } from "@/lib/shared-files";
+import { cookies } from "next/headers";
+import { ADMIN_SESSION_COOKIE, validateAdminSession } from "@/lib/admin-auth";
+import { AdminNoteEditor } from "@/components/admin-note-editor";
 
 export const dynamic = "force-dynamic";
 
@@ -47,7 +50,8 @@ export default async function NotePage({ params }: { params: Promise<{ slug: str
   const title = note.markdown.match(/^#\s+(.+)$/m)?.[1] ?? note.path.split("/").at(-1)?.replace(/\.md$/i, "") ?? slug;
   const pathParts = note.path.replace(/\.md$/i, "").split("/").filter(Boolean);
   const renderedMarkdown = prepareMarkdown(note.markdown, slug).replace(/^#\s+.+(?:\r?\n)+/, "");
-  const [notes, enabledThemes] = await Promise.all([getPublicNotes(), getEnabledThemes()]);
+  const [notes, enabledThemes, cookieStore] = await Promise.all([getPublicNotes(), getEnabledThemes(), cookies()]);
+  const canEdit = note.type === "plain" && validateAdminSession(cookieStore.get(ADMIN_SESSION_COOKIE)?.value);
   const drawing = getExcalidrawData(note.markdown);
   if (drawing) {
     const embeddedFiles = await Promise.all(getExcalidrawEmbeddedFiles(note.markdown).map(async ({ id, reference }) => {
@@ -80,6 +84,7 @@ export default async function NotePage({ params }: { params: Promise<{ slug: str
             <span className="note-document-icon" aria-hidden="true">▤</span>
             <div><h1>{title}</h1>{formatDate(note.mtime) && <p>Обновлено {formatDate(note.mtime)}</p>}</div>
           </div>
+          {canEdit && <AdminNoteEditor slug={slug} />}
         </>}
         {drawing ? <ExcalidrawViewer data={drawing} /> : (
           <div className="prose">
