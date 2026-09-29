@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { LivePreviewEditor } from "@/components/live-preview-editor";
 
 type Source = { markdown: string; revision: string; path: string; conflict: boolean };
 
@@ -14,7 +13,6 @@ export function AdminNoteEditor({ slug }: { slug: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
-  const [preview, setPreview] = useState(true);
   const dirty = source !== null && source.markdown !== text;
 
   useEffect(() => {
@@ -70,15 +68,12 @@ export function AdminNoteEditor({ slug }: { slug: string }) {
   return <section className="admin-note-workspace" aria-label="Редактор опубликованной заметки">
     <header className="admin-note-toolbar">
       <div className="admin-note-ident"><strong>Редактор заметки</strong><span title={source.path}>{source.path}</span></div>
-      <div className="admin-note-actions"><label className="admin-note-preview-toggle"><input type="checkbox" checked={preview} onChange={(event) => setPreview(event.target.checked)} /> Предпросмотр</label><button type="button" onClick={close} disabled={busy}>Закрыть</button><button type="button" className="admin-note-save" onClick={() => void save()} disabled={!dirty || busy || source.conflict}>{busy ? "Сохраняю…" : "Сохранить"}</button></div>
+      <div className="admin-note-actions"><button type="button" onClick={close} disabled={busy}>Закрыть</button><button type="button" className="admin-note-save" onClick={() => void save()} disabled={!dirty || busy || source.conflict}>{busy ? "Сохраняю…" : "Сохранить"}</button></div>
     </header>
     {source.conflict && <p className="admin-note-warning" role="alert">У заметки уже есть конфликтующие версии в LiveSync. Разрешите конфликт в Obsidian перед редактированием здесь.</p>}
     {error && <p className="admin-note-warning" role="alert">{error}</p>}
     {saved && !dirty && <p className="admin-note-success" role="status">Сохранено в CouchDB. Obsidian получит изменение при следующей синхронизации.</p>}
-    <div className={`admin-note-panels${preview ? " admin-note-panels-split" : ""}`}>
-      <div className="admin-note-pane"><div className="admin-note-pane-label">Markdown <span>{new Intl.NumberFormat("ru-RU").format(text.length)} символов</span></div><textarea aria-label="Исходный Markdown заметки" value={text} onChange={(event) => { setText(event.target.value); setSaved(false); }} spellCheck={false} /></div>
-      {preview && <div className="admin-note-pane admin-note-preview"><div className="admin-note-pane-label">Просмотр</div><div className="prose"><ReactMarkdown remarkPlugins={[remarkGfm]}>{text.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, "")}</ReactMarkdown></div></div>}
-    </div>
+    <LivePreviewEditor key={slug} documentId={slug} notePath={source.path} value={text} onChange={(value) => { setText(value); setSaved(false); }} ariaLabel="Редактировать опубликованную заметку" className="admin-note-live-editor" />
     <p className="admin-note-hint">Сохраняется весь Markdown вместе со свойствами. Свойство <code>vcobs-link</code> должно остаться неизменным. ⌘/Ctrl + S — сохранить.</p>
   </section>;
 }

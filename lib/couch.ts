@@ -61,7 +61,7 @@ async function getDocuments<T>(keys: string[]) {
   return response.rows.flatMap((row) => (row.doc ? [row.doc] : []));
 }
 
-async function findMarkdownFiles(): Promise<CouchFile[]> {
+export async function findMarkdownFiles(): Promise<CouchFile[]> {
   const files: CouchFile[] = [];
   let bookmark: string | undefined;
   let previousBookmark: string | undefined;
@@ -206,6 +206,28 @@ export async function getPublishedNoteSource(slug: string) {
   return { note, markdown };
 }
 
+/** Resolve a LiveSync file by its complete CouchDB ID, including any slashes. */
+export async function getVaultNoteSource(id: string) {
+  if (!id || id.length > 4096 || id.startsWith("_") || id.includes("\0")) return null;
+  const response = await couchRequest("/_all_docs?include_docs=true&conflicts=true", {
+    method: "POST", body: JSON.stringify({ keys: [id] }),
+  });
+  if (!response.ok) throw new Error(`CouchDB request failed (${response.status}).`);
+  const result = await response.json() as AllDocsResponse<CouchFile>;
+  const note = result.rows?.[0]?.doc;
+  if (!note || note.deleted || note._id !== id || !["plain", "newnote"].includes(note.type) || !note.path?.toLowerCase().endsWith(".md")) return null;
+  if (!Array.isArray(note.children) || note.children.some((child) => typeof child !== "string")) throw new UnsupportedVaultNoteError();
+  const leaves = await getDocuments<Leaf>(note.children);
+  const chunks = new Map(leaves.map((leaf) => [leaf._id, leaf]));
+  const parts = note.children.map((child) => chunks.get(child));
+  if (parts.some((leaf) => !leaf || leaf.type !== "leaf" || typeof leaf.data !== "string")) throw new UnsupportedVaultNoteError();
+  return { note, markdown: parts.map((leaf) => leaf!.data).join("") };
+}
+
+export class UnsupportedVaultNoteError extends Error {
+  constructor() { super("Заметка не содержит доступные текстовые чанки LiveSync."); }
+}
+
 export async function getPublicNotes() {
   const index = await getPublicationIndex();
   return [...index.notes.values()].sort((a, b) => (b.mtime ?? 0) - (a.mtime ?? 0));
@@ -222,6 +244,49 @@ export async function getFile(path: string) {
     ? parts.join("")
     : Buffer.concat(parts.map((part) => Buffer.from(part, "base64"))).toString("base64");
   return { file, data };
+}
+
+export class VaultMediaTooLargeError extends Error {}
+
+/** A basename lookup is used only for bare Obsidian embeds after an exact-path miss. */
+export async function findUniqueVaultImagePathByBasename(name: string): Promise<string | null | "ambiguous"> {
+  if (!name || name.includes("/") || name.includes("\\") || name.length > 255) return null;
+  const escaped = name.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const response = await couchFetch<FindResponse<CouchFile>>("/_find", {
+    method: "POST",
+    body: JSON.stringify({
+      selector: { _id: { $regex: `(?:^|/)${escaped}$` }, type: "newnote", deleted: { $ne: true } },
+      fields: ["_id", "path", "type", "deleted"],
+      limit: 2,
+    }),
+  });
+  const matches = response.docs.filter((file) => !file.deleted && file.type === "newnote" && file.path?.split("/").at(-1)?.toLowerCase() === name.toLowerCase());
+  if (matches.length > 1) return "ambiguous";
+  return matches[0]?.path ?? null;
+}
+
+/** Fetch a binary vault attachment by path without assembling an unbounded response. */
+export async function getVaultImage(path: string, maxBytes = 20 * 1024 * 1024) {
+  const [file] = await getDocuments<CouchFile>([path.toLowerCase()]);
+  if (!file || file.deleted || file.path?.toLowerCase() !== path.toLowerCase() || !Array.isArray(file.children)) return null;
+  if (typeof file.size === "number" && file.size > maxBytes) throw new VaultMediaTooLargeError();
+  if (file.children.some((child) => typeof child !== "string")) return null;
+  const buffers: Buffer[] = [];
+  let size = 0;
+  for (let offset = 0; offset < file.children.length; offset += 100) {
+    const leaves = await getDocuments<Leaf>(file.children.slice(offset, offset + 100));
+    const byId = new Map(leaves.map((leaf) => [leaf._id, leaf]));
+    for (const id of file.children.slice(offset, offset + 100)) {
+      const leaf = byId.get(id);
+      if (!leaf || leaf.type !== "leaf" || typeof leaf.data !== "string" || !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(leaf.data)) return null;
+      if (leaf.data.length > Math.ceil((maxBytes - size) / 3) * 4 + 4) throw new VaultMediaTooLargeError();
+      const chunk = Buffer.from(leaf.data, "base64");
+      size += chunk.length;
+      if (size > maxBytes) throw new VaultMediaTooLargeError();
+      buffers.push(chunk);
+    }
+  }
+  return Buffer.concat(buffers, size);
 }
 
 /** Obsidian embeds may refer to an attachment by basename while it lives elsewhere in the vault. */

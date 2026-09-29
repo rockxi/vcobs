@@ -8,7 +8,7 @@ const adminSections = [
   { href: "/admin/components", name: "Библиотека компонентов", description: "Токены, темы и состояния общих компонентов интерфейса." },
   { href: "/admin/themes", name: "Темы для посетителей", description: "Выберите, какие темы доступны на публичных страницах." },
   { href: "/admin/remote", name: "Удалённые экраны", description: "Подключение к доступным Mac через защищённый браузерный сеанс." },
-  { href: "/", name: "Редактор заметок", description: "Откройте опубликованную заметку и редактируйте Markdown напрямую через CouchDB." },
+  { href: "/admin/vault", name: "Редактор заметок", description: "Все заметки CouchDB в проводнике папок с редактированием Markdown на месте." },
 ] as const;
 
 export default async function AdminPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
