@@ -33,5 +33,22 @@ services:
     ports:
       - "127.0.0.1:3081:3081"
 
+  obsidian:
+    image: lscr.io/linuxserver/obsidian:latest
+    container_name: vcobs-obsidian
+    restart: unless-stopped
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: Europe/Moscow
+      SUBFOLDER: /admin/obsidian/
+      SELKIES_ALLOWED_ORIGINS: https://vcobs.rockxi.ru
+    ports:
+      - "127.0.0.1:3092:3000"
+    volumes:
+      - ./data/obsidian-config:/config
+      - ./data/obsidian-vault:/vault
+    shm_size: "1gb"
+
 volumes:
   vcobs-files:
