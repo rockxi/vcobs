@@ -5,9 +5,10 @@ import { spawn } from "node:child_process";
 import { createServer } from "node:http";
 
 const slug = "editor_test";
+const documentId = "folder/example.md";
 const initial = `---\nvcobs-link: ${slug}\nvcobs-topic: tests\n---\n# Проверка\nСтарый текст\n`;
 const documents = new Map([
-  ["example.md", { _id: "example.md", _rev: "1-start", path: "Example.md", children: ["h:old"], type: "plain", ctime: 1, mtime: 1, size: Buffer.byteLength(initial), eden: {} }],
+  [documentId, { _id: documentId, _rev: "1-start", path: "folder/Example.md", children: ["h:old"], type: "plain", ctime: 1, mtime: 1, size: Buffer.byteLength(initial), eden: {} }],
   ["h:old", { _id: "h:old", type: "leaf", data: initial }],
 ]);
 
@@ -17,18 +18,16 @@ const mock = createServer(async (request, response) => {
   const body = parts.length ? JSON.parse(Buffer.concat(parts).toString()) : null;
   const path = new URL(request.url, "http://localhost").pathname.replace(/^\/obsidian/, "");
   let status = 200, result;
-  if (path === "/_find") result = { docs: body.bookmark === "done" ? [] : [documents.get("example.md")], bookmark: "done" };
+  if (path === "/_find") result = { docs: body.bookmark === "done" ? [] : [documents.get(documentId)], bookmark: "done" };
   else if (path === "/_all_docs") result = { rows: body.keys.map((id) => ({ id, doc: documents.get(id) })) };
   else if (path === "/_bulk_docs") result = body.docs.map((doc) => {
-    if (documents.has(doc._id)) return { id: doc._id, error: "conflict" };
-    documents.set(doc._id, doc);
-    return { id: doc._id, ok: true, rev: "1-leaf" };
+    const existing = documents.get(doc._id);
+    if (existing && (!doc._rev || doc._rev !== existing._rev)) return { id: doc._id, error: "conflict" };
+    const rev = doc._id === documentId ? "2-saved" : "1-leaf";
+    documents.set(doc._id, { ...doc, _rev: rev });
+    return { id: doc._id, ok: true, rev };
   });
-  else if (request.method === "GET" && documents.has(decodeURIComponent(path.slice(1)))) result = documents.get(decodeURIComponent(path.slice(1)));
-  else if (request.method === "PUT" && path === "/example.md") {
-    if (body._rev !== documents.get("example.md")._rev) { status = 409; result = { error: "conflict" }; }
-    else { documents.set("example.md", { ...body, _rev: "2-saved" }); result = { ok: true, id: "example.md", rev: "2-saved" }; }
-  } else { status = 404; result = { error: "not_found" }; }
+  else { status = 404; result = { error: "not_found" }; }
   response.writeHead(status, { "Content-Type": "application/json" });
   response.end(JSON.stringify(result));
 });
@@ -65,7 +64,7 @@ try {
   assert.equal(missingPublication.status, 400);
   const save = await fetch(`${origin}/api/admin/notes/${slug}`, { method: "PUT", headers: { ...headers, origin, "Content-Type": "application/json" }, body: JSON.stringify({ markdown: changed, revision: "1-start" }) });
   assert.equal(save.status, 200, await save.text());
-  const metadata = documents.get("example.md");
+  const metadata = documents.get(documentId);
   assert.equal(metadata._rev, "2-saved");
   assert.equal(metadata.children.map((id) => documents.get(id).data).join(""), changed);
   assert.equal(metadata.size, Buffer.byteLength(changed));

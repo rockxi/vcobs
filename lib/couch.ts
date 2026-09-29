@@ -186,10 +186,16 @@ export async function getPublicNote(slug: string) {
 export async function getPublishedNoteSource(slug: string) {
   const candidate = (await getPublicationIndex()).notes.get(slug);
   if (!candidate) return null;
-  const response = await couchRequest(`/${encodeURIComponent(candidate._id)}?conflicts=true`);
-  if (response.status === 404) return null;
+  // LiveSync document IDs are paths. CouchDB rejects a percent-encoded slash in
+  // a single-document URL, while _all_docs accepts the complete ID as a key.
+  const response = await couchRequest("/_all_docs?include_docs=true&conflicts=true", {
+    method: "POST",
+    body: JSON.stringify({ keys: [candidate._id] }),
+  });
   if (!response.ok) throw new Error(`CouchDB request failed (${response.status}).`);
-  const note = await response.json() as CouchFile;
+  const result = await response.json() as AllDocsResponse<CouchFile>;
+  const note = result.rows?.[0]?.doc;
+  if (!note) return null;
   if (note.deleted || note._id !== candidate._id || note.type !== "plain" || !note.path?.toLowerCase().endsWith(".md") || !Array.isArray(note.children)) return null;
   const leaves = await getDocuments<Leaf>(note.children);
   const chunks = new Map(leaves.map((leaf) => [leaf._id, leaf]));

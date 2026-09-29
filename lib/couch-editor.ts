@@ -37,10 +37,11 @@ export async function savePublishedNote(slug: string, markdown: string, revision
 
   const next = { ...current.note, children: chunks.map((chunk) => chunk._id), mtime: Date.now(), size: Buffer.byteLength(markdown, "utf8"), eden: {} };
   delete next._conflicts;
-  const response = await couchRequest(`/${encodeURIComponent(next._id)}`, { method: "PUT", body: JSON.stringify(next) });
-  if (response.status === 409) return { kind: "conflict" };
+  // Path IDs may contain slashes; _bulk_docs avoids CouchDB URL routing ambiguity.
+  const response = await couchRequest("/_bulk_docs", { method: "POST", body: JSON.stringify({ docs: [next] }) });
   if (!response.ok) return { kind: "failed" };
-  const saved = await response.json() as { ok?: boolean; rev?: string };
+  const [saved] = await response.json() as Array<{ ok?: boolean; rev?: string; error?: string }>;
+  if (saved?.error === "conflict") return { kind: "conflict" };
   if (!saved.ok || !saved.rev) return { kind: "failed" };
   clearPublicationCache();
   return { kind: "saved", revision: saved.rev };
