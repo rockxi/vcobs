@@ -1,0 +1,9 @@
+FROM node:22-bookworm-slim
+RUN npm install --global @openai/codex@0.159.2 && npm cache clean --force
+WORKDIR /service
+COPY --chown=node:node . ./
+RUN mkdir -p /data/codex /service/empty && chown -R node:node /data /service/empty
+ENV NODE_ENV=production PORT=3090 VCOBS_CHAT_DATA_DIR=/data CODEX_HOME=/data/codex
+USER node
+EXPOSE 3090
+CMD ["node", "server.mjs"]

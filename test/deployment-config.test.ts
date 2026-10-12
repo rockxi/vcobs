@@ -9,7 +9,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 test("persists temporary shared files in the application data directory", async () => {
   const compose = await readFile(path.join(root, "docker-compose.yaml"), "utf8");
   assert.match(compose, /^\s*- vcobs-files:\/app\/data\/files$/m);
-  assert.match(compose, /^volumes:\n\s+vcobs-files:$/m);
+  assert.match(compose, /^volumes:\n\s+vcobs-files:/m);
   assert.doesNotMatch(compose, /\.\/data\/files/);
 });
 

@@ -4,6 +4,7 @@ import { ADMIN_SESSION_COOKIE, adminAuthConfigured, validateAdminSession } from 
 export const dynamic = "force-dynamic";
 
 const adminSections = [
+  { href: "/admin/chat", name: "Чат с Codex", description: "Личные диалоги с моделями через подписку ChatGPT и защищённое подключение сервера." },
   { href: "/admin/links", name: "Активные ссылки", description: "Просмотр, редактирование и отзыв опубликованных заметок и файлов." },
   { href: "/admin/components", name: "Библиотека компонентов", description: "Токены, темы и состояния общих компонентов интерфейса." },
   { href: "/admin/themes", name: "Темы для посетителей", description: "Выберите, какие темы доступны на публичных страницах." },

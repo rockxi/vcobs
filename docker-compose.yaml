@@ -13,6 +13,8 @@ services:
       PORT: 3080
       HOSTNAME: 0.0.0.0
       VCOBS_REMOTE_RELAY_INTERNAL_URL: http://remote-relay:3081
+      VCOBS_CHAT_SERVICE_URL: http://chat-service:3090
+      VCOBS_CHAT_SERVICE_SECRET: ${VCOBS_CHAT_SERVICE_SECRET:-}
     ports:
       - "3080:3080"
     volumes:
@@ -20,6 +22,51 @@ services:
       - vcobs-files:/app/data/files
     depends_on:
       - remote-relay
+    networks:
+      - default
+      - chat-internal
+
+  chat-service:
+    build:
+      context: ./chat-service
+    restart: unless-stopped
+    init: true
+    environment:
+      PORT: 3090
+      VCOBS_CHAT_SERVICE_SECRET: ${VCOBS_CHAT_SERVICE_SECRET:-}
+      VCOBS_CHAT_HTTPS_PROXY: http://chat-egress:3091
+    volumes:
+      - vcobs-chat:/data
+    networks:
+      - chat-internal
+    depends_on:
+      - chat-egress
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  # The Codex container has no direct Internet route. This TCP bridge exposes
+  # only the existing Asus Xray HTTP CONNECT proxy to its private network.
+  chat-egress:
+    image: node:22-alpine
+    command: ["node", "/opt/vcobs/chat-egress.mjs"]
+    restart: unless-stopped
+    init: true
+    user: node
+    environment:
+      VCOBS_XRAY_HOST: ${VCOBS_XRAY_HOST:-172.31.0.1}
+      VCOBS_XRAY_PORT: ${VCOBS_XRAY_PORT:-10809}
+    volumes:
+      - ./ops/chat-egress.mjs:/opt/vcobs/chat-egress.mjs:ro
+    networks:
+      - default
+      - chat-internal
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
 
   remote-relay:
     build:
@@ -35,3 +82,8 @@ services:
 
 volumes:
   vcobs-files:
+  vcobs-chat:
+
+networks:
+  chat-internal:
+    internal: true
