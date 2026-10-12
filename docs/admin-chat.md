@@ -38,6 +38,14 @@ requiring WebSockets or a persistent chunked HTTP stream. Chat-service is on an
 Only chat-egress has an outbound route; it forwards TCP to the fixed Xray
 listener. A failed proxy cannot silently fall back to direct model requests.
 
+The chat image explicitly installs Debian's `ca-certificates`: the native Codex
+HTTPS client needs system trust roots even though Node itself bundles CAs.
+A successful Node proxy probe alone therefore does not verify Codex device login.
+Keep TLS certificate verification enabled; never work around trust errors by
+disabling it. Verify `account/login/start` with isolated temporary Codex state
+after changing the image, and report only success/verification host, not codes or
+tokens. This checks authorization transport without completing login or inference.
+
 The `vcobs-chat` named volume holds the service's local history and Codex state,
 including private account credentials. Do not publish, log or commit its contents.
 Back it up as sensitive data. Restarting containers preserves this volume; never

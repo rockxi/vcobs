@@ -6,6 +6,13 @@ import test from "node:test";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
+test("installs system trust roots for the native Codex HTTPS authentication client", async () => {
+  const dockerfile = await readFile(path.join(root, "chat-service/Dockerfile"), "utf8");
+  assert.match(dockerfile, /apt-get install -y --no-install-recommends ca-certificates/);
+  assert.ok(dockerfile.indexOf("ca-certificates") < dockerfile.indexOf("USER node"));
+  assert.doesNotMatch(dockerfile, /NODE_TLS_REJECT_UNAUTHORIZED|danger_accept_invalid_certs|--insecure/);
+});
+
 test("persists temporary shared files in the application data directory", async () => {
   const compose = await readFile(path.join(root, "docker-compose.yaml"), "utf8");
   assert.match(compose, /^\s*- vcobs-files:\/app\/data\/files$/m);

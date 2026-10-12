@@ -1,4 +1,8 @@
 FROM node:22-bookworm-slim
+# Codex's native HTTPS client uses the system trust store, not Node's bundled CAs.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 RUN npm install --global @openai/codex@0.159.2 && npm cache clean --force
 WORKDIR /service
 COPY --chown=node:node . ./
