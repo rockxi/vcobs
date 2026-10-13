@@ -64,6 +64,16 @@ the Obsidian vault. Existing conversation history and account login stay in the
 original `vcobs-chat` volume. New threads, resumed threads and every new turn
 receive the same fixed working directory and permissions.
 
+The upgrade creates a new native Codex thread on the next message in each
+pre-upgrade chat: old rollouts can retain their original no-tools instructions
+even after a resume override. The UI chat ID and its complete visible history
+stay unchanged; the original Codex thread is retained, not deleted. The new
+thread receives a one-time, labeled context excerpt of up to 20 recent messages,
+up to 3,000 trailing characters per message and 48,000 UTF-8 bytes overall.
+Omissions/truncations are disclosed in that context; older details remain in the
+UI but may need to be quoted again for the model. Subsequent turns and restarts
+resume the new thread normally without repeating the migration context.
+
 **The owner explicitly selected `danger-full-access` with approval policy
 `never`. `/workspace` is a working directory, NOT an enforced filesystem
 boundary.** Codex commands can read and change other files accessible to the

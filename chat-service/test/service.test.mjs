@@ -6,7 +6,7 @@ import { mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { once } from 'node:events';
-import { ChatService, CodexRpc, createChatServer, proxyEnvironment, codexArgs, MAX_CHAT_SNAPSHOT_BYTES, WORKSPACE_DIR } from '../server.mjs';
+import { ChatService, CodexRpc, createChatServer, proxyEnvironment, codexArgs, MAX_CHAT_SNAPSHOT_BYTES, WORKSPACE_DIR, NATIVE_RUNTIME_VERSION, MAX_REPLAY_BYTES, conversationReplay } from '../server.mjs';
 const env = { PATH: process.env.PATH, VCOBS_CHAT_HTTPS_PROXY: 'http://proxy.internal:3091', VCOBS_CHAT_SERVICE_SECRET: 's'.repeat(40) };
 const temp = () => mkdtempSync(join(tmpdir(), 'vcobs-chat-test-'));
 class FakeRpc extends EventEmitter {
@@ -121,6 +121,62 @@ test('concurrent sends reject, errors sanitized, invalid model never starts turn
   rpc.failure = 'turn/start'; await assert.rejects(service.send(id, 'one', 'test-model'));
   // Non-HttpError never reaches snapshots or persistence.
   assert.ok(!JSON.stringify(service.snapshot(id)).includes('SECRET')); assert.ok(!readFileSync(service.file, 'utf8').includes('SECRET')); service.close();
+});
+test('legacy chats migrate once without losing visible history or deleting old rollouts', async () => {
+  const { service, rpc } = setup(); const id = service.create().chat.id;
+  const chat = service.get(id);
+  chat.threadId = 'old-no-tools';
+  chat.messages = [{ id: 'old-user', role: 'user', text: 'Remember my project', createdAt: chat.createdAt }, { id: 'old-answer', role: 'assistant', text: 'Old answer', createdAt: chat.createdAt }];
+  const original = structuredClone(chat.messages); service.save();
+  await service.send(id, 'Use terminal now', 'test-model');
+  assert.equal(chat.id, id); assert.equal(chat.runtimeVersion, NATIVE_RUNTIME_VERSION);
+  assert.deepEqual(chat.previousThreadIds, ['old-no-tools']);
+  assert.deepEqual(chat.messages.slice(0, 2), original);
+  assert.equal(chat.messages.length, 3);
+  const firstTurn = rpc.calls.find(call => call.method === 'turn/start');
+  assert.equal(firstTurn.params.input.length, 2);
+  assert.match(firstTurn.params.input[0].text, /Remember my project/);
+  assert.equal(firstTurn.params.input[1].text, 'Use terminal now');
+  assert.equal(chat.contextReplayPending, false);
+  assert.ok(!rpc.calls.some(call => call.method === 'thread/delete' || call.method === 'thread/resume'));
+  assert.equal(service.snapshot(id).chat.previousThreadIds, undefined);
+  rpc.emit('notification', 'turn/completed', { threadId: chat.threadId, turn: { id: chat.turnId, status: 'completed' } });
+  service.close();
+  const next = setup({ dataDir: service.dataDir }); await next.service.send(id, 'Continue', 'test-model');
+  assert.equal(next.rpc.calls.filter(call => call.method === 'thread/start').length, 0);
+  assert.equal(next.rpc.calls.filter(call => call.method === 'thread/resume').length, 1);
+  assert.equal(next.rpc.calls.find(call => call.method === 'turn/start').params.input.length, 1);
+  assert.deepEqual(next.service.get(id).messages.slice(0, 2), original); next.service.close();
+});
+test('failed migration startup and turn acknowledgement preserve history and replay on restart retry', async () => {
+  const { service, rpc } = setup(); const id = service.create().chat.id; const chat = service.get(id);
+  chat.threadId = 'legacy'; chat.messages = [{ id: 'u', role: 'user', text: 'Original context', createdAt: chat.createdAt }];
+  rpc.failure = 'thread/start'; await assert.rejects(service.send(id, 'First try', 'test-model'));
+  assert.equal(chat.threadId, 'legacy'); assert.equal(chat.messages.length, 1);
+  rpc.failure = 'turn/start'; await assert.rejects(service.send(id, 'Second try', 'test-model'));
+  assert.equal(chat.contextReplayPending, true);
+  assert.equal(chat.messages.filter(message => message.text === 'Original context').length, 1);
+  const previousThread = chat.threadId; service.close();
+  const next = setup({ dataDir: service.dataDir });
+  // No rollout exists if turn/start never succeeded; do not get stuck resuming it.
+  next.rpc.count = 100;
+  await next.service.send(id, 'Retry after restart', 'test-model');
+  assert.ok(next.rpc.calls.some(call => call.method === 'thread/start'));
+  assert.ok(!next.rpc.calls.some(call => call.method === 'thread/resume'));
+  assert.deepEqual(next.service.get(id).previousThreadIds, ['legacy', previousThread]);
+  const input = next.rpc.calls.find(call => call.method === 'turn/start').params.input;
+  assert.match(input[0].text, /Original context/);
+  assert.equal(next.service.get(id).messages.filter(message => message.text === 'Original context').length, 1);
+  assert.equal(next.service.get(id).contextReplayPending, false); next.service.close();
+});
+test('migration replay contains only bounded labeled user/assistant data with omissions disclosed', () => {
+  const history = Array.from({ length: 100 }, (_, index) => ({ role: index % 2 ? 'assistant' : 'user', text: `${index}:` + '\u0000🙂'.repeat(10_000) }));
+  history.push({ role: 'developer', text: 'OBSOLETE PRIVATE SYSTEM PROMPT' });
+  const replay = conversationReplay(history);
+  assert.ok(Buffer.byteLength(replay) <= MAX_REPLAY_BYTES);
+  assert.match(replay, /omittedMessages/); assert.match(replay, /truncated/);
+  assert.ok(!replay.includes('OBSOLETE PRIVATE SYSTEM PROMPT'));
+  assert.deepEqual(history[0].text.length > 10_000, true);
 });
 test('restart marks running conversations interrupted', async () => {
   const { service } = setup(); const id = service.create().chat.id; await service.send(id, 'Hello', 'test-model'); service.save();
