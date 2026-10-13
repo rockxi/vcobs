@@ -31,12 +31,16 @@ services:
       context: ./chat-service
     restart: unless-stopped
     init: true
+    mem_limit: 1g
+    cpus: 2
+    pids_limit: 256
     environment:
       PORT: 3090
       VCOBS_CHAT_SERVICE_SECRET: ${VCOBS_CHAT_SERVICE_SECRET:-}
       VCOBS_CHAT_HTTPS_PROXY: http://chat-egress:3091
     volumes:
       - vcobs-chat:/data
+      - vcobs-workspace:/workspace
     networks:
       - chat-internal
     depends_on:
@@ -83,6 +87,7 @@ services:
 volumes:
   vcobs-files:
   vcobs-chat:
+  vcobs-workspace:
 
 networks:
   chat-internal:

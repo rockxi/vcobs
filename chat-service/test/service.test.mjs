@@ -6,7 +6,7 @@ import { mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { once } from 'node:events';
-import { ChatService, CodexRpc, createChatServer, proxyEnvironment, codexArgs, MAX_CHAT_SNAPSHOT_BYTES } from '../server.mjs';
+import { ChatService, CodexRpc, createChatServer, proxyEnvironment, codexArgs, MAX_CHAT_SNAPSHOT_BYTES, WORKSPACE_DIR } from '../server.mjs';
 const env = { PATH: process.env.PATH, VCOBS_CHAT_HTTPS_PROXY: 'http://proxy.internal:3091', VCOBS_CHAT_SERVICE_SECRET: 's'.repeat(40) };
 const temp = () => mkdtempSync(join(tmpdir(), 'vcobs-chat-test-'));
 class FakeRpc extends EventEmitter {
@@ -62,6 +62,8 @@ test('proxy is mandatory, validated, and credentials/API keys are not inherited'
   const child = proxyEnvironment({ ...env, OPENAI_API_KEY: 'secret', NO_PROXY: '*', CODEX_HOME: '/user' }, '/isolated');
   assert.equal(child.HTTPS_PROXY, env.VCOBS_CHAT_HTTPS_PROXY + '/'); assert.equal(child.NO_PROXY, ''); assert.equal(child.OPENAI_API_KEY, undefined); assert.equal(child.CODEX_HOME, '/isolated/codex');
   assert.ok(codexArgs().includes('features.responses_websockets=false'));
+  for (const setting of ['sandbox_mode="danger-full-access"', 'web_search="live"', 'features.shell_tool=true', 'features.unified_exec=true', 'shell_environment_policy.inherit="all"', 'approval_policy="never"']) assert.ok(codexArgs().includes(setting));
+  for (const feature of ['apps', 'enable_mcp_apps', 'multi_agent', 'plugins', 'request_permissions_tool']) assert.ok(codexArgs().includes(`features.${feature}=false`));
 });
 test('status is fail closed without proxy and never starts app-server', async () => {
   const { service, rpc } = setup({ env: {} }); const status = await service.status(); assert.equal(status.configured, false); assert.equal(status.ready, false); assert.equal(rpc.started, undefined); service.close();
@@ -84,12 +86,18 @@ test('model list uses server catalog and account reads are cached for polling', 
   assert.equal(rpc.calls.filter(c => c.method === 'account/read').length, 1);
   assert.deepEqual((await service.models()).models[0], { id: 'test-model', name: 'Test', description: '', default: true }); service.close();
 });
-test('conversation events persist, turn isolation, resume with no environment access', async () => {
+test('native tools use fixed workspace and owner-selected full access on new, resumed and subsequent turns without losing history', async () => {
   const { service, rpc } = setup(); const id = service.create().chat.id;
   await service.send(id, 'Привет', 'test-model');
-  assert.deepEqual(rpc.calls.find(c => c.method === 'thread/start').params.environments, []);
-  assert.deepEqual(rpc.calls.find(c => c.method === 'turn/start').params.environments, []);
-  assert.equal(rpc.calls.find(c => c.method === 'turn/start').params.sandboxPolicy.networkAccess, false);
+  const start = rpc.calls.find(c => c.method === 'thread/start').params;
+  assert.equal(start.cwd, WORKSPACE_DIR); assert.equal(start.sandbox, 'danger-full-access');
+  assert.equal(start.approvalPolicy, 'never'); assert.equal(start.config.web_search, 'live');
+  assert.equal(start.environments, undefined); assert.deepEqual(start.dynamicTools, []);
+  assert.match(start.developerInstructions, /native Codex terminal/);
+  const turn = rpc.calls.find(c => c.method === 'turn/start').params;
+  assert.equal(turn.cwd, WORKSPACE_DIR); assert.equal(turn.environments, undefined);
+  assert.deepEqual(turn.sandboxPolicy, { type: 'dangerFullAccess' });
+  assert.equal(turn.approvalPolicy, 'never');
   rpc.emit('notification', 'item/agentMessage/delta', { threadId: 'thread1', turnId: 'turn-wrong', itemId: 'a', delta: 'WRONG' });
   rpc.emit('notification', 'item/agentMessage/delta', { threadId: 'thread1', turnId: 'turn1', itemId: 'a', delta: 'Ответ' });
   rpc.emit('notification', 'turn/completed', { threadId: 'thread1', turn: { id: 'turn1', status: 'completed' } });
@@ -97,6 +105,9 @@ test('conversation events persist, turn isolation, resume with no environment ac
   const dir = service.dataDir; service.close();
   const next = setup({ dataDir: dir }); assert.equal(next.service.snapshot(id).messages[1].text, 'Ответ');
   await next.service.send(id, 'Ещё', 'test-model'); assert.ok(next.rpc.calls.some(c => c.method === 'thread/resume'));
+  const resume = next.rpc.calls.find(c => c.method === 'thread/resume').params;
+  assert.equal(resume.cwd, WORKSPACE_DIR); assert.equal(resume.sandbox, 'danger-full-access');
+  assert.equal(resume.config.web_search, 'live'); assert.equal(resume.approvalPolicy, 'never');
   next.rpc.emit('notification', 'turn/completed', { threadId: 'thread1', turn: { id: 'stale-turn', status: 'completed' } });
   assert.equal(next.service.snapshot(id).status, 'running');
   await next.service.stop(id); assert.equal(next.service.snapshot(id).status, 'idle');
@@ -173,6 +184,7 @@ test('JSONL RPC handshake, server requests rejected and timeout/exit reject pend
   let child;
   const spawnFn = (_cmd, args, options) => {
     assert.ok(args.includes('stdio://')); assert.equal(options.env.OPENAI_API_KEY, undefined);
+    assert.equal(options.cwd, WORKSPACE_DIR);
     child = new EventEmitter(); child.stdin = new PassThrough(); child.stdout = new PassThrough(); child.stderr = new PassThrough(); child.kill = () => {};
     child.stdin.on('data', data => {
       const value = JSON.parse(String(data));

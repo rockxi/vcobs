@@ -13,6 +13,24 @@ test("installs system trust roots for the native Codex HTTPS authentication clie
   assert.doesNotMatch(dockerfile, /NODE_TLS_REJECT_UNAUTHORIZED|danger_accept_invalid_certs|--insecure/);
 });
 
+test("keeps native Codex workspace persistent without host mounts, elevated privileges or custom executors", async () => {
+  const compose = await readFile(path.join(root, "docker-compose.yaml"), "utf8");
+  const dockerfile = await readFile(path.join(root, "chat-service/Dockerfile"), "utf8");
+  const chat = compose.slice(compose.indexOf("  chat-service:"), compose.indexOf("  # The Codex container"));
+  assert.match(chat, /- vcobs-workspace:\/workspace/);
+  assert.match(compose, /^  vcobs-workspace:$/m);
+  assert.match(dockerfile, /mkdir -p \/data\/codex \/workspace/);
+  assert.match(dockerfile, /chown -R node:node \/data \/workspace/);
+  assert.match(dockerfile, /ca-certificates bash curl git python3/);
+  assert.match(dockerfile, /USER node/);
+  assert.match(chat, /cap_drop:\n\s+- ALL/);
+  assert.match(chat, /no-new-privileges:true/);
+  assert.match(chat, /mem_limit: 1g/);
+  assert.match(chat, /cpus: 2/);
+  assert.match(chat, /pids_limit: 256/);
+  assert.doesNotMatch(chat, /privileged:|SYS_ADMIN|unconfined|docker\.sock|\.\/.*:\/workspace|executor/);
+});
+
 test("persists temporary shared files in the application data directory", async () => {
   const compose = await readFile(path.join(root, "docker-compose.yaml"), "utf8");
   assert.match(compose, /^\s*- vcobs-files:\/app\/data\/files$/m);

@@ -51,8 +51,43 @@ including private account credentials. Do not publish, log or commit its content
 Back it up as sensitive data. Restarting containers preserves this volume; never
 use `docker compose down -v` for an update. The chat container is separate from
 the application and receives neither CouchDB credentials nor the site's admin
-password/session secret. Shell access, MCP and filesystem tools are disabled
-for chats.
+password/session secret.
+
+## Native terminal, files and live web search
+
+Codex starts directly in `/workspace` and uses its own built-in terminal and
+file tools; no separate executor or custom sandbox is involved. The
+`vcobs-workspace` named volume is initialized with image-owned non-root
+permissions and persists files across container restarts. All chats share this
+folder, so simultaneous edits can conflict. It is not the host's `~/vcobs` or
+the Obsidian vault. Existing conversation history and account login stay in the
+original `vcobs-chat` volume. New threads, resumed threads and every new turn
+receive the same fixed working directory and permissions.
+
+**The owner explicitly selected `danger-full-access` with approval policy
+`never`. `/workspace` is a working directory, NOT an enforced filesystem
+boundary.** Codex commands can read and change other files accessible to the
+container's `node` user, including private Codex authentication and chat history
+under `/data`, and may inspect the service process environment. Prompt guidance
+asks it not to access credentials, but is not a security control. Do not give
+untrusted users this admin session or treat pasted third-party instructions as
+trusted commands. Live web/terminal access means data can leave through the
+proxy. The container still runs non-root, drops all capabilities, sets
+`no-new-privileges`, has no host-directory mounts or Docker socket, and has no
+direct Internet route. No host AppArmor or kernel settings are changed.
+Standard Docker limits cap this service at 1 GiB memory, 2 CPUs and 256 processes
+to contain accidental runaway terminal workloads. Workspace storage has no
+separate quota; avoid filling the host disk with generated or downloaded files.
+
+Terminal commands inherit only the existing allowlisted environment, including
+HTTP(S)/ALL proxy variables. `curl`, Git and Python are available; commands must
+use the Asus proxy. Some clients (for example Node's native `fetch`) do not
+automatically honor proxy environment variables and require their own proxy
+configuration. Proxy failure cannot create a direct Internet route. Native live
+web search is enabled through Codex/OpenAI; its requests also use Xray. MCP,
+plugins, apps, dynamic tools and multi-agent tools remain disabled. The browser
+API still accepts only chat messages and allowlisted chat operations, never
+arbitrary RPC, command, directory or permission parameters.
 
 ## Verification
 

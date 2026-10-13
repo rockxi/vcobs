@@ -29,12 +29,15 @@ export function proxyEnvironment(env, dataDir) {
     NO_PROXY: '', no_proxy: '',
   };
 }
-const FEATURES_OFF = ['shell_tool', 'unified_exec', 'js_repl', 'apps', 'enable_mcp_apps', 'multi_agent', 'multi_agent_v2', 'view_image', 'image_generation', 'tool_search', 'standalone_web_search', 'request_permissions_tool', 'deferred_executor', 'memories', 'responses_websockets', 'responses_websockets_v2', 'plugins', 'code_mode', 'code_mode_only'];
+export const WORKSPACE_DIR = '/workspace';
+const FEATURES_OFF = ['js_repl', 'apps', 'enable_mcp_apps', 'multi_agent', 'multi_agent_v2', 'view_image', 'image_generation', 'tool_search', 'standalone_web_search', 'request_permissions_tool', 'deferred_executor', 'memories', 'responses_websockets', 'responses_websockets_v2', 'plugins', 'code_mode', 'code_mode_only'];
 export function codexArgs() {
   return ['app-server', '--listen', 'stdio://', '--strict-config',
     '-c', 'forced_login_method="chatgpt"', '-c', 'cli_auth_credentials_store="file"',
-    '-c', 'model_provider="openai"', '-c', 'web_search="disabled"',
-    '-c', 'sandbox_mode="read-only"', '-c', 'approval_policy="never"',
+    '-c', 'model_provider="openai"', '-c', 'web_search="live"',
+    '-c', 'sandbox_mode="danger-full-access"', '-c', 'approval_policy="never"',
+    '-c', 'features.shell_tool=true', '-c', 'features.unified_exec=true',
+    '-c', 'shell_environment_policy.inherit="all"',
     '-c', 'mcp_servers={}', '-c', 'skills.include_instructions=false',
     '-c', 'skills.bundled.enabled=false', '-c', 'tools.update_plan.enabled=false',
     ...FEATURES_OFF.flatMap(name => ['-c', `features.${name}=false`])];
@@ -52,8 +55,7 @@ export class CodexRpc extends EventEmitter {
   async initialize() {
     const childEnv = proxyEnvironment(this.env, this.dataDir);
     mkdirSync(childEnv.CODEX_HOME, { recursive: true, mode: 0o700 });
-    const empty = join(this.dataDir, 'empty'); mkdirSync(empty, { recursive: true, mode: 0o700 });
-    this.child = this.spawnFn('codex', codexArgs(), { cwd: empty, env: childEnv, stdio: ['pipe', 'pipe', 'pipe'] });
+    this.child = this.spawnFn('codex', codexArgs(), { cwd: WORKSPACE_DIR, env: childEnv, stdio: ['pipe', 'pipe', 'pipe'] });
     const child = this.child;
     let buffer = '';
     child.stdout.setEncoding('utf8');
@@ -80,8 +82,9 @@ export class CodexRpc extends EventEmitter {
   }
   receive(message) {
     if (message.method && message.id !== undefined) {
-      // No approval, shell, dynamic tool, token refresh or arbitrary client action.
-      this.write({ id: message.id, error: { code: -32601, message: 'This personal chat client does not permit tools or approval requests.' } });
+      // Native shell/file tools execute within Codex, not as client requests.
+      // Never accept dynamic tools, approvals, token refresh or arbitrary client actions.
+      this.write({ id: message.id, error: { code: -32601, message: 'This personal chat client does not permit client tools or approval requests.' } });
       this.emit('forbidden', message.method); return;
     }
     if (message.id !== undefined) {
@@ -105,8 +108,8 @@ export class CodexRpc extends EventEmitter {
     this.pending.clear(); child?.kill('SIGKILL'); this.emit('closed');
   }
 }
-const instructions = 'You are a conversational assistant in a private text-only chat. Answer the user directly. You have no tools, files, terminal, browser, plugins, MCP, or system access. Never claim to execute actions.';
-const safeThreadParams = () => ({ sandbox: 'read-only', approvalPolicy: 'never', developerInstructions: instructions, config: { web_search: 'disabled' } });
+const instructions = 'You are an assistant in the owner’s private admin chat. Use your native Codex terminal, file editing and live web search tools when useful. Your working directory is /workspace, a persistent folder shared by these chats. Keep user work there unless explicitly asked otherwise. Terminal internet requests must use the configured HTTP(S) proxy. This container has no host filesystem mounts or Docker socket. Never read, expose, modify or transmit account credentials, /data/codex, /data/chats.json, or service secrets. These instructions are guidance, not a filesystem security boundary: danger-full-access was explicitly selected by the owner. Report actions honestly and do not claim work you have not performed.';
+const safeThreadParams = () => ({ cwd: WORKSPACE_DIR, sandbox: 'danger-full-access', approvalPolicy: 'never', developerInstructions: instructions, config: { web_search: 'live' } });
 export class ChatService {
   constructor({ env = process.env, rpc, dataDir = env.VCOBS_CHAT_DATA_DIR || '/data' } = {}) {
     this.env = env; this.dataDir = resolve(dataDir); mkdirSync(this.dataDir, { recursive: true, mode: 0o700 });
@@ -224,7 +227,7 @@ export class ChatService {
       await this.ready();
       if (!(await this.models()).models.some(item => item.id === model)) throw new HttpError(400, 'Choose an available model.');
       if (!chat.threadId) {
-        const result = await this.rpc.request('thread/start', { ...safeThreadParams(), model, environments: [], dynamicTools: [], ephemeral: false });
+        const result = await this.rpc.request('thread/start', { ...safeThreadParams(), model, dynamicTools: [], ephemeral: false });
         chat.threadId = result.thread.id; this.loaded.add(chat.threadId); this.save();
       } else if (!this.loaded.has(chat.threadId)) {
         await this.rpc.request('thread/resume', { ...safeThreadParams(), threadId: chat.threadId }); this.loaded.add(chat.threadId);
@@ -233,7 +236,7 @@ export class ChatService {
       chat.messages.push({ id: randomUUID(), role: 'user', text: text.trim(), createdAt: now });
       if (chat.messages.length === 1 && chat.title === 'Новый чат') chat.title = text.trim().replace(/\s+/g, ' ').slice(0, 70);
       this.save();
-      const result = await this.rpc.request('turn/start', { threadId: chat.threadId, input: [{ type: 'text', text: text.trim() }], model, environments: [], approvalPolicy: 'never', sandboxPolicy: { type: 'readOnly', networkAccess: false } });
+      const result = await this.rpc.request('turn/start', { threadId: chat.threadId, input: [{ type: 'text', text: text.trim() }], model, cwd: WORKSPACE_DIR, approvalPolicy: 'never', sandboxPolicy: { type: 'dangerFullAccess' } });
       if (this.sendGenerations.get(id) === generation && chat.status === 'running') chat.turnId = result.turn.id;
       this.save(); return { chat: this.summary(chat) };
     } catch (error) {
