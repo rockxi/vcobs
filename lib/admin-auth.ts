@@ -4,6 +4,13 @@ function scrypt(password: string, salt: Buffer, length: number, options: { N: nu
   return new Promise((resolve, reject) => scryptCallback(password, salt, length, options, (error, derived) => error ? reject(error) : resolve(derived)));
 }
 export const ADMIN_SESSION_COOKIE = "vcobs_admin_session";
+export function adminSessionFromRequest(request: Request): string | undefined {
+  for (const part of (request.headers.get("cookie") ?? "").split(";")) {
+    const [name, ...value] = part.trim().split("=");
+    if (name === ADMIN_SESSION_COOKIE) return value.join("=") || undefined;
+  }
+  return undefined;
+}
 const SESSION_TTL_SECONDS = 8 * 60 * 60;
 const HASH_LENGTH = 64, MAX_LOGIN_ATTEMPTS = 5, MAX_GLOBAL_LOGIN_ATTEMPTS = 50, LOGIN_WINDOW_MS = 15 * 60 * 1000;
 const attempts = new Map<string, { count: number; resetAt: number }>();

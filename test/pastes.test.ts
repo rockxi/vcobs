@@ -15,7 +15,7 @@ test.afterEach(async () => { await rm(testDirectory, { recursive: true, force: t
 test("old paste records without editable remain read-only", async () => {
   const createdAt = new Date().toISOString();
   await writeFile(path.join(testDirectory, "legacy123.json"), JSON.stringify({ text: "old", createdAt }));
-  assert.deepEqual(await pastes.getPaste("legacy123"), { text: "old", createdAt, editable: false });
+  assert.deepEqual(await pastes.getPaste("legacy123"), { text: "old", createdAt, editable: false, adminOnly: false });
   assert.equal(await pastes.updatePaste("legacy123", "new"), "read-only");
 });
 
@@ -85,7 +85,7 @@ test("admin editability changes persist for current and legacy records", async (
   const createdAt = new Date().toISOString();
   await writeFile(path.join(testDirectory, "legacy456.json"), JSON.stringify({ text: "old", createdAt }));
   assert.equal(await pastes.setPasteEditable("legacy456", true), "updated");
-  assert.deepEqual(await pastes.getPaste("legacy456"), { text: "old", createdAt, editable: true });
+  assert.deepEqual(await pastes.getPaste("legacy456"), { text: "old", createdAt, editable: true, adminOnly: false });
   assert.equal(await pastes.setPasteEditable("unknown12", true), "not-found");
   assert.equal(await pastes.setPasteEditable("legacy456", "true"), "not-found");
 });
@@ -99,6 +99,34 @@ test("lists only active valid pastes as metadata in stable newest-first order", 
   await writeFile(path.join(testDirectory, ".newer123.backup"), "backup");
   const records = await pastes.listActivePastes(now);
   assert.deepEqual(records.map((record) => record.slug), ["newer123", "older123"]);
-  assert.deepEqual(records[0], { slug: "newer123", createdAt: new Date(now - 1_000).toISOString(), expiresAt: new Date(now - 1_000 + pastes.PASTE_TTL_MS).toISOString(), length: 6, editable: true });
+  assert.deepEqual(records[0], { slug: "newer123", createdAt: new Date(now - 1_000).toISOString(), expiresAt: new Date(now - 1_000 + pastes.PASTE_TTL_MS).toISOString(), length: 6, editable: true, adminOnly: false });
   assert.equal((await readdir(testDirectory)).includes("expired123.json"), true);
+});
+
+test("private pastes persist access restrictions across text and editability changes", async () => {
+  const slug = await pastes.createPaste("private", true, true);
+  const original = await pastes.getPaste(slug);
+  assert.equal(original?.adminOnly, true);
+  assert.equal(JSON.parse(await readFile(path.join(testDirectory, `${slug}.json`), "utf8")).adminOnly, true);
+  assert.equal(await pastes.updatePaste(slug, "guest replacement"), "not-found");
+  assert.equal(await pastes.updatePaste(slug, ""), "not-found");
+  assert.equal(await pastes.updatePaste(slug, "admin replacement", true), "updated");
+  assert.equal((await pastes.getPaste(slug))?.adminOnly, true);
+  assert.equal((await pastes.getPaste(slug))?.createdAt, original?.createdAt);
+  assert.equal(await pastes.setPasteEditable(slug, false), "updated");
+  assert.equal(await pastes.updatePaste(slug, "admin replacement", true), "read-only");
+  assert.equal((await pastes.getPaste(slug))?.adminOnly, true);
+  const inventory = await pastes.listActivePastes();
+  assert.equal(inventory[0].adminOnly, true);
+  assert.equal("text" in inventory[0], false);
+});
+
+test("malformed stored privacy flags fail closed instead of being treated as public", async () => {
+  for (const adminOnly of [null, "true", 1, {}, []]) {
+    await writeFile(path.join(testDirectory, "malformed123.json"), JSON.stringify({ text: "private", createdAt: new Date().toISOString(), editable: true, adminOnly }));
+    assert.equal(await pastes.getPaste("malformed123"), null);
+    assert.equal(await pastes.updatePaste("malformed123", "replacement", true), "not-found");
+    assert.equal(await pastes.setPasteEditable("malformed123", false), "not-found");
+    assert.deepEqual(await pastes.listActivePastes(), []);
+  }
 });

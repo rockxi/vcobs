@@ -30,10 +30,11 @@ export default async function NotePage({ params }: { params: Promise<{ slug: str
   if (!note) {
     const paste = await getPaste(slug);
     if (paste) {
+      if (paste.adminOnly && !validateAdminSession((await cookies()).get(ADMIN_SESSION_COOKIE)?.value)) notFound();
       const created = new Intl.DateTimeFormat("ru-RU", { dateStyle: "long", timeStyle: "short" }).format(new Date(paste.createdAt));
       return <main className="reader-shell">
-        <header className="reader-header"><Link className="back-link" href="/" aria-label="Создать новую вставку">← <span>vcobs</span></Link><span className="public-badge"><i /> по ссылке</span></header>
-        <article className="note-paper paste-paper"><div className="note-context"><span>{paste.editable ? "Доступно редактирование по ссылке" : "Удалится через 12 часов"}</span><time>Создано {created}</time></div>{paste.editable ? <EditablePaste initialText={paste.text} slug={slug} /> : <><PasteCopyButton text={paste.text} /><pre className="paste-content">{paste.text}</pre></>}</article>
+        <header className="reader-header"><Link className="back-link" href="/" aria-label="Создать новую вставку">← <span>vcobs</span></Link><span className="public-badge"><i /> {paste.adminOnly ? "только администратору" : "по ссылке"}</span></header>
+        <article className="note-paper paste-paper"><div className="note-context"><span>{paste.editable ? paste.adminOnly ? "Редактирование только для администратора" : "Доступно редактирование по ссылке" : "Удалится через 12 часов"}</span><time>Создано {created}</time></div>{paste.editable ? <EditablePaste initialText={paste.text} slug={slug} /> : <><PasteCopyButton text={paste.text} /><pre className="paste-content">{paste.text}</pre></>}</article>
         <footer className="reader-footer"><Link href="/">Создать свою ссылку</Link> <span>·</span> vcobs</footer>
       </main>;
     }

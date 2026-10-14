@@ -3,6 +3,8 @@ import { getPublicNotes } from "@/lib/couch";
 import { PasteForm } from "@/components/paste-form";
 import { VaultTree } from "@/components/vault-tree";
 import { getEnabledThemes } from "@/lib/theme-settings";
+import { cookies } from "next/headers";
+import { ADMIN_SESSION_COOKIE, validateAdminSession } from "@/lib/admin-auth";
 
 // CouchDB credentials exist only at container runtime, never while the image builds.
 export const dynamic = "force-dynamic";
@@ -13,6 +15,7 @@ function formatDate(timestamp?: number) {
 
 export default async function HomePage() {
   const [notes, enabledThemes] = await Promise.all([getPublicNotes(), getEnabledThemes()]);
+  const isAdmin = validateAdminSession((await cookies()).get(ADMIN_SESSION_COOKIE)?.value);
   const topicNotes = notes.filter((note) => note.topic);
   return (
     <div className="vault-layout">
@@ -28,7 +31,7 @@ export default async function HomePage() {
       </section>
       <section className="paste-section">
         <div className="paste-intro"><p className="eyebrow">quick share</p><h2>Отправьте текст или файл</h2><p>Подойдёт для заметок, логов и файлов до 500 МБ. Ссылка и содержимое автоматически удалятся через 12 часов.</p></div>
-        <PasteForm />
+        <PasteForm isAdmin={isAdmin} />
       </section>
       <section className="note-grid" aria-label="Опубликованные заметки">
         {topicNotes.map((note) => (

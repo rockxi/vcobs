@@ -7,13 +7,14 @@ export const PASTE_TTL_MS = 12 * 60 * 60 * 1000;
 const DATA_DIR = process.env.PASTE_DATA_DIR ?? path.join(process.cwd(), "data", "pastes");
 const SLUG_PATTERN = /^[a-zA-Z0-9_-]{8,32}$/;
 const slugLocks = new Map<string, Promise<void>>();
-export type Paste = { text: string; createdAt: string; editable: boolean };
+export type Paste = { text: string; createdAt: string; editable: boolean; adminOnly: boolean };
 export type PasteInventoryItem = {
   slug: string;
   createdAt: string;
   expiresAt: string;
   length: number;
   editable: boolean;
+  adminOnly: boolean;
 };
 
 function isExpired(paste: Paste, now = Date.now()) {
@@ -40,13 +41,15 @@ async function readCurrentPaste(slug: string): Promise<Paste | null> {
   try {
     const value = JSON.parse(await readFile(path.join(DATA_DIR, `${slug}.json`), "utf8")) as Partial<Paste>;
     if (typeof value.text !== "string" || typeof value.createdAt !== "string") return null;
-    return { text: value.text, createdAt: value.createdAt, editable: value.editable === true };
+    // Legacy records are public, but malformed privacy flags must never downgrade a private note.
+    if ("adminOnly" in value && typeof value.adminOnly !== "boolean") return null;
+    return { text: value.text, createdAt: value.createdAt, editable: value.editable === true, adminOnly: value.adminOnly === true };
   } catch {
     return null;
   }
 }
 
-export async function createPaste(text: string, editable = false) {
+export async function createPaste(text: string, editable = false, adminOnly = false) {
   await mkdir(DATA_DIR, { recursive: true });
   for (let attempt = 0; attempt < 5; attempt += 1) {
     const slug = randomBytes(9).toString("base64url");
@@ -56,7 +59,7 @@ export async function createPaste(text: string, editable = false) {
     });
     if (!file) continue;
     try {
-      await file.writeFile(JSON.stringify({ text, createdAt: new Date().toISOString(), editable } satisfies Paste), "utf8");
+      await file.writeFile(JSON.stringify({ text, createdAt: new Date().toISOString(), editable, adminOnly } satisfies Paste), "utf8");
     } finally {
       await file.close();
     }
@@ -98,7 +101,7 @@ export async function listActivePastes(now = Date.now()): Promise<PasteInventory
     const paste = await readCurrentPaste(slug);
     if (!paste || isExpired(paste, now)) return null;
     const createdAt = Date.parse(paste.createdAt);
-    return { slug, createdAt: paste.createdAt, expiresAt: new Date(createdAt + PASTE_TTL_MS).toISOString(), length: paste.text.length, editable: paste.editable };
+    return { slug, createdAt: paste.createdAt, expiresAt: new Date(createdAt + PASTE_TTL_MS).toISOString(), length: paste.text.length, editable: paste.editable, adminOnly: paste.adminOnly };
   }));
   return records.filter((record): record is PasteInventoryItem => record !== null).sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt) || a.slug.localeCompare(b.slug));
 }
@@ -133,9 +136,7 @@ async function writePasteAtomically(slug: string, paste: Paste): Promise<boolean
   }
 }
 
-export async function updatePaste(slug: string, text: unknown): Promise<UpdatePasteResult> {
-  if (typeof text !== "string" || !text.trim()) return "invalid-text";
-  if (text.length > MAX_PASTE_LENGTH) return "too-large";
+export async function updatePaste(slug: string, text: unknown, adminPermission = false): Promise<UpdatePasteResult> {
   if (!SLUG_PATTERN.test(slug)) return "not-found";
   return withSlugLock(slug, async () => {
     const paste = await readCurrentPaste(slug);
@@ -143,6 +144,9 @@ export async function updatePaste(slug: string, text: unknown): Promise<UpdatePa
       if (paste) await unlink(path.join(DATA_DIR, `${slug}.json`)).catch(() => undefined);
       return "not-found";
     }
+    if (paste.adminOnly && !adminPermission) return "not-found";
+    if (typeof text !== "string" || !text.trim()) return "invalid-text";
+    if (text.length > MAX_PASTE_LENGTH) return "too-large";
     if (!paste.editable) return "read-only";
 
     return (await writePasteAtomically(slug, { ...paste, text })) ? "updated" : "not-found";

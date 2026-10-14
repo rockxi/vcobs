@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { updatePaste } from "@/lib/pastes";
+import { adminSessionFromRequest, originIsSameSite, validateAdminSession } from "@/lib/admin-auth";
 
 export async function PUT(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   let body: unknown;
@@ -7,7 +8,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ slug
     return NextResponse.json({ error: "Некорректный запрос." }, { status: 400 });
   }
   const text = typeof body === "object" && body !== null && "text" in body ? (body as { text?: unknown }).text : undefined;
-  const result = await updatePaste((await params).slug, text);
+  const adminPermission = validateAdminSession(adminSessionFromRequest(request)) && originIsSameSite(request);
+  const result = await updatePaste((await params).slug, text, adminPermission);
   if (result === "updated") return NextResponse.json({ ok: true });
   if (result === "invalid-text") return NextResponse.json({ error: "Текст не должен быть пустым." }, { status: 400 });
   if (result === "too-large") return NextResponse.json({ error: "Текст длиннее 1 000 000 символов." }, { status: 413 });
