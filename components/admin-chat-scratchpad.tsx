@@ -75,7 +75,7 @@ export function AdminChatScratchpad() {
   return <div className={styles.scratchpad}>
     <div className={styles.scratchpadControls}>
       <label htmlFor="admin-chat-scratchpad" className={styles.srOnly}>Личное поле администратора</label>
-      <textarea id="admin-chat-scratchpad" rows={2} maxLength={32_000} disabled={!loaded} value={text} placeholder="Личное поле…" aria-describedby="admin-chat-scratchpad-status" onBlur={() => { if (loaded) void save(); }} onChange={(event) => {
+      <textarea id="admin-chat-scratchpad" rows={2} maxLength={1_000_000} disabled={!loaded} value={text} placeholder="Личное поле…" aria-describedby="admin-chat-scratchpad-status" onBlur={() => { if (loaded) void save(); }} onChange={(event) => {
         latest.current = event.target.value; setText(event.target.value); setCopyState(""); setError(""); setState("Не сохранено");
         clearTimeout(timer.current); timer.current = setTimeout(() => void save(), 650);
       }} />

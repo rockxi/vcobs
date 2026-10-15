@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-export const CHAT_SCRATCHPAD_LIMIT = 32_000;
+export const CHAT_SCRATCHPAD_LIMIT = 1_000_000;
 const filePath = path.join(process.env.PASTE_DATA_DIR ?? path.join(process.cwd(), "data", "pastes"), ".admin-chat-scratchpad.json");
 
 export async function getChatScratchpad(): Promise<string> {

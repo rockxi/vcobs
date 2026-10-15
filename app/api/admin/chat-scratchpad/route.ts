@@ -27,14 +27,14 @@ export async function PUT(request: Request) {
       const { done, value: chunk } = await reader.read();
       if (done) break;
       length += chunk.byteLength;
-      if (length > CHAT_SCRATCHPAD_LIMIT * 6 + 256) { await reader.cancel(); return json({ error: "Максимум 32 000 символов." }, 413); }
+      if (length > CHAT_SCRATCHPAD_LIMIT * 6 + 256) { await reader.cancel(); return json({ error: "Максимум 1 000 000 символов." }, 413); }
       chunks.push(chunk);
     }
     value = JSON.parse(Buffer.concat(chunks).toString("utf8"));
   } catch { return json({ error: "Некорректный запрос." }, 400); }
   finally { reader.releaseLock(); }
   if (!value || typeof value !== "object" || !("text" in value) || typeof value.text !== "string") return json({ error: "Ожидается текст." }, 400);
-  if (value.text.length > CHAT_SCRATCHPAD_LIMIT) return json({ error: "Максимум 32 000 символов." }, 413);
+  if (value.text.length > CHAT_SCRATCHPAD_LIMIT) return json({ error: "Максимум 1 000 000 символов." }, 413);
   try { await saveChatScratchpad(value.text); return json({ saved: true }); }
   catch { return json({ error: "Не удалось сохранить поле. Текст остался в браузере; повторите попытку." }, 500); }
 }

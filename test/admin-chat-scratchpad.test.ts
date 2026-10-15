@@ -63,11 +63,27 @@ test("scratchpad validates data and character/body limits without damaging saved
   for (const body of [null, [], {}, { text: null }, { text: 3 }]) assert.equal((await route.PUT(request("PUT", body))).status, 400);
   assert.equal((await route.PUT(request("PUT", { text: "x" }, undefined, "https://vcobs.test", "text/plain"))).status, 415);
   const maximum = "п".repeat(store.CHAT_SCRATCHPAD_LIMIT);
+  assert.equal(store.CHAT_SCRATCHPAD_LIMIT, 1_000_000);
   assert.equal((await route.PUT(request("PUT", { text: maximum }))).status, 200);
-  assert.equal((await route.PUT(request("PUT", { text: maximum + "!" }))).status, 413);
-  assert.equal((await route.PUT(request("PUT", { text: "x", padding: "x".repeat(200_000) }))).status, 413);
+  assert.deepEqual(await (await route.GET(request())).json(), { text: maximum });
+  const overflow = await route.PUT(request("PUT", { text: maximum + "!" }));
+  assert.equal(overflow.status, 413);
+  assert.equal((await overflow.json()).error, "Максимум 1 000 000 символов.");
+  assert.equal((await route.PUT(request("PUT", { text: "x", padding: "x".repeat(store.CHAT_SCRATCHPAD_LIMIT * 6 + 256) }))).status, 413);
   assert.equal(await store.getChatScratchpad(), maximum);
   await assert.rejects(store.saveChatScratchpad(maximum + "!"));
+});
+
+test("scratchpad accepts one million characters with maximum JSON escaping", async () => {
+  const text = "\u0000".repeat(store.CHAT_SCRATCHPAD_LIMIT);
+  assert.equal((await route.PUT(request("PUT", { text }))).status, 200);
+  assert.equal(await store.getChatScratchpad(), text);
+});
+
+test("scratchpad keeps existing 32,000-character storage compatible", async () => {
+  const text = "я".repeat(32_000);
+  await writeFile(path.join(directory, ".admin-chat-scratchpad.json"), JSON.stringify({ text }));
+  assert.deepEqual(await (await route.GET(request())).json(), { text });
 });
 
 test("corrupt scratchpad fails visibly rather than resetting saved content", async () => {
@@ -87,6 +103,7 @@ test("scratchpad header stays separate from chat requests and exposes fixed scro
   assert.match(component, /const endpoint = "\/api\/admin\/chat-scratchpad"/);
   assert.match(component, /navigator\.clipboard\.writeText\(latest.current\)/);
   assert.match(component, /disabled=\{!loaded\}/);
+  assert.match(component, /maxLength=\{1_000_000\}/);
   assert.match(component, /while \(latest.current !== saved.current\)/);
   assert.match(component, /attempt !== loadAttempt.current/);
   assert.match(workspace, /<AdminChatScratchpad \/><label className=\{styles.modelLabel\}/);
