@@ -107,5 +107,12 @@ test("scratchpad header stays separate from chat requests and exposes fixed scro
   assert.match(component, /while \(latest.current !== saved.current\)/);
   assert.match(component, /attempt !== loadAttempt.current/);
   assert.match(workspace, /<AdminChatScratchpad \/><label className=\{styles.modelLabel\}/);
-  assert.match(css, /height:44px; min-height:44px; max-height:44px; resize:none; overflow:auto/);
+  assert.match(css, /\.scratchpad \{ flex:0 1 220px; min-width:180px; max-width:220px; \}/);
+  assert.match(css, /width:110px; height:32px; min-height:32px; max-height:32px; resize:none; overflow:auto/);
+  const tablet = css.split("@media(min-width:761px) and (max-width:1100px)")[1].split("@media(max-width:760px)")[0];
+  assert.doesNotMatch(tablet, /\.scratchpad\s*\{/);
+  const mobile = css.split("@media(max-width:760px)")[1];
+  assert.match(mobile, /\.scratchpad \{ flex:0 1 190px; min-width:0; \}/);
+  assert.match(mobile, /\.scratchpadControls textarea \{ width:80px; height:44px; min-height:44px; max-height:44px; font-size:16px; \}/);
+  assert.match(mobile, /\.scratchpadControls button \{ height:44px;/);
 });

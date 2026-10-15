@@ -22,11 +22,11 @@
 .heading { flex:1; min-width:0; }
 .heading h1 { margin:0 0 4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:600; font-size:16px; line-height:1.3; }
 .connection { font-size:12px; color:var(--muted); }
-.scratchpad { flex:0 1 300px; min-width:180px; max-width:300px; }
+.scratchpad { flex:0 1 220px; min-width:180px; max-width:220px; }
 .scratchpadControls { display:flex; align-items:center; gap:6px; }
-.scratchpadControls textarea { display:block; flex:1; min-width:0; width:190px; height:44px; min-height:44px; max-height:44px; resize:none; overflow:auto; padding:6px 8px; border:1px solid var(--line); border-radius:9px; background:var(--surface); color:var(--ink); font-size:12px; line-height:15px; }
+.scratchpadControls textarea { display:block; flex:1; min-width:0; width:110px; height:32px; min-height:32px; max-height:32px; resize:none; overflow:auto; padding:6px 8px; border:1px solid var(--line); border-radius:9px; background:var(--surface); color:var(--ink); font-size:12px; line-height:15px; }
 .scratchpadControls textarea::placeholder { color:var(--muted); }
-.scratchpadControls button { flex-shrink:0; border:1px solid var(--line); border-radius:9px; padding:9px 10px; background:var(--surface); color:var(--ink); font-size:12px; }
+.scratchpadControls button { flex-shrink:0; height:32px; border:1px solid var(--line); border-radius:9px; padding:5px 8px; background:var(--surface); color:var(--ink); font-size:12px; }
 .scratchpadStatus { display:flex; align-items:baseline; gap:6px; min-height:14px; padding-top:3px; font-size:10px; line-height:1.3; color:var(--muted); overflow-wrap:anywhere; }
 .scratchpadStatus button { border:0; padding:0; background:transparent; color:var(--accent); font-size:10px; text-decoration:underline; }
 .modelLabel { max-width:45%; }
@@ -82,7 +82,6 @@
 @media(min-width:761px) and (max-width:1100px) {
   .toolbar { flex-wrap:wrap; gap:10px; padding:12px 20px; }
   .heading { flex-basis:calc(100% - 60px); }
-  .scratchpad { flex:1; max-width:none; }
   .modelLabel { max-width:45%; }
 }
 @media(max-width:760px) {
@@ -94,9 +93,9 @@
   .menuButton { display:block; background:transparent; border:0; color:var(--ink); padding:8px 0; }
   .toolbar { padding:12px 16px; min-height:72px; gap:10px; flex-wrap:wrap; }
   .heading { flex-basis:calc(100% - 38px); }
-  .scratchpad { flex:1 1 170px; min-width:0; max-width:none; }
-  .scratchpadControls textarea { width:80px; font-size:16px; }
-  .scratchpadControls button { padding:9px 7px; font-size:11px; }
+  .scratchpad { flex:0 1 190px; min-width:0; }
+  .scratchpadControls textarea { width:80px; height:44px; min-height:44px; max-height:44px; font-size:16px; }
+  .scratchpadControls button { height:44px; padding:9px 7px; font-size:11px; }
   .heading h1 { font-size:14px; }
   .connection { font-size:10px; }
   .modelLabel { max-width:37%; }
