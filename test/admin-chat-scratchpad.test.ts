@@ -96,19 +96,19 @@ test("corrupt scratchpad fails visibly rather than resetting saved content", asy
   assert.equal(await store.getChatScratchpad(), "recovered");
 });
 
-test("scratchpad header stays separate from chat requests and exposes fixed scrollable input", () => {
+test("scratchpad header stays separate from chat requests and exposes compact clipboard buttons", () => {
   const component = readFileSync(new URL("../components/admin-chat-scratchpad.tsx", import.meta.url), "utf8");
   const workspace = readFileSync(new URL("../components/admin-chat-workspace.tsx", import.meta.url), "utf8");
   const css = readFileSync(new URL("../app/admin/chat/chat.module.css", import.meta.url), "utf8");
   assert.match(component, /const endpoint = "\/api\/admin\/chat-scratchpad"/);
   assert.match(component, /navigator\.clipboard\.writeText\(latest.current\)/);
-  assert.match(component, /disabled=\{!loaded\}/);
-  assert.match(component, /maxLength=\{1_000_000\}/);
+  assert.match(component, /navigator\.clipboard\.readText\(\)/);
+  assert.doesNotMatch(component, /<textarea/);
+  assert.match(component, /value.length > 1_000_000/);
   assert.match(component, /while \(latest.current !== saved.current\)/);
   assert.match(component, /attempt !== loadAttempt.current/);
   assert.match(workspace, /<AdminChatScratchpad \/><label className=\{styles.modelLabel\}/);
-  assert.match(css, /\.scratchpad \{ flex:0 1 220px; min-width:180px; max-width:220px; \}/);
-  assert.match(css, /width:110px; height:32px; min-height:32px; max-height:32px; resize:none; overflow:auto/);
+  assert.match(css, /\.scratchpad \{ flex:0 1 140px; min-width:76px; max-width:140px; \}/);
   assert.match(css, /\.toolbar \{[^}]*align-items:flex-start/);
   assert.match(css, /\.scratchpadControls \{[^}]*align-items:center;[^}]*min-height:36px/);
   assert.match(css, /\.modelLabel select \{[^}]*height:36px/);
@@ -119,9 +119,8 @@ test("scratchpad header stays separate from chat requests and exposes fixed scro
   const tablet = css.split("@media(min-width:761px) and (max-width:1100px)")[1].split("@media(max-width:760px)")[0];
   assert.doesNotMatch(tablet, /\.scratchpad\s*\{/);
   const mobile = css.split("@media(max-width:760px)")[1];
-  assert.match(mobile, /\.scratchpad \{ flex:0 1 190px; min-width:0; \}/);
-  assert.match(mobile, /\.scratchpadControls textarea \{ width:80px; height:44px; min-height:44px; max-height:44px; font-size:16px; \}/);
-  assert.match(mobile, /\.scratchpadControls button \{ height:44px;/);
+  assert.match(mobile, /\.scratchpad \{ flex:0 1 140px; min-width:0; \}/);
+  assert.match(mobile, /\.scratchpadControls button \{ min-width:44px; height:44px;/);
   assert.match(mobile, /\.scratchpadControls \{ min-height:44px; \}/);
   assert.match(mobile, /\.modelLabel select \{ height:44px;/);
 });

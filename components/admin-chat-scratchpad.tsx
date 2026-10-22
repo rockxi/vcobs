@@ -21,7 +21,7 @@ export function AdminChatScratchpad() {
   const latest = useRef("");
   const saved = useRef("");
   const saving = useRef(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const [pasting, setPasting] = useState(false);
   const copyAttempt = useRef(0);
   const loadAttempt = useRef(0);
   const mounted = useRef(true);
@@ -39,7 +39,6 @@ export function AdminChatScratchpad() {
   }, []);
 
   const save = useCallback(async () => {
-    clearTimeout(timer.current);
     if (saving.current || latest.current === saved.current) return;
     saving.current = true;
     setError(""); setState("Сохраняю…");
@@ -59,7 +58,7 @@ export function AdminChatScratchpad() {
   useEffect(() => {
     mounted.current = true;
     void load();
-    return () => { mounted.current = false; loadAttempt.current += 1; clearTimeout(timer.current); };
+    return () => { mounted.current = false; loadAttempt.current += 1; };
   }, [load]);
 
   async function copy() {
@@ -68,18 +67,32 @@ export function AdminChatScratchpad() {
       await navigator.clipboard.writeText(latest.current);
       if (mounted.current && attempt === copyAttempt.current) setCopyState("Скопировано");
     } catch {
-      if (mounted.current && attempt === copyAttempt.current) setCopyState("Не удалось скопировать. Выделите текст и нажмите Ctrl/Cmd+C.");
+      if (mounted.current && attempt === copyAttempt.current) setCopyState("Не удалось скопировать. Разрешите доступ к буферу обмена и повторите.");
+    }
+  }
+
+  async function paste() {
+    setPasting(true);
+    setCopyState("");
+    setError("");
+    try {
+      const value = await navigator.clipboard.readText();
+      if (!mounted.current) return;
+      if (value.length > 1_000_000) throw new Error("Максимум 1 000 000 символов.");
+      latest.current = value;
+      setText(value);
+      await save();
+    } catch (cause) {
+      if (mounted.current) setCopyState(cause instanceof Error && cause.message === "Максимум 1 000 000 символов." ? cause.message : "Не удалось вставить. Разрешите доступ к буферу обмена и повторите.");
+    } finally {
+      if (mounted.current) setPasting(false);
     }
   }
 
   return <div className={styles.scratchpad}>
     <div className={styles.scratchpadControls}>
-      <label htmlFor="admin-chat-scratchpad" className={styles.srOnly}>Личное поле администратора</label>
-      <textarea id="admin-chat-scratchpad" rows={2} maxLength={1_000_000} disabled={!loaded} value={text} placeholder="Личное поле…" aria-describedby="admin-chat-scratchpad-status" onBlur={() => { if (loaded) void save(); }} onChange={(event) => {
-        latest.current = event.target.value; setText(event.target.value); setCopyState(""); setError(""); setState("Не сохранено");
-        clearTimeout(timer.current); timer.current = setTimeout(() => void save(), 650);
-      }} />
-      <button type="button" disabled={!loaded || !text} onClick={() => void copy()}>Скопировать</button>
+      <button type="button" disabled={!loaded || pasting} title="Вставить из буфера обмена" aria-label="Вставить из буфера обмена" aria-describedby="admin-chat-scratchpad-status" onClick={() => void paste()}>В</button>
+      <button type="button" disabled={!loaded || !text || pasting} title="Скопировать" aria-label="Скопировать" onClick={() => void copy()}>С</button>
     </div>
     <div id="admin-chat-scratchpad-status" className={styles.scratchpadStatus} role="status" aria-live="polite">
       <span>{error || copyState || state}</span>{error && <button type="button" onClick={() => void (loaded ? save() : load())}>Повторить</button>}
