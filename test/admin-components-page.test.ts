@@ -27,7 +27,8 @@ test("component library has an accessible selector backed by the shared vcobs th
   assert.match(librarySource, /<select id="vcobs-theme"/);
   assert.match(librarySource, /onChange=\{\(event\) => setThemeId/);
   assert.match(librarySource, /aria-describedby="vcobs-theme-description"/);
-  assert.match(librarySource, /themeCssVariables\(theme\)/);
+  assert.match(librarySource, /useTheme\(\)/);
+  assert.doesNotMatch(librarySource, /themeCssVariables\(theme\)|useState<VcobsTheme/);
   assert.match(themeSource, /export const vcobsThemes/);
   assert.match(themeSource, /defaultVcobsTheme/);
 });

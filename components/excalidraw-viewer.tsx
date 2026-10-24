@@ -2,6 +2,8 @@
 
 import dynamic from "next/dynamic";
 import type { ExcalidrawInitialDataState } from "@excalidraw/excalidraw/types";
+import { useTheme } from "@/components/theme-provider";
+import { themeScheme } from "@/lib/themes";
 
 const Excalidraw = dynamic(
   () => import("@excalidraw/excalidraw").then((module) => module.Excalidraw),
@@ -9,13 +11,14 @@ const Excalidraw = dynamic(
 );
 
 export function ExcalidrawViewer({ data }: { data: ExcalidrawInitialDataState }) {
+  const { theme } = useTheme();
   return (
     <div className="excalidraw-frame">
       <Excalidraw
         initialData={{ ...data, scrollToContent: true }}
-        theme="dark"
+        theme={themeScheme(theme)}
         viewModeEnabled
-        UIOptions={{ canvasActions: { changeViewBackgroundColor: false, clearCanvas: false, export: false, loadScene: false, saveToActiveFile: false, toggleTheme: true } }}
+        UIOptions={{ canvasActions: { changeViewBackgroundColor: false, clearCanvas: false, export: false, loadScene: false, saveToActiveFile: false, toggleTheme: false } }}
       />
     </div>
   );

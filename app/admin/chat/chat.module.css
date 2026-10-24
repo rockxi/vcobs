@@ -7,15 +7,15 @@
 .sidebarHeader { display:flex; align-items:center; justify-content:space-between; padding:0 8px 26px; }
 .brand { color:var(--ink); text-decoration:none; font-weight:650; letter-spacing:-.03em; font-size:18px; }
 .brand span { font-weight:400; color:var(--muted); }
-.newChat { display:flex; align-items:center; gap:10px; padding:12px 14px; border:1px solid var(--line); border-radius:10px; background:var(--surface-raised); color:var(--ink); text-align:left; }
+.newChat { display:flex; align-items:center; gap:10px; padding:12px 14px; border:1px solid var(--control-border); border-radius:var(--control-radius,10px); background:var(--control-raised); color:var(--control-foreground); text-align:left;  box-shadow:var(--control-shadow,none); }
 .newChat span { color:var(--accent); font-size:21px; line-height:1; }
 .chatList { flex:1; min-height:0; overflow:auto; margin:24px -2px 12px; }
-.chatItem { display:flex; gap:8px; justify-content:space-between; align-items:center; width:100%; border:0; border-radius:8px; padding:11px 12px; margin-bottom:3px; color:var(--muted); background:transparent; text-align:left; font-size:14px !important; }
+.chatItem { display:flex; gap:8px; justify-content:space-between; align-items:center; width:100%; border:0; border-radius:var(--control-radius,8px); padding:11px 12px; margin-bottom:3px; color:var(--muted); background:transparent; text-align:left; font-size:14px !important;  box-shadow:var(--control-shadow,none); }
 .chatItem span { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 .chatItem small { color:var(--accent); }
-.chatItem:hover,.selected { color:var(--ink); background:var(--surface-raised); }
+.chatItem:hover,.selected { color:var(--control-foreground); background:var(--control-raised);  box-shadow:var(--control-shadow,none); }
 .sidebarFooter { display:flex; flex-direction:column; gap:14px; padding:16px 8px 0; border-top:1px solid var(--line); font-size:13px; }
-.sidebarFooter button { padding:0; text-align:left; background:transparent; border:0; color:var(--ink); }
+.sidebarFooter button { padding:0; text-align:left; background:transparent; border:0; color:var(--control-foreground);  box-shadow:var(--control-shadow,none); }
 .sidebarFooter a { color:var(--muted); text-decoration:none; }
 .main { display:flex; flex:1; flex-direction:column; min-width:0; position:relative; }
 .toolbar { flex-shrink:0; display:flex; align-items:flex-start; gap:14px; min-height:80px; padding:16px 30px; border-bottom:1px solid var(--line); }
@@ -24,18 +24,18 @@
 .connection { font-size:12px; color:var(--muted); }
 .scratchpad { flex:0 1 140px; min-width:76px; max-width:140px; }
 .scratchpadControls { display:flex; align-items:center; gap:6px; min-height:36px; }
-.scratchpadControls button { flex-shrink:0; min-width:32px; height:32px; border:1px solid var(--line); border-radius:9px; padding:5px 8px; background:var(--surface); color:var(--ink); font-size:12px; }
+.scratchpadControls button { flex-shrink:0; min-width:32px; height:32px; border:1px solid var(--control-border); border-radius:var(--control-radius,9px); padding:5px 8px; background:var(--control-surface); color:var(--control-foreground); font-size:12px;  box-shadow:var(--control-shadow,none); }
 .scratchpadStatus { display:flex; align-items:baseline; gap:6px; min-height:14px; padding-top:3px; font-size:10px; line-height:1.3; color:var(--muted); overflow-wrap:anywhere; }
 .scratchpadStatus span { min-width:0; }
-.scratchpadStatus button { flex-shrink:0; border:0; padding:0; background:transparent; color:var(--accent); font-size:10px; text-decoration:underline; }
+.scratchpadStatus button { flex-shrink:0; border:0; padding:0; background:transparent; color:var(--accent); font-size:10px; text-decoration:underline;  box-shadow:var(--control-shadow,none); }
 .modelLabel { max-width:45%; }
-.modelLabel select { display:block; max-width:100%; height:36px; color:var(--ink); background:var(--surface); border:1px solid var(--line); border-radius:9px; padding:9px 10px; font-size:13px; }
-.settingsButton { width:36px; height:36px; border:1px solid var(--line); border-radius:9px; background:var(--surface); color:var(--muted); }
+.modelLabel select { display:block; max-width:100%; height:36px; color:var(--control-foreground); background:var(--control-surface); border:1px solid var(--control-border); border-radius:var(--control-radius,9px); padding:9px 10px; font-size:13px;  box-shadow:var(--control-shadow,none); }
+.settingsButton { width:36px; height:36px; border:1px solid var(--control-border); border-radius:var(--control-radius,9px); background:var(--control-surface); color:var(--muted);  box-shadow:var(--control-shadow,none); }
 .settings { flex-shrink:0; max-height:45vh; overflow:auto; margin:16px auto 0; width:min(760px,calc(100% - 48px)); padding:20px; border:1px solid var(--line); border-radius:14px; background:var(--surface); font-size:14px; line-height:1.5; }
 .settings h2 { margin:0; font-size:16px; }
 .settings p { color:var(--muted); margin:7px 0; }
 .settingActions { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:14px; }
-.settings button,.error button { color:var(--ink); background:var(--surface-raised); border:1px solid var(--line); padding:8px 12px; border-radius:8px; font-size:13px; }
+.settings button,.error button { color:var(--control-foreground); background:var(--control-raised); border:1px solid var(--control-border); padding:8px 12px; border-radius:var(--control-radius,8px); font-size:13px;  box-shadow:var(--control-shadow,none); }
 .deviceLogin { display:flex; flex-direction:column; align-items:flex-start; gap:10px; margin-top:16px; }
 .deviceLogin code { font-size:22px; letter-spacing:.12em; color:var(--ink); user-select:all; }
 .deviceLogin a { color:var(--accent); }
@@ -58,8 +58,9 @@
 .markdown p { white-space:pre-wrap; }
 .markdown :is(h1,h2,h3,h4,h5,h6) { color:var(--ink); line-height:1.35; margin:24px 0 10px; }
 .markdown h1 { font-size:24px; }.markdown h2 { font-size:21px; }.markdown h3 { font-size:18px; }
-.markdown pre { max-width:100%; overflow:auto; padding:16px; border:1px solid var(--line); border-radius:10px; background:var(--surface); font-size:13px; white-space:pre; }
-.markdown :not(pre)>code { padding:2px 5px; background:var(--surface-raised); border-radius:4px; font-size:.9em; }
+.markdown pre { max-width:100%; overflow:auto; padding:16px; border:1px solid var(--line); border-radius:10px; background:var(--input-bg); color:var(--code-fg); font-size:13px; white-space:pre; }
+.markdown pre code { background:transparent; color:inherit; }
+.markdown :not(pre)>code { padding:2px 5px; background:var(--code-bg); color:var(--code-fg); border-radius:4px; font-size:.9em; }
 .markdown a { color:var(--accent); }
 .markdown blockquote { border-left:2px solid var(--accent); margin-left:0; padding-left:16px; color:var(--muted); }
 .markdown table { display:block; overflow:auto; border-collapse:collapse; }
@@ -73,7 +74,7 @@
 .composer textarea::placeholder { color:var(--muted); }
 .composerActions { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:10px; }
 .composerActions > span { font-size:10px; color:var(--muted); }
-.composerActions button { flex-shrink:0; border:1px solid var(--line); border-radius:9px; background:var(--surface-raised); color:var(--ink); padding:9px 13px; font-size:13px; font-weight:600; }
+.composerActions button { flex-shrink:0; border:1px solid var(--control-border); border-radius:var(--control-radius,9px); background:var(--control-raised); color:var(--control-foreground); padding:9px 13px; font-size:13px; font-weight:600;  box-shadow:var(--control-shadow,none); }
 .composerHint { margin:8px 0 0; font-size:10px; color:var(--muted); text-align:center; }
 .muted { color:var(--muted); font-size:13px; padding:0 12px; }
 .menuButton,.mobileClose,.scrim { display:none; }
@@ -87,9 +88,9 @@
   .workspace { min-height:380px; }
   .sidebar { display:none; }
   .sidebarOpen { display:flex; position:absolute; inset:0 auto 0 0; width:280px; z-index:31; }
-  .mobileClose { display:block; background:transparent; color:var(--ink); border:0; font-size:24px !important; }
-  .scrim { display:block; position:fixed; inset:0; background:#0008; border:0; z-index:30; }
-  .menuButton { display:block; background:transparent; border:0; color:var(--ink); padding:8px 0; }
+  .mobileClose { display:block; background:transparent; color:var(--control-foreground); border:0; font-size:24px !important;  box-shadow:var(--control-shadow,none); }
+  .scrim { display:block; position:fixed; inset:0; background:var(--scrim); border:0; z-index:30; }
+  .menuButton { display:block; background:transparent; border:0; color:var(--control-foreground); padding:8px 0;  box-shadow:var(--control-shadow,none); }
   .toolbar { padding:12px 16px; min-height:72px; gap:10px; flex-wrap:wrap; }
   .heading { flex-basis:calc(100% - 38px); }
   .scratchpad { flex:0 1 140px; min-width:0; }

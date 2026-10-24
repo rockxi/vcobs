@@ -2,7 +2,6 @@ import Link from "next/link";
 import { getPublicNotes } from "@/lib/couch";
 import { PasteForm } from "@/components/paste-form";
 import { VaultTree } from "@/components/vault-tree";
-import { getEnabledThemes } from "@/lib/theme-settings";
 import { cookies } from "next/headers";
 import { ADMIN_SESSION_COOKIE, validateAdminSession } from "@/lib/admin-auth";
 
@@ -14,12 +13,12 @@ function formatDate(timestamp?: number) {
 }
 
 export default async function HomePage() {
-  const [notes, enabledThemes] = await Promise.all([getPublicNotes(), getEnabledThemes()]);
+  const notes = await getPublicNotes();
   const isAdmin = validateAdminSession((await cookies()).get(ADMIN_SESSION_COOKIE)?.value);
   const topicNotes = notes.filter((note) => note.topic);
   return (
     <div className="vault-layout">
-      <VaultTree notes={notes} enabledThemes={enabledThemes} />
+      <VaultTree notes={notes} />
       <main className="library-shell">
       <section className="library-hero">
         <span className="brand-mark">v</span>

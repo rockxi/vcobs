@@ -1,0 +1,37 @@
+/* This material is deliberately local to the additional theme. */
+html[data-vcobs-theme="liquid-chrome"] body { isolation:isolate; }
+.liquid-chrome-backdrop { position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none; background:radial-gradient(ellipse at 100% 12%,#213c5c55,transparent 48%); }
+.liquid-chrome-canvas { display:block; width:100%; height:100%; pointer-events:none; }
+.liquid-chrome-backdrop[data-renderer="fallback"] .liquid-chrome-canvas { visibility:hidden; }
+html[data-vcobs-theme="liquid-chrome"] :is(.admin-inventory,.admin-auth-card,.paste-section,.note-card,.admin-hub-card) { background:var(--surface); }
+html[data-vcobs-theme="liquid-chrome"] :is(.theme-selector select,.public-theme-picker select) { background:var(--control-surface); color:var(--control-foreground); border-color:var(--control-border); box-shadow:var(--control-shadow); }
+html[data-vcobs-theme="liquid-chrome"] select option { background:var(--surface); color:var(--ink); }
+html[data-vcobs-theme="liquid-chrome"] :is(input,textarea) { caret-color:var(--accent); }
+html[data-vcobs-theme="liquid-chrome"] :is(input,textarea)::placeholder { color:var(--muted); opacity:1; }
+html[data-vcobs-theme="liquid-chrome"] :is(button,select,input,textarea,a):focus-visible { outline:2px solid var(--focus-ring); outline-offset:3px; }
+html[data-vcobs-theme="liquid-chrome"] :is(.token-card,.component-sample,.type-specimens article) { border-color:var(--line); background:var(--surface); box-shadow:none; }
+html[data-vcobs-theme="liquid-chrome"] :is(.admin-shell button,.glass-material-toolbar button) { border-radius:var(--control-radius); box-shadow:var(--control-shadow); }
+html[data-vcobs-theme="liquid-chrome"] .component-buttons .component-button-success { background:var(--success-bg); color:var(--success-fg); border-color:var(--success-border); }
+html[data-vcobs-theme="liquid-chrome"] :is(.component-field input,.component-field textarea) { border-color:var(--line); background:var(--input-bg); color:var(--ink); }
+html[data-vcobs-theme="liquid-chrome"] .component-field .component-input-error { border-color:var(--error-border); }
+html[data-vcobs-theme="liquid-chrome"] .component-field .component-input-success { border-color:var(--success-border); }
+html[data-vcobs-theme="liquid-chrome"] .component-buttons button:disabled { background:var(--surface-raised); color:var(--muted); box-shadow:none; opacity:1; }
+html[data-vcobs-theme="liquid-chrome"] .glass-toggle-thumb { background:var(--control-gradient); box-shadow:inset 0 1px #ffffff,0 2px 5px #00000066; }
+html[data-vcobs-theme="liquid-chrome"] .glass-toggle[aria-checked="true"] { background:var(--selected-bg); }
+html[data-vcobs-theme="liquid-chrome"] .glass-material-demo { background:transparent; border-color:var(--control-border); border-radius:16px; isolation:isolate; }
+html[data-vcobs-theme="liquid-chrome"] .glass-material-content { position:relative; width:min(68%,540px); color:var(--ink); }
+html[data-vcobs-theme="liquid-chrome"] .glass-material-content p { color:var(--muted); }
+html[data-vcobs-theme="liquid-chrome"] .glass-material-content > span { display:none; }
+html[data-vcobs-theme="liquid-chrome"] .glass-material-toolbar { border-color:var(--control-border); background:var(--control-surface); box-shadow:var(--control-shadow); backdrop-filter:none; -webkit-backdrop-filter:none; }
+html[data-vcobs-theme="liquid-chrome"] .glass-material-toolbar button { display:flex; align-items:center; gap:8px; background:transparent; color:var(--control-foreground); }
+html[data-vcobs-theme="liquid-chrome"] .glass-material-toolbar button svg { width:19px; height:19px; flex:none; }
+html[data-vcobs-theme="liquid-chrome"] .glass-material-toolbar .glass-material-primary { background:var(--control-gradient); color:var(--on-action); }
+/* A translucent margin reveals the single GPU scene; prose/editor surfaces stay solid. */
+html[data-vcobs-theme="liquid-chrome"] .component-library { background:transparent; }
+html[data-vcobs-theme="liquid-chrome"] .component-library .admin-inventory-header { background:var(--document-bg); }
+html[data-vcobs-theme="liquid-chrome"] :is(.theme-description,.component-section-heading) { width:fit-content; background:var(--document-bg); }
+html[data-vcobs-theme="liquid-chrome"] .component-library-shell .glass-toggle { border-radius:999px; }
+@media (max-width:720px) {
+  html[data-vcobs-theme="liquid-chrome"] .glass-material-content { width:100%; max-width:440px; background:var(--document-bg); }
+}
+@media (forced-colors:active) { .liquid-chrome-backdrop { display:none; } }

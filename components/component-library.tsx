@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type CSSProperties } from "react";
-import { defaultVcobsTheme, themeCssVariables, vcobsThemes, type VcobsTheme } from "@/lib/themes";
+import { useState } from "react";
+import { useTheme } from "@/components/theme-provider";
 
 const tokenLabels = {
   ink: "Основной текст", muted: "Вторичный текст", paper: "Основная поверхность", surface: "Поверхность карточки",
@@ -28,18 +28,16 @@ const components = [
 ] as const;
 
 export function ComponentLibrary() {
-  const [themeId, setThemeId] = useState<VcobsTheme["id"]>(defaultVcobsTheme.id);
-  const theme = vcobsThemes.find((item) => item.id === themeId) ?? defaultVcobsTheme;
-  const style = themeCssVariables(theme) as CSSProperties;
+  const { theme, available: vcobsThemes, setThemeId } = useTheme();
 
-  return <main className="admin-shell component-library-shell" data-vcobs-theme={theme.id} style={style}>
+  return <main className="admin-shell component-library-shell" data-vcobs-theme={theme.id}>
     <section className="admin-inventory component-library">
       <header className="admin-inventory-header">
         <div><p className="eyebrow">vcobs · design system</p><h1>Библиотека компонентов</h1><p>Статический словарь production-интерфейса. Имена ниже используются как канонические идентификаторы для следующих экранов.</p></div>
-        <div className="component-library-actions"><label className="theme-selector" htmlFor="vcobs-theme"><span>Тема</span><select id="vcobs-theme" value={theme.id} onChange={(event) => setThemeId(event.target.value as typeof themeId)} aria-describedby="vcobs-theme-description">{vcobsThemes.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label><span id="vcobs-theme-description" className="sr-only">Выбор темы изменяет токены и все образцы компонентов на этой странице.</span><nav className="component-library-nav" aria-label="Администрирование"><Link href="/admin/links">Активные ссылки</Link><form action="/api/admin/logout" method="post"><button type="submit">Выйти</button></form></nav></div>
+        <div className="component-library-actions"><label className="theme-selector" htmlFor="vcobs-theme"><span>Тема</span><select id="vcobs-theme" value={theme.id} onChange={(event) => setThemeId(event.target.value as typeof theme.id)} aria-describedby="vcobs-theme-description">{vcobsThemes.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label><span id="vcobs-theme-description" className="sr-only">Выбор темы изменяет оформление всех страниц в этом браузере.</span><nav className="component-library-nav" aria-label="Администрирование"><Link href="/admin/links">Активные ссылки</Link><form action="/api/admin/logout" method="post"><button type="submit">Выйти</button></form></nav></div>
       </header>
       <p className="theme-description" aria-live="polite">{theme.description}</p>
-      {theme.id === "liquid-glass" && <section className="glass-material-demo" aria-label="Пример материала Liquid Glass">
+      {(theme.id === "liquid-glass" || theme.id === "liquid-chrome") && <section className="glass-material-demo" aria-label={`Пример материала ${theme.name}`}>
         <div className="glass-material-content"><span>1 Лекция</span><h2>Заметки остаются главным</h2><p>Текст находится в слое содержимого. Панель действий проходит поверх него и мягко пропускает цвета фона.</p></div>
         <div className="glass-material-toolbar" role="group" aria-label="Пример панели действий"><button className="glass-material-primary" type="button"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" strokeWidth="1.8" /><path d="m16 16 5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>Поиск</button><button type="button"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M12 16V3m0 0L8 7m4-4 4 4M5 13v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>Поделиться</button></div>
       </section>}

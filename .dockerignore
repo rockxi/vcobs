@@ -4,3 +4,8 @@ node_modules
 .env*
 npm-debug.log*
 README.md
+data
+.codex
+.impeccable
+DESIGN.md
+PRODUCT.md

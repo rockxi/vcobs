@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { PublicNote } from "@/lib/couch";
-import type { ThemeId } from "@/lib/theme-settings";
 import { PublicThemePicker } from "@/components/public-theme-picker";
 
 type TreeNode = {
@@ -53,14 +52,16 @@ function TreeBranch({ node, depth = 0, activeSlug }: { node: TreeNode; depth?: n
   </>;
 }
 
-export function VaultTree({ notes, activeSlug, enabledThemes }: { notes: PublicNote[]; activeSlug?: string; enabledThemes: ThemeId[] }) {
+export function VaultTree({ notes, activeSlug }: { notes: PublicNote[]; activeSlug?: string }) {
   const topicNotes = useMemo(() => notes.filter((note) => note.topic), [notes]);
   const topics = useMemo(() => [...new Set(topicNotes.map((note) => note.topic!))].sort((a, b) => a.localeCompare(b, "ru")), [topicNotes]);
   const [topic, setTopic] = useState("");
   const [topicMenuOpen, setTopicMenuOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const topicFilterRef = useRef<HTMLDivElement>(null);
-  useEffect(() => setCollapsed(localStorage.getItem("vcobs-sidebar") === "collapsed"), []);
+  useEffect(() => {
+    try { setCollapsed(window.localStorage.getItem("vcobs-sidebar") === "collapsed"); } catch { /* Keep the default when browser storage is unavailable. */ }
+  }, []);
   useEffect(() => {
     function closeTopicMenu(event: MouseEvent) {
       if (!topicFilterRef.current?.contains(event.target as Node)) setTopicMenuOpen(false);
@@ -78,7 +79,7 @@ export function VaultTree({ notes, activeSlug, enabledThemes }: { notes: PublicN
   function toggleSidebar() {
     setCollapsed((current) => {
       const next = !current;
-      localStorage.setItem("vcobs-sidebar", next ? "collapsed" : "open");
+      try { window.localStorage.setItem("vcobs-sidebar", next ? "collapsed" : "open"); } catch { /* The sidebar still works in memory. */ }
       return next;
     });
   }
@@ -126,7 +127,7 @@ export function VaultTree({ notes, activeSlug, enabledThemes }: { notes: PublicN
           })}
         </div>
       </div>
-      <PublicThemePicker enabled={enabledThemes} />
+      <PublicThemePicker />
       <p className="vault-label">Файлы</p>
       <nav className="vault-tree" aria-label="Опубликованные заметки по папкам">
         <TreeBranch node={tree} activeSlug={activeSlug} />

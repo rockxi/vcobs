@@ -1,0 +1,398 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-24T09:12:24.292Z",
+  "title": "Design System: vcobs",
+  "extensions": {
+    "colorMeta": {
+      "accent": {
+        "role": "primary",
+        "displayName": "accent",
+        "tonalRamp": [
+          "oklch(15.00% 0.2135 304.53)",
+          "oklch(26.43% 0.2135 304.53)",
+          "oklch(37.86% 0.2135 304.53)",
+          "oklch(49.29% 0.2135 304.53)",
+          "oklch(60.71% 0.2135 304.53)",
+          "oklch(72.14% 0.2135 304.53)",
+          "oklch(83.57% 0.2135 304.53)",
+          "oklch(95.00% 0.2135 304.53)"
+        ]
+      },
+      "lime": {
+        "role": "secondary",
+        "displayName": "lime",
+        "tonalRamp": [
+          "oklch(15.00% 0.1258 298.63)",
+          "oklch(26.43% 0.1258 298.63)",
+          "oklch(37.86% 0.1258 298.63)",
+          "oklch(49.29% 0.1258 298.63)",
+          "oklch(60.71% 0.1258 298.63)",
+          "oklch(72.14% 0.1258 298.63)",
+          "oklch(83.57% 0.1258 298.63)",
+          "oklch(95.00% 0.1258 298.63)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.0109 297.62)",
+          "oklch(26.43% 0.0109 297.62)",
+          "oklch(37.86% 0.0109 297.62)",
+          "oklch(49.29% 0.0109 297.62)",
+          "oklch(60.71% 0.0109 297.62)",
+          "oklch(72.14% 0.0109 297.62)",
+          "oklch(83.57% 0.0109 297.62)",
+          "oklch(95.00% 0.0109 297.62)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "muted",
+        "tonalRamp": [
+          "oklch(15.00% 0.0206 295.67)",
+          "oklch(26.43% 0.0206 295.67)",
+          "oklch(37.86% 0.0206 295.67)",
+          "oklch(49.29% 0.0206 295.67)",
+          "oklch(60.71% 0.0206 295.67)",
+          "oklch(72.14% 0.0206 295.67)",
+          "oklch(83.57% 0.0206 295.67)",
+          "oklch(95.00% 0.0206 295.67)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "paper",
+        "tonalRamp": [
+          "oklch(15.00% 0.0143 278.57)",
+          "oklch(26.43% 0.0143 278.57)",
+          "oklch(37.86% 0.0143 278.57)",
+          "oklch(49.29% 0.0143 278.57)",
+          "oklch(60.71% 0.0143 278.57)",
+          "oklch(72.14% 0.0143 278.57)",
+          "oklch(83.57% 0.0143 278.57)",
+          "oklch(95.00% 0.0143 278.57)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "surface",
+        "tonalRamp": [
+          "oklch(15.00% 0.0159 279.33)",
+          "oklch(26.43% 0.0159 279.33)",
+          "oklch(37.86% 0.0159 279.33)",
+          "oklch(49.29% 0.0159 279.33)",
+          "oklch(60.71% 0.0159 279.33)",
+          "oklch(72.14% 0.0159 279.33)",
+          "oklch(83.57% 0.0159 279.33)",
+          "oklch(95.00% 0.0159 279.33)"
+        ]
+      },
+      "surface-raised": {
+        "role": "neutral",
+        "displayName": "surface raised",
+        "tonalRamp": [
+          "oklch(15.00% 0.0174 279.95)",
+          "oklch(26.43% 0.0174 279.95)",
+          "oklch(37.86% 0.0174 279.95)",
+          "oklch(49.29% 0.0174 279.95)",
+          "oklch(60.71% 0.0174 279.95)",
+          "oklch(72.14% 0.0174 279.95)",
+          "oklch(83.57% 0.0174 279.95)",
+          "oklch(95.00% 0.0174 279.95)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "line",
+        "tonalRamp": [
+          "oklch(15.00% 0.0183 280.69)",
+          "oklch(26.43% 0.0183 280.69)",
+          "oklch(37.86% 0.0183 280.69)",
+          "oklch(49.29% 0.0183 280.69)",
+          "oklch(60.71% 0.0183 280.69)",
+          "oklch(72.14% 0.0183 280.69)",
+          "oklch(83.57% 0.0183 280.69)",
+          "oklch(95.00% 0.0183 280.69)"
+        ]
+      },
+      "chrome-accent": {
+        "role": "primary",
+        "displayName": "chrome accent",
+        "tonalRamp": [
+          "oklch(15.00% 0.0641 258.63)",
+          "oklch(26.43% 0.0641 258.63)",
+          "oklch(37.86% 0.0641 258.63)",
+          "oklch(49.29% 0.0641 258.63)",
+          "oklch(60.71% 0.0641 258.63)",
+          "oklch(72.14% 0.0641 258.63)",
+          "oklch(83.57% 0.0641 258.63)",
+          "oklch(95.00% 0.0641 258.63)"
+        ]
+      },
+      "chrome-lime": {
+        "role": "secondary",
+        "displayName": "chrome lime",
+        "tonalRamp": [
+          "oklch(15.00% 0.0304 265.33)",
+          "oklch(26.43% 0.0304 265.33)",
+          "oklch(37.86% 0.0304 265.33)",
+          "oklch(49.29% 0.0304 265.33)",
+          "oklch(60.71% 0.0304 265.33)",
+          "oklch(72.14% 0.0304 265.33)",
+          "oklch(83.57% 0.0304 265.33)",
+          "oklch(95.00% 0.0304 265.33)"
+        ]
+      },
+      "chrome-ink": {
+        "role": "neutral",
+        "displayName": "chrome ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.0114 252.09)",
+          "oklch(26.43% 0.0114 252.09)",
+          "oklch(37.86% 0.0114 252.09)",
+          "oklch(49.29% 0.0114 252.09)",
+          "oklch(60.71% 0.0114 252.09)",
+          "oklch(72.14% 0.0114 252.09)",
+          "oklch(83.57% 0.0114 252.09)",
+          "oklch(95.00% 0.0114 252.09)"
+        ]
+      },
+      "chrome-muted": {
+        "role": "neutral",
+        "displayName": "chrome muted",
+        "tonalRamp": [
+          "oklch(15.00% 0.0301 254.71)",
+          "oklch(26.43% 0.0301 254.71)",
+          "oklch(37.86% 0.0301 254.71)",
+          "oklch(49.29% 0.0301 254.71)",
+          "oklch(60.71% 0.0301 254.71)",
+          "oklch(72.14% 0.0301 254.71)",
+          "oklch(83.57% 0.0301 254.71)",
+          "oklch(95.00% 0.0301 254.71)"
+        ]
+      },
+      "chrome-paper": {
+        "role": "neutral",
+        "displayName": "chrome paper",
+        "tonalRamp": [
+          "oklch(15.00% 0.0249 262.09)",
+          "oklch(26.43% 0.0249 262.09)",
+          "oklch(37.86% 0.0249 262.09)",
+          "oklch(49.29% 0.0249 262.09)",
+          "oklch(60.71% 0.0249 262.09)",
+          "oklch(72.14% 0.0249 262.09)",
+          "oklch(83.57% 0.0249 262.09)",
+          "oklch(95.00% 0.0249 262.09)"
+        ]
+      },
+      "chrome-surface": {
+        "role": "neutral",
+        "displayName": "chrome surface",
+        "tonalRamp": [
+          "oklch(15.00% 0.0332 258.28)",
+          "oklch(26.43% 0.0332 258.28)",
+          "oklch(37.86% 0.0332 258.28)",
+          "oklch(49.29% 0.0332 258.28)",
+          "oklch(60.71% 0.0332 258.28)",
+          "oklch(72.14% 0.0332 258.28)",
+          "oklch(83.57% 0.0332 258.28)",
+          "oklch(95.00% 0.0332 258.28)"
+        ]
+      },
+      "chrome-surface-raised": {
+        "role": "neutral",
+        "displayName": "chrome surface raised",
+        "tonalRamp": [
+          "oklch(15.00% 0.0425 255.90)",
+          "oklch(26.43% 0.0425 255.90)",
+          "oklch(37.86% 0.0425 255.90)",
+          "oklch(49.29% 0.0425 255.90)",
+          "oklch(60.71% 0.0425 255.90)",
+          "oklch(72.14% 0.0425 255.90)",
+          "oklch(83.57% 0.0425 255.90)",
+          "oklch(95.00% 0.0425 255.90)"
+        ]
+      },
+      "chrome-line": {
+        "role": "neutral",
+        "displayName": "chrome line",
+        "tonalRamp": [
+          "oklch(15.00% 0.0430 256.46)",
+          "oklch(26.43% 0.0430 256.46)",
+          "oklch(37.86% 0.0430 256.46)",
+          "oklch(49.29% 0.0430 256.46)",
+          "oklch(60.71% 0.0430 256.46)",
+          "oklch(72.14% 0.0430 256.46)",
+          "oklch(83.57% 0.0430 256.46)",
+          "oklch(95.00% 0.0430 256.46)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Public display",
+        "purpose": "Existing Georgia public/library display headings."
+      },
+      "title": {
+        "displayName": "Note title",
+        "purpose": "Existing Inter note mastheads."
+      },
+      "body": {
+        "displayName": "Reading body",
+        "purpose": "System UI family and note reading rhythm."
+      },
+      "label": {
+        "displayName": "Metadata",
+        "purpose": "Existing technical metadata and code labels."
+      }
+    },
+    "shadows": [
+      {
+        "name": "surface-shadow",
+        "value": "var(--shadow)",
+        "purpose": "Default none; preserve component-specific depth."
+      },
+      {
+        "name": "control-shadow",
+        "value": "var(--control-shadow)",
+        "purpose": "Theme-specific control material."
+      },
+      {
+        "name": "editor-workspace",
+        "value": "0 18px 40px var(--shadow-color)",
+        "purpose": "Existing administrator note workspace."
+      }
+    ],
+    "motion": [
+      {
+        "name": "topic-menu",
+        "value": ".36s cubic-bezier(.22,1,.36,1)",
+        "purpose": "Existing topic menu clipping and movement."
+      },
+      {
+        "name": "neutral-control",
+        "value": ".16s ease",
+        "purpose": "Existing note action background and border transition."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "admin-records",
+        "value": "620px"
+      },
+      {
+        "name": "public-reader",
+        "value": "720px"
+      },
+      {
+        "name": "admin-vault",
+        "value": "760px"
+      },
+      {
+        "name": "token-grid",
+        "value": "820px"
+      },
+      {
+        "name": "note-editor-split",
+        "value": "900px"
+      }
+    ],
+    "tonalRampPolicy": "Synthesized OKLCH ramps are panel visualization metadata, not additional application theme tokens."
+  },
+  "components": [
+    {
+      "name": "Primary action",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Administrator save action with its live material and foreground.",
+      "html": "<button class=\"ds-primary\" type=\"button\">Сохранить</button>",
+      "css": ".ds-primary{min-height:38px;padding:8px 13px;border:1px solid var(--border-strong);border-radius:var(--control-radius,0);background:var(--control-gradient);color:var(--on-action);font:700 13px var(--ui-font);cursor:pointer;box-shadow:var(--control-shadow,none)}.ds-primary:hover:not(:disabled){background:var(--action-hover)}.ds-primary:focus-visible{outline:2px solid var(--focus-ring);outline-offset:3px}.ds-primary:disabled{opacity:.5;cursor:not-allowed}"
+    },
+    {
+      "name": "Neutral action",
+      "kind": "button",
+      "description": "Note-editor action on a raised surface.",
+      "html": "<button class=\"ds-neutral\" type=\"button\">Редактировать</button>",
+      "css": ".ds-neutral{padding:9px 15px;border:1px solid var(--border-strong);background:var(--control-raised);color:var(--control-foreground);font:600 13px var(--ui-font);cursor:pointer;transition:background .16s ease,border-color .16s ease}.ds-neutral:hover:not(:disabled){background:var(--hover-bg);border-color:var(--hover-border)}.ds-neutral:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}.ds-neutral:disabled{opacity:.5;cursor:not-allowed}@media(prefers-reduced-motion:reduce){.ds-neutral{transition:none}}"
+    },
+    {
+      "name": "Vault search",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Existing administrator vault search field.",
+      "html": "<input class=\"ds-search\" type=\"search\" aria-label=\"Поиск заметок\" placeholder=\"Поиск заметок\">",
+      "css": ".ds-search{width:100%;min-height:38px;padding:8px 11px;border:1px solid var(--border-strong);border-radius:var(--control-radius,5px);background:var(--input-bg);color:var(--ink);caret-color:var(--accent);font:13px var(--ui-font)}.ds-search::placeholder{color:var(--muted);opacity:1}.ds-search:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}"
+    },
+    {
+      "name": "Vault navigation",
+      "kind": "nav",
+      "refersTo": "navigation",
+      "description": "Current-page administrator vault item.",
+      "html": "<nav aria-label=\"Заметки\"><button class=\"ds-file\" aria-current=\"page\" type=\"button\"><span aria-hidden=\"true\">◇</span><span>Еженедельный обзор</span></button></nav>",
+      "css": ".ds-file{display:flex;align-items:center;width:100%;min-height:33px;gap:8px;padding:6px 12px;border:0;background:transparent;color:var(--ink);font:13px var(--ui-font);text-align:left;cursor:pointer}.ds-file>span:first-child{color:var(--accent)}.ds-file:hover{background:var(--hover-bg)}.ds-file[aria-current=\"page\"]{background:var(--selected-bg);color:var(--ink);box-shadow:inset 3px 0 var(--accent-glow)}.ds-file:focus-visible{outline:2px solid var(--focus-ring);outline-offset:-2px}"
+    },
+    {
+      "name": "Publication status",
+      "kind": "chip",
+      "refersTo": "status",
+      "description": "Component-library publication status badges.",
+      "html": "<div class=\"ds-status-row\"><span class=\"ds-status ds-editable\">редактирование</span><span class=\"ds-status\">только чтение</span></div>",
+      "css": ".ds-status-row{display:flex;flex-wrap:wrap;gap:9px}.ds-status{display:inline-flex;align-items:center;gap:7px;padding:5px 8px;border:1px solid var(--line);background:var(--surface-raised);color:var(--muted);font:11px ui-monospace,SFMono-Regular,monospace;white-space:nowrap}.ds-editable{border-color:var(--accent);color:var(--lime)}"
+    },
+    {
+      "name": "Administrator record",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Existing bordered record surface and public link.",
+      "html": "<article class=\"ds-record\"><span class=\"ds-record-meta\">только чтение</span><h3>Еженедельный обзор</h3><a href=\"/admin/links\">Открыть активные ссылки</a></article>",
+      "css": ".ds-record{padding:18px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}.ds-record-meta{color:var(--muted);font:11px ui-monospace,SFMono-Regular,monospace}.ds-record h3{margin:14px 0;font-size:15px;overflow-wrap:anywhere}.ds-record a{color:var(--link-fg);font-size:12px;text-decoration:underline;text-underline-offset:3px}.ds-record a:hover{color:var(--lime)}.ds-record a:focus-visible{outline:2px solid var(--focus-ring);outline-offset:3px}"
+    },
+    {
+      "name": "Editor notice",
+      "kind": "custom",
+      "description": "Success and warning messages from the note editor.",
+      "html": "<div><p class=\"ds-notice ds-success\" role=\"status\">Изменения сохранены.</p><p class=\"ds-notice ds-error\" role=\"alert\">Не удалось сохранить изменения.</p></div>",
+      "css": ".ds-notice{margin:0;padding:11px 16px;border-bottom:1px solid var(--error-border);color:var(--error-fg);background:var(--error-bg);font-size:13px}.ds-success{border-color:var(--success-border);color:var(--success-fg);background:var(--success-bg)}"
+    }
+  ],
+  "narrative": {
+    "overview": "vcobs keeps document reading and administrator tasks in the foreground. Existing page structures and theme choices remain intact. Obsidianite is the default; the theme registry defines six additional choices rather than one replacement identity.\n\nThe shared system uses restrained task surfaces, explicit text hierarchy and consistent semantic roles. The optional Liquid Chrome theme adds mirrored silver and black/blue reflections around calm content areas. The user approved the visual candidate and requested production publication on 2026-10-24.",
+    "keyCharacteristics": [
+      "Shared layout and behavior across theme choices.",
+      "Theme-aware text, surfaces, controls and status colors.",
+      "Solid reading and editing surfaces with decorative material at the edges."
+    ],
+    "rules": [
+      {
+        "name": "The Single Registry Rule",
+        "body": "Define theme identities, base tokens and role overrides in `lib/themes.ts`; consume generated CSS properties throughout the application.",
+        "section": "colors"
+      },
+      {
+        "name": "The Reading Hierarchy Rule",
+        "body": "Preserve readable body text and the existing heading hierarchy when adding a theme; material effects must not become a text treatment.",
+        "section": "typography"
+      },
+      {
+        "name": "The Content Surface Rule",
+        "body": "Keep decorative reflections behind content and outside the image, remote-framebuffer and drawing data themselves.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do preserve Obsidianite as the default and retain all existing theme choices.",
+      "Do use the single registry and semantic roles across public and administrator pages.",
+      "Do keep reading, editor and chat content legible under every theme.",
+      "Do preserve focus, disabled, error and success states.",
+      "Do keep Liquid Chrome optional and preserve the administrator's theme-availability settings."
+    ],
+    "donts": [
+      "Don't change layouts or application functions to introduce a theme.",
+      "Don't replace Liquid Glass with Liquid Chrome.",
+      "Don't recolor uploaded images, remote pixels or drawing objects.",
+      "Don't place animated glare over text or intercept input with decorative rendering.",
+      "Don't claim measured GPU performance from configured renderer limits."
+    ]
+  }
+}

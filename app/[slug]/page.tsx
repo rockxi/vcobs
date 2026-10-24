@@ -8,7 +8,6 @@ import { getFile, getFileByName, getPublicNote, getPublicNotes } from "@/lib/cou
 import { getPaste } from "@/lib/pastes";
 import { getExcalidrawData, getExcalidrawEmbeddedFiles, mediaType, prepareMarkdown, resolveVaultPath } from "@/lib/markdown";
 import { VaultTree } from "@/components/vault-tree";
-import { getEnabledThemes } from "@/lib/theme-settings";
 import { PasteCopyButton } from "@/components/paste-copy-button";
 import { EditablePaste } from "@/components/editable-paste";
 import { formatSharedFileSize } from "@/components/file-share-utils";
@@ -51,7 +50,7 @@ export default async function NotePage({ params }: { params: Promise<{ slug: str
   const title = note.markdown.match(/^#\s+(.+)$/m)?.[1] ?? note.path.split("/").at(-1)?.replace(/\.md$/i, "") ?? slug;
   const pathParts = note.path.replace(/\.md$/i, "").split("/").filter(Boolean);
   const renderedMarkdown = prepareMarkdown(note.markdown, slug).replace(/^#\s+.+(?:\r?\n)+/, "");
-  const [notes, enabledThemes, cookieStore] = await Promise.all([getPublicNotes(), getEnabledThemes(), cookies()]);
+  const [notes, cookieStore] = await Promise.all([getPublicNotes(), cookies()]);
   const canEdit = note.type === "plain" && validateAdminSession(cookieStore.get(ADMIN_SESSION_COOKIE)?.value);
   const drawing = getExcalidrawData(note.markdown);
   if (drawing) {
@@ -70,7 +69,7 @@ export default async function NotePage({ params }: { params: Promise<{ slug: str
   }
   return (
     <div className={`vault-layout${drawing ? " vault-layout-drawing" : ""}`}>
-      <VaultTree notes={notes} activeSlug={slug} enabledThemes={enabledThemes} />
+      <VaultTree notes={notes} activeSlug={slug} />
       <main className={`reader-shell${drawing ? " reader-shell-drawing" : ""}`}>
       <header className="reader-header">
         <Link className="back-link" href="/" aria-label="Все опубликованные заметки">⌕ <span>Все заметки</span></Link>
