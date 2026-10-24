@@ -163,4 +163,3 @@ The sidecar contains seven self-contained examples derived from actual controls:
 - Don't recolor uploaded images, remote pixels or drawing objects.
 - Don't place animated glare over text or intercept input with decorative rendering.
 - Don't claim measured GPU performance from configured renderer limits.
-
