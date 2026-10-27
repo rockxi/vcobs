@@ -15,7 +15,6 @@ async function request(method = "GET", text?: string) {
 export function AdminChatScratchpad() {
   const [text, setText] = useState("");
   const [loaded, setLoaded] = useState(false);
-  const [state, setState] = useState("Загрузка…");
   const [error, setError] = useState("");
   const [copyState, setCopyState] = useState("");
   const latest = useRef("");
@@ -28,20 +27,20 @@ export function AdminChatScratchpad() {
 
   const load = useCallback(async () => {
     const attempt = ++loadAttempt.current;
-    setError(""); setState("Загрузка…");
+    setError("");
     try {
       const data = await request();
       if (!mounted.current || attempt !== loadAttempt.current) return;
       if (typeof data.text !== "string") throw new Error("Не удалось прочитать поле.");
       latest.current = data.text; saved.current = data.text;
-      setText(data.text); setLoaded(true); setState("Сохранено");
-    } catch (cause) { if (mounted.current && attempt === loadAttempt.current) { setError(cause instanceof Error ? cause.message : "Не удалось загрузить поле."); setState("Не загружено"); } }
+      setText(data.text); setLoaded(true);
+    } catch (cause) { if (mounted.current && attempt === loadAttempt.current) { setError(cause instanceof Error ? cause.message : "Не удалось загрузить поле."); } }
   }, []);
 
   const save = useCallback(async () => {
     if (saving.current || latest.current === saved.current) return;
     saving.current = true;
-    setError(""); setState("Сохраняю…");
+    setError("");
     try {
       // One request at a time: an older response can never overwrite a newer edit.
       while (latest.current !== saved.current) {
@@ -49,9 +48,8 @@ export function AdminChatScratchpad() {
         await request("PUT", snapshot);
         saved.current = snapshot;
       }
-      if (mounted.current) setState("Сохранено");
     } catch (cause) {
-      if (mounted.current) { setState("Не сохранено"); setError(cause instanceof Error ? cause.message : "Не удалось сохранить поле."); }
+      if (mounted.current) { setError(cause instanceof Error ? cause.message : "Не удалось сохранить поле."); }
     } finally { saving.current = false; }
   }, []);
 
@@ -65,7 +63,7 @@ export function AdminChatScratchpad() {
     const attempt = ++copyAttempt.current;
     try {
       await navigator.clipboard.writeText(latest.current);
-      if (mounted.current && attempt === copyAttempt.current) setCopyState("Скопировано");
+      if (mounted.current && attempt === copyAttempt.current) setCopyState("");
     } catch {
       if (mounted.current && attempt === copyAttempt.current) setCopyState("Не удалось скопировать. Разрешите доступ к буферу обмена и повторите.");
     }
@@ -91,11 +89,11 @@ export function AdminChatScratchpad() {
 
   return <div className={styles.scratchpad}>
     <div className={styles.scratchpadControls}>
-      <button type="button" disabled={!loaded || pasting} title="Вставить из буфера обмена" aria-label="Вставить из буфера обмена" aria-describedby="admin-chat-scratchpad-status" onClick={() => void paste()}>В</button>
-      <button type="button" disabled={!loaded || !text || pasting} title="Скопировать" aria-label="Скопировать" onClick={() => void copy()}>С</button>
+      <button type="button" disabled={!loaded || pasting} title="Вставить из буфера обмена" aria-label="Вставить из буфера обмена" aria-describedby={error || copyState ? "admin-chat-scratchpad-status" : undefined} onClick={() => void paste()}>{"<"}</button>
+      <button type="button" disabled={!loaded || !text || pasting} title="Скопировать" aria-label="Скопировать" onClick={() => void copy()}>{">"}</button>
     </div>
-    <div id="admin-chat-scratchpad-status" className={styles.scratchpadStatus} role="status" aria-live="polite">
-      <span>{error || copyState || state}</span>{error && <button type="button" onClick={() => void (loaded ? save() : load())}>Повторить</button>}
-    </div>
+    {(error || copyState) && <div id="admin-chat-scratchpad-status" className={styles.scratchpadStatus} role="status" aria-live="polite">
+      <span>{error || copyState}</span>{error && <button type="button" onClick={() => void (loaded ? save() : load())}>Повторить</button>}
+    </div>}
   </div>;
 }
