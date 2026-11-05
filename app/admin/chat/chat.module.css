@@ -28,8 +28,8 @@
 .scratchpadStatus { display:flex; align-items:baseline; gap:6px; min-height:14px; padding-top:3px; font-size:10px; line-height:1.3; color:var(--muted); overflow-wrap:anywhere; }
 .scratchpadStatus span { min-width:0; }
 .scratchpadStatus button { flex-shrink:0; border:0; padding:0; background:transparent; color:var(--accent); font-size:10px; text-decoration:underline;  box-shadow:var(--control-shadow,none); }
-.modelLabel { max-width:45%; }
-.modelLabel select { display:block; max-width:100%; height:36px; color:var(--control-foreground); background:var(--control-surface); border:1px solid var(--control-border); border-radius:var(--control-radius,9px); padding:9px 10px; font-size:13px;  box-shadow:var(--control-shadow,none); }
+.modelLabel { flex:0 0 200px; width:200px; min-width:0; max-width:45%; }
+.modelLabel select { display:block; box-sizing:border-box; width:100%; min-width:0; max-width:100%; height:36px; color:var(--control-foreground); background:var(--control-surface); border:1px solid var(--control-border); border-radius:var(--control-radius,9px); padding:9px 10px; font-size:13px;  box-shadow:var(--control-shadow,none); }
 .settingsButton { width:36px; height:36px; border:1px solid var(--control-border); border-radius:var(--control-radius,9px); background:var(--control-surface); color:var(--muted);  box-shadow:var(--control-shadow,none); }
 .settings { flex-shrink:0; max-height:45vh; overflow:auto; margin:16px auto 0; width:min(760px,calc(100% - 48px)); padding:20px; border:1px solid var(--line); border-radius:14px; background:var(--surface); font-size:14px; line-height:1.5; }
 .settings h2 { margin:0; font-size:16px; }
@@ -98,7 +98,7 @@
   .scratchpadControls button { min-width:44px; height:44px; padding:9px 7px; font-size:11px; }
   .heading h1 { font-size:14px; }
   .connection { font-size:10px; }
-  .modelLabel { max-width:37%; }
+  .modelLabel { flex-basis:140px; width:140px; max-width:37%; }
   .modelLabel select { height:44px; font-size:11px; padding:8px 4px; }
   .settingsButton { display:none; }
   .settings { width:calc(100% - 24px); padding:16px; max-height:40vh; }
