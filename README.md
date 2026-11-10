@@ -3,7 +3,7 @@
 Admin-only personal Codex chat setup and Xray routing:
 [docs/admin-chat.md](docs/admin-chat.md).
 
-Публичный read-only просмотрщик Obsidian vault, синхронизируемого через Self-hosted LiveSync и CouchDB.
+Публичный просмотрщик Obsidian vault, синхронизируемого через Self-hosted LiveSync и CouchDB.
 
 Заметка доступна по `/{slug}` только если в самом начале файла есть frontmatter:
 
@@ -12,6 +12,8 @@ Admin-only personal Codex chat setup and Xray routing:
 vcobs-link = note_1
 ---
 ```
+
+Чтобы разрешить любому посетителю редактировать содержимое опубликованной заметки, добавьте в её frontmatter `vcobs-editable: true`. Свойства при публичном редактировании недоступны и сохраняются без изменений. Ссылка даёт возможность записи всем, у кого она есть; не включайте это для важных или приватных заметок.
 
 Также поддерживается стандартная YAML-запись `vcobs-link: note_1`. `slug` может содержать латинские буквы, цифры, `_` и `-`. Повторяющийся slug намеренно не публикуется до устранения дубликата.
 
@@ -55,7 +57,7 @@ curl -X POST http://localhost:3000/api/v1/refresh \
 - Рендерит Markdown и GFM-таблицы, чекбоксы, ссылки и код.
 - Рендерит `.excalidraw.md` с JSON-сценой в разделе `# Drawing` в интерактивном режиме просмотра.
 - Поддерживает Obsidian-embeds `![[image.png]]` и относительные Markdown-картинки. Медиа отдаётся только по ссылке из опубликованной заметки.
-- Публичные посетители могут только читать опубликованные документы; администратор может редактировать все Markdown-заметки LiveSync.
+- Публичные посетители могут редактировать документы с `vcobs-editable: true`; администратор может редактировать все Markdown-заметки LiveSync.
 
 Для production задайте отдельный длинный `VCOBS_REFRESH_TOKEN`, запустите `npm run build && npm run start` за reverse proxy с HTTPS.
 

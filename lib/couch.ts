@@ -168,6 +168,13 @@ export function getVcobsTopic(chunk: string) {
   return topic && topic.length <= 128 ? topic : null;
 }
 
+export function getVcobsEditable(markdown: string) {
+  const frontmatter = markdown.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/);
+  if (!frontmatter) return false;
+  const matches = [...frontmatter[1].matchAll(/^vcobs-editable\s*(?:=|:)\s*(.*?)\s*$/gm)];
+  return matches.length === 1 && /^true(?:\s+#.*)?$/i.test(matches[0][1]);
+}
+
 export function stripFrontmatter(markdown: string) {
   return markdown.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, "");
 }
@@ -179,7 +186,7 @@ export async function getPublicNote(slug: string) {
   const chunks = await getLeafData(note.children);
   const markdown = note.children.map((id) => chunks.get(id) ?? "").join("");
   if (getVcobsLink(markdown) !== slug) return null;
-  return { ...note, markdown: stripFrontmatter(markdown) };
+  return { ...note, editable: getVcobsEditable(markdown), markdown: stripFrontmatter(markdown) };
 }
 
 /** A fresh, complete source is required before editing; never edit a cached or partial document. */

@@ -1,5 +1,5 @@
 import "server-only";
-import { couchRequest, clearPublicationCache, getPublishedNoteSource, getVaultNoteSource, getVcobsLink } from "@/lib/couch";
+import { couchRequest, clearPublicationCache, getPublishedNoteSource, getVaultNoteSource, getVcobsEditable, getVcobsLink } from "@/lib/couch";
 import { liveSyncChunks } from "@/lib/livesync-edit";
 import { getExcalidrawData } from "@/lib/markdown";
 
@@ -42,15 +42,19 @@ export async function saveVaultNote(id: string, markdown: string, revision: stri
   return { kind: "saved", revision: saved.rev };
 }
 
-export async function savePublishedNote(slug: string, markdown: string, revision: string): Promise<SaveResult> {
+export async function savePublishedNote(slug: string, markdown: string, revision: string, publicEdit = false): Promise<SaveResult> {
   if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$/.test(slug) || typeof markdown !== "string" || !/^[1-9]\d*-[a-zA-Z0-9]+$/.test(revision)) return { kind: "invalid" };
   if (Buffer.byteLength(markdown, "utf8") > MAX_MARKDOWN_BYTES) return { kind: "too-large" };
-  if (getVcobsLink(markdown) !== slug) return { kind: "invalid" };
-  if (getExcalidrawData(markdown)) return { kind: "drawing" };
-
   const current = await getPublishedNoteSource(slug);
-  if (!current) return { kind: "not-found" };
-  if (getExcalidrawData(current.markdown)) return { kind: "drawing" };
+  if (!current || (publicEdit && !getVcobsEditable(current.markdown))) return { kind: "not-found" };
+  if (publicEdit) {
+    const frontmatter = current.markdown.match(/^---\r?\n[\s\S]*?\r?\n---(?:\r?\n|$)/)?.[0];
+    if (!frontmatter) return { kind: "not-found" };
+    markdown = frontmatter + markdown;
+    if (Buffer.byteLength(markdown, "utf8") > MAX_MARKDOWN_BYTES) return { kind: "too-large" };
+  }
+  if (getVcobsLink(markdown) !== slug) return { kind: "invalid" };
+  if (getExcalidrawData(markdown) || getExcalidrawData(current.markdown)) return { kind: "drawing" };
   if (current.note._conflicts?.length || current.note._rev !== revision) return { kind: "conflict" };
   if (current.markdown === markdown) return { kind: "saved", revision };
 

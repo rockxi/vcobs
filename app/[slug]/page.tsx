@@ -51,7 +51,8 @@ export default async function NotePage({ params }: { params: Promise<{ slug: str
   const pathParts = note.path.replace(/\.md$/i, "").split("/").filter(Boolean);
   const renderedMarkdown = prepareMarkdown(note.markdown, slug).replace(/^#\s+.+(?:\r?\n)+/, "");
   const [notes, cookieStore] = await Promise.all([getPublicNotes(), cookies()]);
-  const canEdit = note.type === "plain" && validateAdminSession(cookieStore.get(ADMIN_SESSION_COOKIE)?.value);
+  const isAdmin = validateAdminSession(cookieStore.get(ADMIN_SESSION_COOKIE)?.value);
+  const canEdit = note.type === "plain" && (isAdmin || note.editable);
   const drawing = getExcalidrawData(note.markdown);
   if (drawing) {
     const embeddedFiles = await Promise.all(getExcalidrawEmbeddedFiles(note.markdown).map(async ({ id, reference }) => {
@@ -84,7 +85,7 @@ export default async function NotePage({ params }: { params: Promise<{ slug: str
             <span className="note-document-icon" aria-hidden="true">▤</span>
             <div><h1>{title}</h1>{formatDate(note.mtime) && <p>Обновлено {formatDate(note.mtime)}</p>}</div>
           </div>
-          {canEdit && <AdminNoteEditor slug={slug} />}
+          {canEdit && <AdminNoteEditor slug={slug} publicEdit={!isAdmin} />}
         </>}
         {drawing ? <ExcalidrawViewer data={drawing} /> : (
           <div className="prose">

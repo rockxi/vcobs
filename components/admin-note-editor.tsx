@@ -6,7 +6,8 @@ import { LivePreviewEditor } from "@/components/live-preview-editor";
 
 type Source = { markdown: string; revision: string; path: string; conflict: boolean };
 
-export function AdminNoteEditor({ slug }: { slug: string }) {
+export function AdminNoteEditor({ slug, publicEdit = false }: { slug: string; publicEdit?: boolean }) {
+  const endpoint = `/api/${publicEdit ? "notes" : "admin/notes"}/${encodeURIComponent(slug)}`;
   const router = useRouter();
   const [source, setSource] = useState<Source | null>(null);
   const [text, setText] = useState("");
@@ -25,7 +26,7 @@ export function AdminNoteEditor({ slug }: { slug: string }) {
   async function openEditor() {
     setBusy(true); setError(""); setSaved(false);
     try {
-      const response = await fetch(`/api/admin/notes/${encodeURIComponent(slug)}`, { cache: "no-store" });
+      const response = await fetch(endpoint, { cache: "no-store" });
       const body = await response.json();
       if (!response.ok) throw new Error(body.error ?? "Не удалось загрузить заметку.");
       setSource(body as Source); setText(body.markdown);
@@ -37,7 +38,7 @@ export function AdminNoteEditor({ slug }: { slug: string }) {
     if (!source || !dirty || busy || source.conflict) return;
     setBusy(true); setError(""); setSaved(false);
     try {
-      const response = await fetch(`/api/admin/notes/${encodeURIComponent(slug)}`, {
+      const response = await fetch(endpoint, {
         method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ markdown: text, revision: source.revision }),
       });
       const body = await response.json();
@@ -74,6 +75,6 @@ export function AdminNoteEditor({ slug }: { slug: string }) {
     {error && <p className="admin-note-warning" role="alert">{error}</p>}
     {saved && !dirty && <p className="admin-note-success" role="status">Сохранено в CouchDB. Obsidian получит изменение при следующей синхронизации.</p>}
     <LivePreviewEditor key={slug} documentId={slug} notePath={source.path} value={text} onChange={(value) => { setText(value); setSaved(false); }} ariaLabel="Редактировать опубликованную заметку" className="admin-note-live-editor" />
-    <p className="admin-note-hint">Сохраняется весь Markdown вместе со свойствами. Свойство <code>vcobs-link</code> должно остаться неизменным. ⌘/Ctrl + S — сохранить.</p>
+    <p className="admin-note-hint">{publicEdit ? "Свойства заметки сохраняются без изменений." : <>Сохраняется весь Markdown вместе со свойствами. Свойство <code>vcobs-link</code> должно остаться неизменным.</>} ⌘/Ctrl + S — сохранить.</p>
   </section>;
 }
