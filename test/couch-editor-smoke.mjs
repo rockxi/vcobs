@@ -73,7 +73,7 @@ try {
   const publicUrl = `${origin}/api/notes/${slug}`;
   assert.equal((await fetch(publicUrl)).status, 404);
   assert.equal((await fetch(publicUrl, { method: "PUT", headers: { origin, "Content-Type": "application/json" }, body: JSON.stringify({ markdown: "unauthorized", revision: "2-saved" }) })).status, 404);
-  const enabled = changed.replace("vcobs-topic: tests", "vcobs-topic: tests\nvcobs-editable: true");
+  const enabled = changed.replace("vcobs-topic: tests", "vcobs-topic: tests\nvcobs-editable: \"true\"");
   documents.set("h:public", { _id: "h:public", type: "leaf", data: enabled });
   documents.set(documentId, { ...metadata, type: "newnote", _rev: "3-enabled", children: ["h:public"] });
   const publicRead = await fetch(publicUrl);
@@ -84,7 +84,7 @@ try {
   const publicSave = await fetch(publicUrl, { method: "PUT", headers: { origin, "Content-Type": "application/json" }, body: JSON.stringify({ markdown: "Публичная правка", revision: "3-enabled" }) });
   assert.equal(publicSave.status, 200, await publicSave.text());
   const publicDoc = documents.get(documentId);
-  assert.equal(publicDoc.children.map((id) => documents.get(id).data).join(""), `---\nvcobs-link: ${slug}\nvcobs-topic: tests\nvcobs-editable: true\n---\nПубличная правка`);
+  assert.equal(publicDoc.children.map((id) => documents.get(id).data).join(""), `---\nvcobs-link: ${slug}\nvcobs-topic: tests\nvcobs-editable: "true"\n---\nПубличная правка`);
   assert.equal((await fetch(publicUrl, { method: "PUT", headers: { origin, "Content-Type": "application/json" }, body: JSON.stringify({ markdown: "stale", revision: "3-enabled" }) })).status, 409);
   console.log("Couch editor smoke test passed: admin and public editing, access control, CSRF, preserved properties, stale revision.");
 } finally {

@@ -172,7 +172,7 @@ export function getVcobsEditable(markdown: string) {
   const frontmatter = markdown.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/);
   if (!frontmatter) return false;
   const matches = [...frontmatter[1].matchAll(/^vcobs-editable\s*(?:=|:)\s*(.*?)\s*$/gm)];
-  return matches.length === 1 && /^true(?:\s+#.*)?$/i.test(matches[0][1]);
+  return matches.length === 1 && /^(?:true|"true"|'true')(?:\s+#.*)?$/i.test(matches[0][1]);
 }
 
 export function stripFrontmatter(markdown: string) {
