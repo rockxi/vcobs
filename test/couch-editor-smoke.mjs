@@ -75,7 +75,7 @@ try {
   assert.equal((await fetch(publicUrl, { method: "PUT", headers: { origin, "Content-Type": "application/json" }, body: JSON.stringify({ markdown: "unauthorized", revision: "2-saved" }) })).status, 404);
   const enabled = changed.replace("vcobs-topic: tests", "vcobs-topic: tests\nvcobs-editable: true");
   documents.set("h:public", { _id: "h:public", type: "leaf", data: enabled });
-  documents.set(documentId, { ...metadata, _rev: "3-enabled", children: ["h:public"] });
+  documents.set(documentId, { ...metadata, type: "newnote", _rev: "3-enabled", children: ["h:public"] });
   const publicRead = await fetch(publicUrl);
   assert.equal(publicRead.status, 200);
   const publicSource = await publicRead.json();

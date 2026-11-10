@@ -203,7 +203,7 @@ export async function getPublishedNoteSource(slug: string) {
   const result = await response.json() as AllDocsResponse<CouchFile>;
   const note = result.rows?.[0]?.doc;
   if (!note) return null;
-  if (note.deleted || note._id !== candidate._id || note.type !== "plain" || !note.path?.toLowerCase().endsWith(".md") || !Array.isArray(note.children)) return null;
+  if (note.deleted || note._id !== candidate._id || !["plain", "newnote"].includes(note.type) || !note.path?.toLowerCase().endsWith(".md") || !Array.isArray(note.children)) return null;
   const leaves = await getDocuments<Leaf>(note.children);
   const chunks = new Map(leaves.map((leaf) => [leaf._id, leaf]));
   const parts = note.children.map((id) => chunks.get(id));

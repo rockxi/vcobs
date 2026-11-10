@@ -52,7 +52,7 @@ export default async function NotePage({ params }: { params: Promise<{ slug: str
   const renderedMarkdown = prepareMarkdown(note.markdown, slug).replace(/^#\s+.+(?:\r?\n)+/, "");
   const [notes, cookieStore] = await Promise.all([getPublicNotes(), cookies()]);
   const isAdmin = validateAdminSession(cookieStore.get(ADMIN_SESSION_COOKIE)?.value);
-  const canEdit = note.type === "plain" && (isAdmin || note.editable);
+  const canEdit = ["plain", "newnote"].includes(note.type) && (isAdmin || note.editable);
   const drawing = getExcalidrawData(note.markdown);
   if (drawing) {
     const embeddedFiles = await Promise.all(getExcalidrawEmbeddedFiles(note.markdown).map(async ({ id, reference }) => {
