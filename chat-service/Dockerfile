@@ -3,7 +3,7 @@ FROM node:22-bookworm-slim
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates bash curl git python3 \
     && rm -rf /var/lib/apt/lists/*
-RUN npm install --global @openai/codex@0.159.2 && npm cache clean --force
+RUN npm install --global @openai/codex@0.171.0 && npm cache clean --force
 WORKDIR /service
 COPY --chown=node:node . ./
 RUN mkdir -p /data/codex /workspace && chown -R node:node /data /workspace
